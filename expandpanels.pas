@@ -17,7 +17,7 @@ You can check out the repository (in linux) with the command:
         svn co http://svn.lazarusforum.de/svn/expandpanels expandpanels
 }
 //////////////////////////////
-//  ExpandPanels   Version 1.992
+//  ExpandPanels   Version 1.993
 //////////////////////////////
 
     {
@@ -25,10 +25,11 @@ Todo  List
 
 
 - Every animation sould be equal and a standarised way to execute it
-- A new animation kills the old one!!!
+- A new animation should kill an old one (so at least the last animation is done correctly)
 - simplyfy everything with verctor addition and scalar multiplication (orthogonal basis vectors... and so on)
       if horizonatal and vertical would be described by a unity vector, I could calculate if a certain operation should be performed
       and I could just multiply the basis vector  with an operation to get a delta movement (or none)
+- the TExpandPanels lacks a arrange on bottom
      }
 
 unit ExpandPanels;
@@ -42,7 +43,6 @@ uses
   LResources, StdCtrls, dialogs, SysUtils;
 
 type
-  TExpandPanelsDirection=(EPHorizontal,EPVertical);
   TExpandPanelsBehaviour=(EPHotMouse,EPMultipanel,EPSinglePanel);
 //  TBoundEvent=procedure(sender:TObject; ALeft, ATop, AWidth, AHeight: integer) of object;
   TAnimationEvent=procedure(sender:TObject; deltaLeft, deltaTop, deltaWidth, deltaHeight: integer) of object;
@@ -164,7 +164,7 @@ type
     PanelArray:TList;
     
     // Properties
-    FDirection: TExpandPanelsDirection;
+    FArrangeKind: TAnchorKind;
     FButtonPosition,
     FCollapseKind:TAnchorKind;
     FOrthogonalAbove:integer;
@@ -186,7 +186,7 @@ type
     procedure WriteRelevantOrthogonalSize(comp:TMyRollOut; size:integer);
     procedure WriteRelevantOrthogonalAbove(comp:TMyRollOut; size:integer);
 
-    procedure setDirection(value: TExpandPanelsDirection);
+    procedure setArrangeKind(value: TAnchorKind);
     procedure setButtonPosition(value:TAnchorKind);
     procedure setCollapseKind(value:TAnchorKind);
     procedure setUseClientSize(value:boolean);
@@ -236,7 +236,7 @@ type
 //    property UseFixedHeight:boolean read FUseFixedHeight write WriteFUseFixedSize;
 //    property UseClientHeight:boolean read FUseClientHeight write WriteFUseClientSize;
 //    property AutoCollapseIfTooHigh:boolean read FAutoCollapseIfTooHigh write WriteFAutoCollapseIfTooHigh;
-    property Direction:TExpandPanelsDirection read FDirection write setDirection;
+    property ArrangeKind:TAnchorKind read FArrangeKind write setArrangeKind;
     property CollapseKind:TAnchorKind read FCollapseKind write setCollapseKind;
     property ButtonPosition:TAnchorKind read FButtonPosition write setButtonPosition;
     property OnArrangePanels: TNotifyEvent read FOnArrangePanels write FOnArrangePanels;
@@ -321,7 +321,7 @@ begin
 
   PanelArray:=TList.create;
 
-  FDirection:=EPVertical;
+  FArrangeKind:=akTop;
   FUseFixedSize:=false;
   FUseClientSize:=false;
   FFixedSize:=400;
@@ -433,67 +433,72 @@ end;
 
 function TExpandPanels.RelevantAbove(comp: TControl): integer;
 begin
-  case FDirection of
-    EPHorizontal: Result:=comp.Left;
-    EPVertical: Result:=comp.Top;
+  case FArrangeKind of
+    akLeft: Result:=comp.Left;
+    akTop: Result:=comp.Top;
   end;
 end;
 
 function TExpandPanels.RelevantSize(comp: TControl): integer;
 begin
-  case FDirection of
-    EPHorizontal: Result:=comp.Width;
-    EPVertical: Result:=comp.Height;
+  case FArrangeKind of
+    akLeft: Result:=comp.Width;
+    akTop: Result:=comp.Height;
   end;
 end;
 
 function TExpandPanels.RelevantOrthogonalSize(comp: TControl): integer;
 begin
-  case FDirection of
-    EPHorizontal: Result:=comp.Height;
-    EPVertical: Result:=comp.Width;
+  case FArrangeKind of
+    akLeft: Result:=comp.Height;
+    akTop: Result:=comp.Width;
   end;
 end;
 
 procedure TExpandPanels.WriteRelevantAbove(comp: TMyRollOut; above: integer);
 begin
-  case FDirection of
-    EPHorizontal: comp.Left:=above;
-    EPVertical: comp.Top:=above;
+  case FArrangeKind of
+    akLeft: comp.Left:=above;
+    akTop: comp.Top:=above;
   end;
 end;
 
 procedure TExpandPanels.WriteRelevantSize(comp: TMyRollOut; size: integer);
 begin
-  case FDirection of
-    EPHorizontal: comp.Width:=size;
-    EPVertical: comp.Height:=size;
+  case FArrangeKind of
+    akLeft: comp.Width:=size;
+    akTop: comp.Height:=size;
   end;
 end;
 
 procedure TExpandPanels.WriteRelevantOrthogonalSize(comp: TMyRollOut;
   size: integer);
 begin
-  case FDirection of
-    EPHorizontal: comp.Height:=size;
-    EPVertical: comp.Width:=size;
+  case FArrangeKind of
+    akLeft: comp.Height:=size;
+    akTop: comp.Width:=size;
   end;
 end;
 
 procedure TExpandPanels.WriteRelevantOrthogonalAbove(comp: TMyRollOut;
   size: integer);
 begin
-  case FDirection of
-    EPHorizontal: comp.Top:=size;
-    EPVertical: comp.Left:=size;
+  case FArrangeKind of
+    akLeft: comp.Top:=size;
+    akTop: comp.Left:=size;
   end;
 end;
 
 
-procedure TExpandPanels.setDirection(value: TExpandPanelsDirection);
+procedure TExpandPanels.setArrangeKind(value: TAnchorKind);
 begin
-  if FDirection=value then  exit;
-  FDirection:=value;
+  case value of  //that is mean, but I haven't implemented the bottom and right yet....
+    akRight: value:=akLeft;
+    akBottom: value:=akTop;
+  end;
+
+  if FArrangeKind=value then  exit;
+  FArrangeKind:=value;
 
   ArrangePanels;
 end;
@@ -644,9 +649,9 @@ begin
   for i:= idx+1 to PanelArray.Count-1 do
     begin
     size:=RelevantAbove(TMyRollOut(PanelArray[i]));
-    case FDirection of
-      EPVertical:     size := size+ deltaTop + deltaHeight;
-      EPHorizontal:   size := size+ deltaLeft + deltaWidth;
+    case FArrangeKind of
+      akTop:     size := size+ deltaTop + deltaHeight;
+      akLeft:   size := size+ deltaLeft + deltaWidth;
     end;
 
     WriteRelevantAbove(TMyRollOut(PanelArray[i]),size );

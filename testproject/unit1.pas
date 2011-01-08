@@ -95,7 +95,7 @@ end;
 
 procedure TForm1.RDirectionClick(Sender: TObject);
 begin
-  ex1.Direction:=TExpandPanelsDirection(RDirection.ItemIndex);
+  ex1.ArrangeKind:=TAnchorKind(RDirection.ItemIndex);
 end;
 
 initialization
