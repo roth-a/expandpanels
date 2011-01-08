@@ -17,7 +17,7 @@ You can check out the repository (in linux) with the command:
         svn co http://svn.lazarusforum.de/svn/expandpanels expandpanels
 }
 //////////////////////////////
-//  ExpandPanels   Version 1.99
+//  ExpandPanels   Version 1.991
 //////////////////////////////
 
     {
@@ -40,6 +40,7 @@ uses
   LResources, StdCtrls, dialogs, SysUtils;
 
 type
+  TExpandPanelsDirection=(EPHorizontal,EPVertical);
   TExpandPanelsBehaviour=(EPHotMouse,EPMultipanel,EPSinglePanel);
 //  TBoundEvent=procedure(sender:TObject; ALeft, ATop, AWidth, AHeight: integer) of object;
   TAnimationEvent=procedure(sender:TObject; deltaLeft, deltaTop, deltaWidth, deltaHeight: integer) of object;
@@ -92,7 +93,6 @@ type
 
     procedure WriteFExpandedSize(value:integer);
 
-    procedure WriteFVisibleTotal(VisibleTotal:boolean);
     procedure WriteFButtonSize(value:integer);
 
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
@@ -129,7 +129,6 @@ type
     property ExpandedButtonColor:TColor read FExpandedButtonColor write WriteFExpandedButtonColor;
     property CollapsedButtonColor:TColor read FCollapsedButtonColor write WriteFCollapsedButtonColor;
     property CollapseKind:TAnchorKind read FCollapseKind write WriteFCollapseKind;   //To where should it collapse?
-    property VisibleTotal:boolean read FVisibleTotal write WriteFVisibleTotal;
     property ExpandedSize:integer read FExpandedSize write WriteFExpandedSize;
     property ButtonPosition:TAnchorKind read FButtonPosition write WriteFButtonPosition;
     property ButtonSize:integer read FButtonSize write WriteFButtonSize;
@@ -161,6 +160,7 @@ type
 
   TExpandPanels = class(TComponent)
   private
+    FDirection: TExpandPanelsDirection;
     { Private-Deklarationen }
     PanelArray:TList;
     
@@ -180,13 +180,13 @@ type
 
     function RelevantSize(comp:TControl):integer;
 
-    procedure WriteFButtonPosition(value:TAnchorKind);
-    procedure WriteFCollapseKind(value:TAnchorKind);
-    procedure WriteFUseClientSize(value:boolean);
-    procedure WriteFUseFixedSize(value:boolean);
-    procedure WriteFAutoCollapseIfTooHigh(value:boolean);
-    procedure WriteFFixedSize(value:integer);
-
+    procedure setDirection(value: TExpandPanelsDirection);
+    procedure setButtonPosition(value:TAnchorKind);
+    procedure setCollapseKind(value:TAnchorKind);
+    procedure setUseClientSize(value:boolean);
+    procedure setUseFixedSize(value:boolean);
+    procedure setAutoCollapseIfTooHigh(value:boolean);
+    procedure setFixedSize(value:integer);
     procedure setLeft(value:Integer);
     procedure setTop(value:Integer);
     procedure setWidth(value:Integer);
@@ -230,8 +230,9 @@ type
 //    property UseFixedHeight:boolean read FUseFixedHeight write WriteFUseFixedSize;
 //    property UseClientHeight:boolean read FUseClientHeight write WriteFUseClientSize;
 //    property AutoCollapseIfTooHigh:boolean read FAutoCollapseIfTooHigh write WriteFAutoCollapseIfTooHigh;
-    property CollapseKind:TAnchorKind read FCollapseKind write WriteFCollapseKind;
-    property ButtonPosition:TAnchorKind read FButtonPosition write WriteFButtonPosition;
+    property Direction:TExpandPanelsDirection read FDirection write setDirection;
+    property CollapseKind:TAnchorKind read FCollapseKind write setCollapseKind;
+    property ButtonPosition:TAnchorKind read FButtonPosition write setButtonPosition;
     property OnArrangePanels: TNotifyEvent read FOnArrangePanels write FOnArrangePanels;
     property  Behaviour:TExpandPanelsBehaviour read FBehaviour write setBehaviour;
   end;
@@ -455,7 +456,15 @@ begin
   end;
 end;
 
-procedure TExpandPanels.WriteFButtonPosition(value: TAnchorKind);
+procedure TExpandPanels.setDirection(value: TExpandPanelsDirection);
+begin
+  if FDirection=value then  exit;
+  FDirection:=value;
+
+  ArrangePanels;
+end;
+
+procedure TExpandPanels.setButtonPosition(value: TAnchorKind);
 var i :integer;
 begin
   if FButtonPosition=value then  exit;
@@ -465,7 +474,7 @@ begin
     Panel(i).ButtonPosition:=value;
 end;
 
-procedure TExpandPanels.WriteFCollapseKind(value: TAnchorKind);
+procedure TExpandPanels.setCollapseKind(value: TAnchorKind);
 var i :integer;
 begin
   if FCollapseKind=value then  exit;
@@ -475,14 +484,14 @@ begin
     Panel(i).CollapseKind:=value;
 end;
 
-procedure TExpandPanels.WriteFUseClientSize(value: boolean);
+procedure TExpandPanels.setUseClientSize(value: boolean);
 begin
   FUseClientSize:=value;
   
   ArrangePanels;
 end;
 
-procedure TExpandPanels.WriteFUseFixedSize(value: boolean);
+procedure TExpandPanels.setUseFixedSize(value: boolean);
 begin
   if FUseFixedSize=value then    exit;
   FUseFixedSize:=value;
@@ -490,7 +499,7 @@ begin
   ArrangePanels;
 end;
 
-procedure TExpandPanels.WriteFAutoCollapseIfTooHigh(value: boolean);
+procedure TExpandPanels.setAutoCollapseIfTooHigh(value: boolean);
 begin
   if FAutoCollapseIfTooHigh=value then   exit;
   FAutoCollapseIfTooHigh:=value;
@@ -500,7 +509,7 @@ begin
 end;
 
 
-procedure TExpandPanels.WriteFFixedSize(value: integer);
+procedure TExpandPanels.setFixedSize(value: integer);
 var r:real;
 begin
   if FFixedSize=value then   exit;
@@ -724,7 +733,7 @@ begin
   for I := 0 to PanelArray.count-1 do
     with TMyRollOut(PanelArray[i]) do
       begin
-      if not VisibleTotal then
+      if not Visible then
         continue;
         
       Top:=oben;
@@ -1002,13 +1011,6 @@ begin
   FExpandedSize:=value;
 end;
 
-procedure TMyRollOut.WriteFVisibleTotal(VisibleTotal: boolean);
-begin
-  FVisibleTotal:=VisibleTotal;
-  
-  Self.Visible:=FVisibleTotal;
-  FButton.Visible:=FVisibleTotal;
-end;
 
 procedure TMyRollOut.WriteFButtonSize(value: integer);
 begin
@@ -1130,17 +1132,18 @@ begin
   if FCollapseKind=value then
     exit;
 
-  FCollapseKind:=value;
-
-
   wasanimated:=Animated;
   wascollpased:=Collapsed;
   Animated:=false;
+
   if Collapsed then
     Collapsed:=false;
 
+  FCollapseKind:=value;
 
   Collapsed := wascollpased;
+
+
   Animated := wasanimated;
 end;
 
@@ -1175,10 +1178,6 @@ begin
   if StopCircleActions or not Assigned(FButton) then
     exit;
   StopCircleActions:=true;
-
-
-  FButton.Visible:=VisibleTotal;
-
 
 
   new:=ButtonRect;
@@ -1267,7 +1266,6 @@ begin
   FButton.Color:=FExpandedButtonColor;
   FButton.Brush.Color:=FExpandedButtonColor;
 
-  Visible:=VisibleTotal;
 
   EndProcedureOfAnimation:=@EndTimerExpand;
 
