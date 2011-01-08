@@ -6,10 +6,28 @@
     veröffentlicht, weitergeben und/oder modifizieren, gemäß Version 2 der Lizenz.
 ==============================================================================}
 
+
+{
+Please send comments and ideas directly to:
+        admin@alexanderroth.spacequadrat.de
+
+You can access this unit over the subversion repository:
+        http://forge.lazarusforum.de/projects/show/expandpanels
+You can check out the repository (in linux) with the command:
+        svn co http://svn.lazarusforum.de/svn/expandpanels expandpanels
+}
 //////////////////////////////
-//  ExpandPanels   Version 1.982
+//  ExpandPanels   Version 1.99
 //////////////////////////////
 
+    {
+Todo  List
+
+
+- Every animation sould be equal and a standarised way to execute it
+- A new animation kills the old one!!!
+
+     }
 
 unit ExpandPanels;
 
@@ -23,7 +41,6 @@ uses
 
 type
   TExpandPanelsBehaviour=(EPHotMouse,EPMultipanel,EPSinglePanel);
-  TCollapseKind=(CKCollapseToButton, CKCollapseToOppositeOfButton);
 //  TBoundEvent=procedure(sender:TObject; ALeft, ATop, AWidth, AHeight: integer) of object;
   TAnimationEvent=procedure(sender:TObject; deltaLeft, deltaTop, deltaWidth, deltaHeight: integer) of object;
   TNormalProcedure=procedure of object;
@@ -39,12 +56,15 @@ type
   end;
 
 
+
+
   { TMyRollOut }
 
   TMyRollOut = class(TPanel)
   private
     FButton:TBoundButton;
-    FCollapseKind:TCollapseKind;
+    FButtonSize: integer;
+    FCollapseKind:TAnchorKind;
     FCollapsed:boolean;
     FAnimated:boolean;
     FOnExpand: TNotifyEvent;
@@ -57,48 +77,43 @@ type
     FButtonPosition:TAnchorKind;
     FExpandedButtonColor:TColor;
     FCollapsedButtonColor:TColor;
-    FExpandedHeight:integer;
-    FExpandedWidth:integer;
+    FExpandedSize:integer;
     FAnimationSpeed:real;
-    FOriginalExpandedHeight:integer;
-    FOriginalExpandedWidth:integer;
     StopCircleActions:boolean;
-    StoredBound:TRect;
     StoredBevelOuter:TPanelBevel;
-    FAnimating,
-    FIsCollapsing,
-    FIsExpanding:boolean;
+    FAnimating:boolean;
     FVisibleTotal:boolean;
 
     TargetAnimationSize:integer;
     EndProcedureOfAnimation:TNormalProcedure;
 
     Timer:TTimer;
-    
-    procedure WriteFExpandedHeight(ExpandedHeight:integer);
-    procedure WriteFExpandedWidth(ExpandedWidth:integer);
+
+
+    procedure WriteFExpandedSize(value:integer);
 
     procedure WriteFVisibleTotal(VisibleTotal:boolean);
-
-    function ButtonPosition2ButtonAnchors(pos:TAnchorKind):TAnchors;
+    procedure WriteFButtonSize(value:integer);
 
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
 
-    procedure WriteFCollapsedButtonColor(CollapsedButtonColor:TColor);
-    procedure WriteFExpandedButtonColor(ExpandedButtonColor:TColor);
-    procedure WriteFButtonPosition(ButtonPosition:TAnchorKind);
-    procedure WriteFCollapseKind(CollapseKind:TCollapseKind);
-    procedure writeFAnimationSpeed(AnimationSpeed:real);
+    procedure WriteFCollapsedButtonColor(value:TColor);
+    procedure WriteFExpandedButtonColor(value:TColor);
+    procedure WriteFButtonPosition(value:TAnchorKind);
+    procedure WriteFCollapseKind(value:TAnchorKind);
+    procedure writeFAnimationSpeed(value:real);
 
-    procedure PositionButton(ALeft, ATop, AWidth, AHeight: integer);
+    procedure PositionButton;
 
     procedure WriteFCollapsed(Collapsed:boolean);
     
+    function RelevantSize(comp:TControl; akind:TAnchorKind):integer;
+    function RelevantOrthogonalSize(comp:TControl; akind:TAnchorKind):integer;
+    function DeltaCoordinates(deltaMove, deltaSize:integer):TRect;  // the outpot (left,top right, bottom) has all the information: left and top encode the movement. rigth and bottom the size changes
+
     procedure TimerAnimateSize(Sender: TObject);
     procedure EndTimerCollapse;
     procedure EndTimerExpand;
-    procedure EndTimerWriteFExpandedHeight;
-    procedure EndTimerWriteFExpandedWidth;
     procedure UpdateAll;
 
     procedure ButtonClick(Sender: TObject);
@@ -107,21 +122,17 @@ type
     procedure AdjustClientRect(var ARect: TRect); override;
   public
     property Animating:boolean read FAnimating;
-    property IsCollapsing:boolean read FIsCollapsing;
-    property IsExpanding:boolean read FIsExpanding;
 
     constructor Create(TheOwner: TComponent); override;
     destructor destroy; override;
   published
     property ExpandedButtonColor:TColor read FExpandedButtonColor write WriteFExpandedButtonColor;
     property CollapsedButtonColor:TColor read FCollapsedButtonColor write WriteFCollapsedButtonColor;
-    property ButtonPosition:TAnchorKind read FButtonPosition write WriteFButtonPosition;
-    property CollapseKind:TCollapseKind read FCollapseKind write WriteFCollapseKind;
+    property CollapseKind:TAnchorKind read FCollapseKind write WriteFCollapseKind;   //To where should it collapse?
     property VisibleTotal:boolean read FVisibleTotal write WriteFVisibleTotal;
-    property ExpandedHeight:integer read FExpandedHeight write WriteFExpandedHeight;
-    property ExpandedWidth:integer read FExpandedWidth write WriteFExpandedWidth;
-    property OriginalExpandedHeight:integer read FOriginalExpandedHeight write FOriginalExpandedHeight;
-    property OriginalExpandedWidth:integer read FOriginalExpandedWidth write FOriginalExpandedWidth;
+    property ExpandedSize:integer read FExpandedSize write WriteFExpandedSize;
+    property ButtonPosition:TAnchorKind read FButtonPosition write WriteFButtonPosition;
+    property ButtonSize:integer read FButtonSize write WriteFButtonSize;
 
     property Button:TBoundButton read FButton;
 
@@ -154,21 +165,27 @@ type
     PanelArray:TList;
     
     // Properties
+    FButtonPosition,
+    FCollapseKind:TAnchorKind;
     FLeft:integer;
     FTop:integer;
     FWidth:integer;
     FBehaviour:TExpandPanelsBehaviour;
     FOnArrangePanels: TNotifyEvent;
-    FFixedHeight:integer;
-    FUseFixedHeight:boolean;
+    FFixedSize:integer;
+    FUseFixedSize:boolean;
     FAutoCollapseIfTooHigh:boolean;
 
-    FUseClientHeight:boolean;
-    
-    procedure WriteFUseClientHeight(value:boolean);
-    procedure WriteFUseFixedHeight(value:boolean);
+    FUseClientSize:boolean;
+
+    function RelevantSize(comp:TControl):integer;
+
+    procedure WriteFButtonPosition(value:TAnchorKind);
+    procedure WriteFCollapseKind(value:TAnchorKind);
+    procedure WriteFUseClientSize(value:boolean);
+    procedure WriteFUseFixedSize(value:boolean);
     procedure WriteFAutoCollapseIfTooHigh(value:boolean);
-    procedure WriteFFixedHeight(value:integer);
+    procedure WriteFFixedSize(value:integer);
 
     procedure setLeft(value:Integer);
     procedure setTop(value:Integer);
@@ -194,7 +211,7 @@ type
     function IdxOfPanel(aname:string):integer; overload;
 
     procedure CollapseIfTooHigh;
-    procedure SetCorrectHeight;
+    procedure SetCorrectSize;
     procedure AddPanel(rollout:TMyRollOut);
     procedure InsertPanel(idx:integer; rollout:TMyRollOut);
     function DeltePanel(aname:string):boolean; overload;
@@ -209,10 +226,12 @@ type
   published
     { Published-Deklarationen }
 
-//    property FixedHeight:integer read FFixedHeight write WriteFFixedHeight;
-//    property UseFixedHeight:boolean read FUseFixedHeight write WriteFUseFixedHeight;
-//    property UseClientHeight:boolean read FUseClientHeight write WriteFUseClientHeight;
+//    property FixedHeight:integer read FFixedHeight write WriteFFixedSize;
+//    property UseFixedHeight:boolean read FUseFixedHeight write WriteFUseFixedSize;
+//    property UseClientHeight:boolean read FUseClientHeight write WriteFUseClientSize;
 //    property AutoCollapseIfTooHigh:boolean read FAutoCollapseIfTooHigh write WriteFAutoCollapseIfTooHigh;
+    property CollapseKind:TAnchorKind read FCollapseKind write WriteFCollapseKind;
+    property ButtonPosition:TAnchorKind read FButtonPosition write WriteFButtonPosition;
     property OnArrangePanels: TNotifyEvent read FOnArrangePanels write FOnArrangePanels;
     property  Behaviour:TExpandPanelsBehaviour read FBehaviour write setBehaviour;
   end;
@@ -295,9 +314,9 @@ begin
 
   PanelArray:=TList.create;
 
-  FUseFixedHeight:=false;
-  FUseClientHeight:=false;
-  FFixedHeight:=400;
+  FUseFixedSize:=false;
+  FUseClientSize:=false;
+  FFixedSize:=400;
   FAutoCollapseIfTooHigh:=false;
   FTop:=10;
   FLeft:=10;
@@ -355,7 +374,7 @@ begin
 
   with rollout do
     begin
-    CollapseKind:=CKCollapseToButton;
+    CollapseKind:=FCollapseKind;
     ButtonPosition:=akTop;
     Left:=self.Left;
     top:=self.Top;
@@ -428,28 +447,52 @@ end;
 
 
 
-procedure TExpandPanels.WriteFUseClientHeight(value: boolean);
+function TExpandPanels.RelevantSize(comp: TControl): integer;
 begin
-  FUseClientHeight:=value;
+  case FCollapseKind of
+    akTop, akBottom: Result:=comp.Height;
+    akLeft, akRight: Result:=comp.Width;
+  end;
+end;
+
+procedure TExpandPanels.WriteFButtonPosition(value: TAnchorKind);
+var i :integer;
+begin
+  if FButtonPosition=value then  exit;
+  FButtonPosition:=value;
+
+  for i := 0 to PanelArray.Count-1 do
+    Panel(i).ButtonPosition:=value;
+end;
+
+procedure TExpandPanels.WriteFCollapseKind(value: TAnchorKind);
+var i :integer;
+begin
+  if FCollapseKind=value then  exit;
+  FCollapseKind:=value;
+
+  for i := 0 to PanelArray.Count-1 do
+    Panel(i).CollapseKind:=value;
+end;
+
+procedure TExpandPanels.WriteFUseClientSize(value: boolean);
+begin
+  FUseClientSize:=value;
   
   ArrangePanels;
 end;
 
-procedure TExpandPanels.WriteFUseFixedHeight(value: boolean);
+procedure TExpandPanels.WriteFUseFixedSize(value: boolean);
 begin
-  if FUseFixedHeight=value then
-    exit;
-    
-  FUseFixedHeight:=value;
+  if FUseFixedSize=value then    exit;
+  FUseFixedSize:=value;
   
   ArrangePanels;
 end;
 
 procedure TExpandPanels.WriteFAutoCollapseIfTooHigh(value: boolean);
 begin
-  if FAutoCollapseIfTooHigh=value then
-    exit;
-
+  if FAutoCollapseIfTooHigh=value then   exit;
   FAutoCollapseIfTooHigh:=value;
   
   if FAutoCollapseIfTooHigh then
@@ -457,15 +500,14 @@ begin
 end;
 
 
-procedure TExpandPanels.WriteFFixedHeight(value: integer);
+procedure TExpandPanels.WriteFFixedSize(value: integer);
 var r:real;
 begin
-  if FFixedHeight=value then
-    exit;
+  if FFixedSize=value then   exit;
 
   r:=value;
   korrigiere(r, 20, 10000);
-  FFixedHeight:=round(r);
+  FFixedSize:=round(r);
   
   ArrangePanels;
 end;
@@ -610,50 +652,50 @@ end;
 
 
 
-procedure TExpandPanels.SetCorrectHeight;
+procedure TExpandPanels.SetCorrectSize;
 const plus=1;   //extra Anstand
 var
-    i, exheight,
+    i, exSize,
     countexpanded,
-    SumHeight, closedHeight:Integer;
+    SumSize, closedSize:Integer;
 begin
   if PanelArray.Count<=0 then
     exit;
     
-  SumHeight:=FFixedHeight;
-  if FUseClientHeight then
-    SumHeight:=TMyRollOut(PanelArray[0]).Parent.Height;
+  SumSize:=FFixedSize;
+  if FUseClientSize then
+    SumSize:=TMyRollOut(PanelArray[0]).Parent.Height;
     
 
   countexpanded:=0;
-  closedHeight:=0;
+  closedSize:=0;
   for I := 0 to PanelArray.count-1 do
     with TMyRollOut(PanelArray[i]) do
       begin
-      if not Collapsed and not IsCollapsing
-       or Collapsed and IsExpanding then
+      if not Collapsed and not Animating         //error producer!!!   animating does not neccessairily mean that it is expanding
+       or Collapsed and Animating then
         inc(countexpanded)
       else
-        closedHeight:=closedHeight+Height;
+        closedSize:=closedSize+Height;
       end;
         
-  exHeight:=SumHeight- FTop- closedHeight;
+  exSize:=SumSize- FTop- closedSize;
 
   case Behaviour of
     EPMultipanel:
       if countexpanded>0 then
-        exHeight:=trunc(exHeight/countexpanded)
+        exSize:=trunc(exSize/countexpanded)
       else
-        exheight:=400;
+        exSize:=400;
   end;
 
   for I := 0 to PanelArray.count-1 do
     with TMyRollOut(PanelArray[i]) do
       begin
-      if not FUseFixedHeight and not FUseClientHeight then
-        ExpandedHeight:=OriginalExpandedHeight
+      if not FUseFixedSize and not FUseClientSize then
+        ExpandedSize:=200
       else
-        ExpandedHeight:=exHeight;
+        ExpandedSize:=exSize;
       end;
 end;
 
@@ -675,7 +717,7 @@ begin
   if Count<=0 then
     exit;
 
-  SetCorrectHeight;
+  SetCorrectSize;
 
   oben:=Top+ plus;
 
@@ -729,7 +771,7 @@ begin
   if  (Behaviour<>EPMultipanel) then
     HotTrackSetActivePanel(TBoundButton(Sender).Tag);
     
-  SetCorrectHeight;
+  SetCorrectSize;
   
 //  ArrangePanels;
 end;
@@ -811,39 +853,63 @@ begin
     DoCollapse;
 end;
 
+function TMyRollOut.RelevantSize(comp: TControl; akind: TAnchorKind): integer;
+begin
+  case akind of
+    akTop, akBottom: Result:=comp.Height;
+    akLeft, akRight: Result:=comp.Width;
+  end;
+end;
+
+function TMyRollOut.RelevantOrthogonalSize(comp: TControl; akind: TAnchorKind
+  ): integer;
+begin
+  case akind of
+    akTop, akBottom: Result:=comp.Width;
+    akLeft, akRight: Result:=comp.Height;
+  end;
+end;
+
+function TMyRollOut.DeltaCoordinates(deltaMove, deltaSize: integer): TRect;
+begin
+  Result:=Rect(0,0,0,0);
+
+  case FCollapseKind of
+    akTop: Result:=Rect(0,0,0,deltaSize);
+    akLeft: Result:=Rect(0,0,deltaSize,0);
+    akBottom: Result:=Rect(0,deltaMove,0,deltaSize);
+    akRight: Result:=Rect(deltaMove,0,deltaSize,0);
+  end;
+end;
+
 
 
 
 procedure TMyRollOut.TimerAnimateSize(Sender: TObject);
 var step:real;
-    originalsize:integer;
-    deltaLeft, deltaTop, deltaWidth, deltaHeight: integer;
+    originalsize, size:integer;
+    deltaMove, deltaSize: integer;
+    delta:TRect;
     vorzeichen:integer;
 begin
-  deltaLeft:=0;
-  deltaTop:=0;
-  deltaWidth:=0;
-  deltaHeight:=0;
+  deltaMove:=0;
+  deltaSize:=0;
   StopCircleActions:=false;
   FAnimating:=true;
   step:=FAnimationSpeed;
 
-  case ButtonPosition of
-    akTop,akBottom:
-      begin
-      vorzeichen:=Sign(TargetAnimationSize-Height);  // muss ich delta addieren oder muss ich delta abziehen
-      originalsize:=ExpandedHeight;
-      if not FAnimated or  not (ComponentState * [csLoading, csDesigning] = []) then
-        step:=abs(Height-TargetAnimationSize);
-      end;
-    akLeft,akRight:
-      begin
-      vorzeichen:=Sign(TargetAnimationSize-Width);  // muss ich delta addieren oder muss ich delta abziehen
-      originalsize:=ExpandedWidth;
-      if not FAnimated or  not (ComponentState * [csLoading, csDesigning] = []) then
-        step:=abs(Width-TargetAnimationSize);
-      end;
-  end;
+
+  Size:=RelevantSize(Self,FCollapseKind);
+
+  vorzeichen:=Sign(TargetAnimationSize-RelevantSize(self, FCollapseKind));  // muss ich delta addieren oder muss ich delta abziehen
+  originalsize:=ExpandedSize;
+
+
+  //One huge step if not animated
+  if not FAnimated or  not (ComponentState * [csLoading, csDesigning] = []) then
+    step:=abs( Size-TargetAnimationSize);
+
+  //small steps if animated
   if FAnimated and (ComponentState * [csLoading, csDesigning] = []) then
     begin
     step:=step* originalsize/200;
@@ -852,46 +918,37 @@ begin
     end;
 
 
-  case ButtonPosition of
-    akTop, akBottom:
-      if abs(height-TargetAnimationSize)>0 then
-        begin                                                                      //  min---x---max    // a = delta
-        if vorzeichen*height+round(step) <= vorzeichen* TargetAnimationSize then   //v*x+a<v*a
-          deltaHeight:=vorzeichen*round(step)
-        else
-          deltaHeight:=TargetAnimationSize-Height;
+  if Abs(Size-TargetAnimationSize)>0 then
+    begin
+    if Abs(Size-TargetAnimationSize)<abs(step) then  // if there is just a little bit left to go, set delta so it can go directly to the end size
+      deltaSize:=TargetAnimationSize-Size
+    else
+      deltaSize:=vorzeichen*round(step);
 
-        if (ButtonPosition=akTop) and (CollapseKind=CKCollapseToOppositeOfButton)
-        or (ButtonPosition=akBottom) and (CollapseKind=CKCollapseToButton) then
-          deltaTop:=-deltaHeight;
+    if  (CollapseKind=akBottom) or (CollapseKind=akRight) then
+      deltaMove:=-deltaSize;
 
-        SetBounds(Left+deltaLeft, Top+deltaTop, Width+deltaWidth, Height+deltaHeight);
-        if assigned(FOnExpandAnimate) then
-          FOnExpandAnimate(self, deltaLeft, deltaTop, deltaWidth, deltaHeight);
-        end
-      else  // wird erst beim nächsten Timer ausgeführt ist aber nicht schlimm
-        if assigned(EndProcedureOfAnimation) then
-          EndProcedureOfAnimation;
-    akLeft, akRight:
-      if abs(Width-TargetAnimationSize)>0 then
-        begin
-        if vorzeichen*Width+round(step) <= vorzeichen* TargetAnimationSize then   //v*x+a<v*a
-          deltaWidth:=vorzeichen*round(step)
-        else
-          deltaWidth:=TargetAnimationSize-Width;
 
-        if (ButtonPosition=akLeft) and (CollapseKind=CKCollapseToOppositeOfButton)
-        or (ButtonPosition=akRight) and (CollapseKind=CKCollapseToButton) then
-          deltaLeft:=-deltaWidth;
+    delta:=DeltaCoordinates(deltaMove, deltaSize);
 
-        SetBounds(Left+deltaLeft, Top+deltaTop, Width+deltaWidth, Height+deltaHeight);
-        if assigned(FOnExpandAnimate) then
-          FOnExpandAnimate(self, deltaLeft, deltaTop, deltaWidth, deltaHeight);
-        end
-      else  // wird erst beim nächsten Timer ausgeführt ist aber nicht schlimm
-        if assigned(EndProcedureOfAnimation) then
-          EndProcedureOfAnimation;
-  end;
+    SetBounds(Left+delta.Left, Top+delta.Top, Width+delta.Right, Height+delta.Bottom);
+
+    if assigned(FOnExpandAnimate) then
+      FOnExpandAnimate(self, delta.Left, delta.Top, delta.Right, delta.Bottom);
+    end;
+
+
+  if Abs(Size-TargetAnimationSize)=0 then        //it's finished  ( executes it NEXT time the timer activates!)
+    begin
+    Timer.Enabled:=false;
+
+    FAnimating:=false;
+
+    StopCircleActions:=false;
+
+    if assigned(EndProcedureOfAnimation) then
+      EndProcedureOfAnimation;
+    end;
 end;
 
 
@@ -899,13 +956,6 @@ end;
 procedure TMyRollOut.EndTimerCollapse;
 var i:integer;
 begin
-  Timer.Enabled:=false;
-  FAnimating:=false;
-  StopCircleActions:=false;
-
-//  Visible:=false;
-
-  FIsCollapsing:=false;
   FCollapsed:=true;
 
   StoredBevelOuter:=BevelOuter;
@@ -923,11 +973,6 @@ end;
 
 procedure TMyRollOut.EndTimerExpand;
 begin
-  Timer.Enabled:=false;
-  FAnimating:=false;
-  StopCircleActions:=false;
-
-  FIsExpanding:=false;
   FCollapsed:=false;
 
   BevelOuter := StoredBevelOuter;
@@ -939,29 +984,6 @@ begin
 end;
 
 
-procedure TMyRollOut.EndTimerWriteFExpandedHeight;
-begin
-  Timer.Enabled:=false;
-  FAnimating:=false;
-  StopCircleActions:=false;
-
-  //if not Collapsed and (FButtonPosition in [akTop, akBottom])   then
-    //Height:=FExpandedHeight;
-
-  UpdateAll;
-end;
-
-procedure TMyRollOut.EndTimerWriteFExpandedWidth;
-begin
-  Timer.Enabled:=false;
-  FAnimating:=false;
-  StopCircleActions:=false;
-
-  //if not Collapsed and (FButtonPosition in [akLeft, akRight]) then
-    //Width:=FExpandedWidth;
-
-  UpdateAll;
-end;
 
 procedure TMyRollOut.UpdateAll;
 begin
@@ -973,70 +995,12 @@ end;
 
 
 
-
-procedure TMyRollOut.WriteFExpandedHeight(ExpandedHeight: integer);
+procedure TMyRollOut.WriteFExpandedSize(value: integer);
 begin
-  if FExpandedHeight=ExpandedHeight then
-    exit;
+  if FExpandedSize=ExpandedSize then exit;
 
-  FExpandedHeight:=ExpandedHeight;
-
-  if not (ComponentState * [csLoading, csDesigning] = []) then
-    begin
-    if csDesigning in ComponentState then
-      FOriginalExpandedHeight:=ExpandedHeight;
-
-    TargetAnimationSize:=ExpandedHeight;
-    EndProcedureOfAnimation:=@EndTimerWriteFExpandedHeight;
-    TimerAnimateSize(self);
-    TimerAnimateSize(self);
-    end
-  else if not Collapsed and not IsCollapsing then
-    begin
-    FAnimating:=true;
-    StopCircleActions:=true;
-
-    TargetAnimationSize:=ExpandedHeight;
-    EndProcedureOfAnimation:=@EndTimerWriteFExpandedHeight;
-    Timer.Enabled:=true;
-    Timer.OnTimer:=@TimerAnimateSize;
-    end
-  else if IsExpanding then
-    TargetAnimationSize:=ExpandedHeight;
+  FExpandedSize:=value;
 end;
-
-
-procedure TMyRollOut.WriteFExpandedWidth(ExpandedWidth: integer);
-begin
-  if FExpandedWidth=ExpandedWidth then
-    exit;
-
-  FExpandedWidth:=ExpandedWidth;
-
-  if not (ComponentState * [csLoading, csDesigning] = []) then
-    begin
-    if csDesigning in ComponentState then
-      FOriginalExpandedWidth:=ExpandedWidth;
-
-    TargetAnimationSize:=ExpandedWidth;
-    EndProcedureOfAnimation:=@EndTimerWriteFExpandedWidth;
-    TimerAnimateSize(self);
-    TimerAnimateSize(self);
-    end
-  else if not Collapsed and not IsCollapsing then
-    begin
-    FAnimating:=true;
-    StopCircleActions:=true;
-
-    TargetAnimationSize:=ExpandedWidth;
-    EndProcedureOfAnimation:=@EndTimerWriteFExpandedWidth;
-    Timer.Enabled:=true;
-    Timer.OnTimer:=@TimerAnimateSize;
-    end
-  else if IsExpanding then
-    TargetAnimationSize:=ExpandedWidth;
-end;
-
 
 procedure TMyRollOut.WriteFVisibleTotal(VisibleTotal: boolean);
 begin
@@ -1046,18 +1010,16 @@ begin
   FButton.Visible:=FVisibleTotal;
 end;
 
-
-function TMyRollOut.ButtonPosition2ButtonAnchors(pos: TAnchorKind): TAnchors;
+procedure TMyRollOut.WriteFButtonSize(value: integer);
 begin
-  result:=[akTop, akLeft, akBottom, akRight];
+  if FButtonSize=value then exit;
 
-  case pos of
-    akBottom: Result:=Result-[akTop];
-    akLeft: Result:=Result-[akRight];
-    akTop:  Result:=Result-[akBottom];
-    akRight:Result:=Result-[akLeft];
-  end;
+  FButtonSize:=value;
+
+  PositionButton;
 end;
+
+
 
 
 //procedure TMyRollOut.ButtonOnSetBounds(sender: TObject; ALeft, ATop, AWidth,AHeight: integer);
@@ -1121,44 +1083,32 @@ procedure TMyRollOut.SetBounds(ALeft, ATop, AWidth, AHeight: integer);
 begin
   inherited SetBounds(ALeft, ATop, AWidth, AHeight);
   
-  if not Collapsed and not FAnimating then
-    begin
-    FExpandedHeight:=AHeight;
-    FExpandedWidth:=AWidth;
-    FOriginalExpandedHeight:=AHeight;
-    FOriginalExpandedWidth:=AWidth;
-    end;
-
-
-  //if not StopCircleActions then
-    //PositionButton(ALeft, ATop, AWidth, AHeight);
-
-//  Update;
+  if not Collapsed and not Animating then
+    FExpandedSize:=RelevantSize(self,FCollapseKind);
 end;
 
 
 
-procedure TMyRollOut.WriteFCollapsedButtonColor(CollapsedButtonColor: TColor);
+procedure TMyRollOut.WriteFCollapsedButtonColor(value: TColor);
 begin
-  FCollapsedButtonColor:=CollapsedButtonColor;
+  FCollapsedButtonColor:=value;
   
   if Collapsed then
     FButton.Color:=FCollapsedButtonColor;
 end;
 
-procedure TMyRollOut.WriteFExpandedButtonColor(ExpandedButtonColor: TColor);
+procedure TMyRollOut.WriteFExpandedButtonColor(value: TColor);
 begin
-  FExpandedButtonColor:=ExpandedButtonColor;
+  FExpandedButtonColor:=value;
 
   if not Collapsed then
     FButton.Color:=FExpandedButtonColor;
 end;
 
-procedure TMyRollOut.WriteFButtonPosition(ButtonPosition: TAnchorKind);
+procedure TMyRollOut.WriteFButtonPosition(value: TAnchorKind);
 var wasanimated, wascollpased:boolean;
 begin
-  if FButtonPosition=ButtonPosition then
-    exit;
+  if FButtonPosition=value then    exit;
 
   wasanimated:=Animated;
   wascollpased:=Collapsed;
@@ -1166,20 +1116,22 @@ begin
   if Collapsed then
     Collapsed:=false;
 
-  FButtonPosition:=ButtonPosition;
-  
+  FButtonPosition:=value;
+  PositionButton;
+
   Collapsed := wascollpased;
   Animated := wasanimated;
-
-  PositionButton(Left, Top, Width, Height);
 end;
 
 
-procedure TMyRollOut.WriteFCollapseKind(CollapseKind: TCollapseKind);
+procedure TMyRollOut.WriteFCollapseKind(value: TAnchorKind);
 var wasanimated, wascollpased:boolean;
 begin
-  if FCollapseKind=CollapseKind then
+  if FCollapseKind=value then
     exit;
+
+  FCollapseKind:=value;
+
 
   wasanimated:=Animated;
   wascollpased:=Collapsed;
@@ -1187,31 +1139,38 @@ begin
   if Collapsed then
     Collapsed:=false;
 
-  FCollapseKind:=CollapseKind;
 
   Collapsed := wascollpased;
   Animated := wasanimated;
 end;
 
-procedure TMyRollOut.writeFAnimationSpeed(AnimationSpeed: real);
+procedure TMyRollOut.writeFAnimationSpeed(value: real);
 begin
-  korrigiere(AnimationSpeed, 3, 1000);
-  FAnimationSpeed:=AnimationSpeed;
+  korrigiere(value, 3, 1000);
+  FAnimationSpeed:=value;
 end;
 
 
 
 
-procedure TMyRollOut.PositionButton(ALeft, ATop, AWidth, AHeight: integer);
+procedure TMyRollOut.PositionButton;
 
-  procedure korr(var int:integer);
+  function ButtonRect:TRect;
   begin
-    if int<1 then
-      int:=1;
+    case FButtonPosition of
+      akBottom,akTop: Result:= Rect(0,0,RelevantOrthogonalSize(self,FButtonPosition), FButtonSize);
+      akLeft,akRight: Result:= Rect(0,0,FButtonSize, RelevantOrthogonalSize(self,FButtonPosition));
+    end;
+
+    //this must come after the thing above!!!
+    // this moves the button to the bottom, or the right
+    case FButtonPosition of
+      akBottom: Result.Top:=Result.Top + RelevantSize(self, FButtonPosition)-FButtonSize;
+      akRight: Result.Left:=Result.Left+ RelevantSize(self, FButtonPosition)-FButtonSize;
+    end;
   end;
 
-
-var    newLeft, newTop, newWidth, newHeight: integer;
+var    new: TRect;
 begin
   if StopCircleActions or not Assigned(FButton) then
     exit;
@@ -1220,42 +1179,20 @@ begin
 
   FButton.Visible:=VisibleTotal;
 
-  case ButtonPosition of
-    akTop, akBottom:
-      begin
-      newLeft:=0;
-      newWidth:=AWidth-2;
-      newHeight:=27;
-      end;
-    akLeft, akRight:
-      begin
-      newTop:=0;
-      newHeight:=AHeight-2;
-      newWidth:=27;
-      end;
-  end;
 
-    //end;
-  case ButtonPosition of
-    akTop:
-      newTop:=0;
-    akBottom:
-      newTop:=AHeight-newHeight-1;
-    akLeft:
-      newLeft:=1;
-    akRight:
-      newLeft:=AWidth-newWidth-1;
-  end;
+
+  new:=ButtonRect;
+  FButton.SetBounds(new.Left, new.Top, new.Right, new.Bottom);
+
 
   //set anchors
-  FButton.Anchors:=ButtonPosition2ButtonAnchors(FButtonPosition);
+  case FButtonPosition of
+    akBottom:   FButton.Anchors:=[akTop, akLeft, akBottom, akRight]-[akTop];
+    akLeft:     FButton.Anchors:=[akTop, akLeft, akBottom, akRight]-[akRight];
+    akTop:      FButton.Anchors:=[akTop, akLeft, akBottom, akRight]-[akBottom];
+    akRight:    FButton.Anchors:=[akTop, akLeft, akBottom, akRight]-[akLeft];
+  end;
 
-  korr(newHeight);
-  korr(newLeft);
-  korr(newWidth);
-  korr(newTop);
-
-  FButton.SetBounds(newLeft, newTop, newWidth, newHeight);
 
   StopCircleActions:=false;
 end;
@@ -1288,19 +1225,10 @@ end;
 procedure TMyRollOut.DoCollapse;
 var collapsesize:integer;
 begin
-  case ButtonPosition of
-    akLeft, akRight: collapsesize:=FButton.Width;
-    akTop, akBottom: collapsesize:=FButton.Height;
-  end;
+  collapsesize:=FButtonSize;  // RelevantSize(FButton, FCollapseKind)
+  TargetAnimationSize:=collapsesize;
 
-  if FCollapsed then
-    begin
-    if Animating then
-      TargetAnimationSize:=collapsesize;
-    exit;
-    end;
-
-  FIsCollapsing:=true;
+  Button.Caption:=IntToStr(TargetAnimationSize);
 
   if assigned(OnPreCollapse) then
     OnPreCollapse(self);
@@ -1309,7 +1237,6 @@ begin
   FButton.Brush.Color:=FCollapsedButtonColor;
 
 
-  TargetAnimationSize:=collapsesize;
   EndProcedureOfAnimation:=@EndTimerCollapse;
   if (ComponentState * [csLoading, csDesigning] = []) and Animated then
     begin
@@ -1326,25 +1253,10 @@ end;
 
 
 procedure TMyRollOut.DoExpand;
-var i:integer;
 begin
-  case ButtonPosition of
-    akTop,akBottom: TargetAnimationSize:=ExpandedHeight;
-    akLeft,akRight: TargetAnimationSize:=ExpandedWidth;
-  end;
+  TargetAnimationSize:=FExpandedSize;
+  Button.Caption:=IntToStr(TargetAnimationSize);
 
-  if not FCollapsed then
-    begin
-    if Animating then
-      TargetAnimationSize:=TargetAnimationSize;
-    exit;
-    end;
-
-  //for i:=0 to ControlCount-1 do
-    //if Controls[i] <> FButton then
-      //Controls[i].Visible:=true;
-
-  FIsExpanding:=true;
 
   if assigned(OnPreExpand) then
     OnPreExpand(self);
@@ -1397,8 +1309,9 @@ begin
 
   inherited;
 
+  FButtonSize:=27;
   FAnimated:=true;
-  FCollapseKind:=CKCollapseToButton;
+  FCollapseKind:=akTop;
   FVisibleTotal:=true;
   FCollapsed:=false;
 //  BorderStyle:=bsSingle;
@@ -1406,10 +1319,9 @@ begin
   FButtonPosition:=akTop;
   FCollapsedButtonColor:=clSkyBlue;
   FExpandedButtonColor:=RGBToColor(23, 136,248);
-  FExpandedHeight:=200;
-  FOriginalExpandedHeight:=FExpandedHeight;
-  FExpandedWidth:=200;
-  FOriginalExpandedWidth:=FExpandedWidth;
+  FExpandedSize:=200;
+  Height:=ExpandedSize;
+  Width:=200;
   FAnimationSpeed:=20;
 //  AutoScroll:=false;
 
@@ -1423,14 +1335,14 @@ begin
   with FButton do
     begin
     Parent:=self;
-    Name:='MainButton';
+    Name:='Button';
     Caption:='Caption';
     Color:=ExpandedButtonColor;
     ControlStyle := ControlStyle + [csNoFocus, csNoDesignSelectable];
     end;
 
   StopCircleActions:=false;
-  PositionButton(Self.Left, self.Top, self.Width, Height);
+  PositionButton;
 end;
 
 
