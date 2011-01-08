@@ -17,7 +17,7 @@ You can check out the repository (in linux) with the command:
         svn co http://svn.lazarusforum.de/svn/expandpanels expandpanels
 }
 //////////////////////////////
-//  ExpandPanels   Version 1.991
+//  ExpandPanels   Version 1.992
 //////////////////////////////
 
     {
@@ -26,7 +26,9 @@ Todo  List
 
 - Every animation sould be equal and a standarised way to execute it
 - A new animation kills the old one!!!
-
+- simplyfy everything with verctor addition and scalar multiplication (orthogonal basis vectors... and so on)
+      if horizonatal and vertical would be described by a unity vector, I could calculate if a certain operation should be performed
+      and I could just multiply the basis vector  with an operation to get a delta movement (or none)
      }
 
 unit ExpandPanels;
@@ -70,10 +72,9 @@ type
     FAnimated:boolean;
     FOnExpand: TNotifyEvent;
     FOnPreExpand: TNotifyEvent;
-    FOnExpandAnimate: TAnimationEvent;
+    FOnAnimate: TAnimationEvent;
     FOnCollapse: TNotifyEvent;
     FOnPreCollapse: TNotifyEvent;
-    FOnCollapseAnimate: TAnimationEvent;
     FOnButtonClick: TNotifyEvent;
     FButtonPosition:TAnchorKind;
     FExpandedButtonColor:TColor;
@@ -141,10 +142,9 @@ type
     property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
     property OnPreExpand: TNotifyEvent read FOnPreExpand write FOnPreExpand;
     property OnExpand: TNotifyEvent read FOnExpand write FOnExpand;
-    property OnExpandAnimate: TAnimationEvent read FOnExpandAnimate write FOnExpandAnimate;
+    property OnAnimate: TAnimationEvent read FOnAnimate write FOnAnimate;
     property OnCollapse: TNotifyEvent read FOnCollapse write FOnCollapse;
     property OnPreCollapse: TNotifyEvent read FOnPreCollapse write FOnPreCollapse;
-    property OnCollapseAnimate: TAnimationEvent read FOnCollapseAnimate write FOnCollapseAnimate;
   end;
 
 
@@ -160,16 +160,16 @@ type
 
   TExpandPanels = class(TComponent)
   private
-    FDirection: TExpandPanelsDirection;
     { Private-Deklarationen }
     PanelArray:TList;
     
     // Properties
+    FDirection: TExpandPanelsDirection;
     FButtonPosition,
     FCollapseKind:TAnchorKind;
-    FLeft:integer;
-    FTop:integer;
-    FWidth:integer;
+    FOrthogonalAbove:integer;
+    FAbove:integer;
+    FOrthogonalSize:integer;
     FBehaviour:TExpandPanelsBehaviour;
     FOnArrangePanels: TNotifyEvent;
     FFixedSize:integer;
@@ -178,7 +178,13 @@ type
 
     FUseClientSize:boolean;
 
+    function RelevantAbove(comp:TControl):integer;
     function RelevantSize(comp:TControl):integer;
+    function RelevantOrthogonalSize(comp:TControl):integer;
+    procedure WriteRelevantAbove(comp:TMyRollOut; above:integer);
+    procedure WriteRelevantSize(comp:TMyRollOut; size:integer);
+    procedure WriteRelevantOrthogonalSize(comp:TMyRollOut; size:integer);
+    procedure WriteRelevantOrthogonalAbove(comp:TMyRollOut; size:integer);
 
     procedure setDirection(value: TExpandPanelsDirection);
     procedure setButtonPosition(value:TAnchorKind);
@@ -187,9 +193,9 @@ type
     procedure setUseFixedSize(value:boolean);
     procedure setAutoCollapseIfTooHigh(value:boolean);
     procedure setFixedSize(value:integer);
-    procedure setLeft(value:Integer);
-    procedure setTop(value:Integer);
-    procedure setWidth(value:Integer);
+    procedure setOrthogonalAbove(value:Integer);
+    procedure setAbove(value:Integer);
+    procedure setOrthogonalSize(value:Integer);
     procedure setBehaviour(value:TExpandPanelsBehaviour);
     
     procedure RollOutOnAnimate(sender:TObject; deltaLeft, deltaTop, deltaWidth, deltaHeight: integer);
@@ -204,14 +210,14 @@ type
   public
     { Public-Deklarationen }
 
-    property  Left:integer read FLeft write setLeft;
-    property  Top:integer read FTop write setTop;
-    property  Width:integer read FWidth write setWidth;
+    property  OrthogonalAbove:integer read FOrthogonalAbove write setOrthogonalAbove;
+    property  Above:integer read FAbove write setAbove;
+    property  OrthogonalSize:integer read FOrthogonalSize write setOrthogonalSize;
 
     function IdxOfPanel(aname:string):integer; overload;
 
     procedure CollapseIfTooHigh;
-    procedure SetCorrectSize;
+//    procedure SetCorrectSize;
     procedure AddPanel(rollout:TMyRollOut);
     procedure InsertPanel(idx:integer; rollout:TMyRollOut);
     function DeltePanel(aname:string):boolean; overload;
@@ -315,13 +321,14 @@ begin
 
   PanelArray:=TList.create;
 
+  FDirection:=EPVertical;
   FUseFixedSize:=false;
   FUseClientSize:=false;
   FFixedSize:=400;
   FAutoCollapseIfTooHigh:=false;
-  FTop:=10;
-  FLeft:=10;
-  FWidth:=200;
+  FAbove:=10;
+  FOrthogonalAbove:=10;
+  FOrthogonalSize:=200;
 end;
 
 
@@ -347,15 +354,7 @@ end;
 
 
 
-{==============================================================================
-  Procedure:    AddPanel
-  Belongs to:   TExpandPanels
-  Result:       None
-  Parameters:
-                  rollout : TMyRollOut  =
 
-  Description:
-==============================================================================}
 procedure TExpandPanels.AddPanel(rollout:TMyRollOut);
 begin
   InsertPanel(PanelArray.Count, rollout);
@@ -365,28 +364,20 @@ end;
 
 procedure TExpandPanels.InsertPanel(idx: integer; rollout: TMyRollOut);
 begin
-  if (Idx=0)and (PanelArray.Count=0) then
-    begin
-    FLeft:=rollout.Left;
-    FWidth:=rollout.Width;
-    FTop:=rollout.Top;
-    end;
-
-
+  WriteRelevantAbove(rollout, FAbove);
+  WriteRelevantOrthogonalAbove(rollout, FOrthogonalAbove);
+  WriteRelevantOrthogonalSize(rollout, FOrthogonalSize);
   with rollout do
     begin
     CollapseKind:=FCollapseKind;
     ButtonPosition:=akTop;
-    Left:=self.Left;
-    top:=self.Top;
-    Width:=self.Width;
     Tag:=Idx;
     FButton.Tag:=Idx;
 
+
     OnButtonClick:=@RollOutClick;
     FButton.OnMouseMove:=@RollOut1MouseMove;
-    OnCollapseAnimate:=@RollOutOnAnimate;
-    OnExpandAnimate:=@RollOutOnAnimate;
+    OnAnimate:=@RollOutOnAnimate;
     end;
 
 
@@ -433,28 +424,71 @@ end;
 
 
 
-{==============================================================================
-  Procedure:    DelLastPanel
-  Belongs to:   TExpandPanels
-  Result:       None
-  Parameters:
 
-  Description:
-==============================================================================}
 procedure TExpandPanels.DelLastPanel;
 begin
   PanelArray.delete(PanelArray.count-1);
 end;
 
 
+function TExpandPanels.RelevantAbove(comp: TControl): integer;
+begin
+  case FDirection of
+    EPHorizontal: Result:=comp.Left;
+    EPVertical: Result:=comp.Top;
+  end;
+end;
 
 function TExpandPanels.RelevantSize(comp: TControl): integer;
 begin
-  case FCollapseKind of
-    akTop, akBottom: Result:=comp.Height;
-    akLeft, akRight: Result:=comp.Width;
+  case FDirection of
+    EPHorizontal: Result:=comp.Width;
+    EPVertical: Result:=comp.Height;
   end;
 end;
+
+function TExpandPanels.RelevantOrthogonalSize(comp: TControl): integer;
+begin
+  case FDirection of
+    EPHorizontal: Result:=comp.Height;
+    EPVertical: Result:=comp.Width;
+  end;
+end;
+
+procedure TExpandPanels.WriteRelevantAbove(comp: TMyRollOut; above: integer);
+begin
+  case FDirection of
+    EPHorizontal: comp.Left:=above;
+    EPVertical: comp.Top:=above;
+  end;
+end;
+
+procedure TExpandPanels.WriteRelevantSize(comp: TMyRollOut; size: integer);
+begin
+  case FDirection of
+    EPHorizontal: comp.Width:=size;
+    EPVertical: comp.Height:=size;
+  end;
+end;
+
+procedure TExpandPanels.WriteRelevantOrthogonalSize(comp: TMyRollOut;
+  size: integer);
+begin
+  case FDirection of
+    EPHorizontal: comp.Height:=size;
+    EPVertical: comp.Width:=size;
+  end;
+end;
+
+procedure TExpandPanels.WriteRelevantOrthogonalAbove(comp: TMyRollOut;
+  size: integer);
+begin
+  case FDirection of
+    EPHorizontal: comp.Top:=size;
+    EPVertical: comp.Left:=size;
+  end;
+end;
+
 
 procedure TExpandPanels.setDirection(value: TExpandPanelsDirection);
 begin
@@ -522,84 +556,39 @@ begin
 end;
 
 
-{==============================================================================
-  Procedure:    setLeft
-  Belongs to:   TExpandPanels
-  Result:       None
-  Parameters:
-                  value : Integer  =
 
-  Description:
-==============================================================================}
-procedure TExpandPanels.setLeft(value:Integer);
+procedure TExpandPanels.setOrthogonalAbove(value:Integer);
 var i:Integer;
 begin
-  FLeft:=value;
-
-  for I := 0 to PanelArray.Count - 1 do
-    with TMyRollOut(PanelArray[i]) do
-      if not Collapsed then
-        Left:= FLeft;
-
+  if FOrthogonalAbove=value then exit;
+  FOrthogonalAbove:=value;
 
   ArrangePanels;
 end;
 
 
-{==============================================================================
-  Procedure:    setTop
-  Belongs to:   TExpandPanels
-  Result:       None                         Width
-  Parameters:
-                  value : Integer  =
-
-  Description:
-==============================================================================}
-procedure TExpandPanels.setTop(value:Integer);
+procedure TExpandPanels.setAbove(value:Integer);
 begin
-  FTop:=value;
-
-  //for I := 0 to PanelArray.Count - 1 do
-    //TMyRollOut(PanelArray[i]).Top:= FTop;
+  if FAbove=value then exit;
+  FAbove:=value;
 
   ArrangePanels;
 end;
 
 
-{==============================================================================
-  Procedure:    setWidth
-  Belongs to:   TExpandPanels
-  Result:       None
-  Parameters:
-                  value : Integer  =
-
-  Description:
-==============================================================================}
-procedure TExpandPanels.setWidth(value:Integer);
+procedure TExpandPanels.setOrthogonalSize(value:Integer);
 var i:Integer;
 begin
-  FWidth:=value;
+  FOrthogonalSize:=value;
 
   for I := 0 to PanelArray.Count - 1 do
-    with TMyRollOut(PanelArray[i]) do
-//      if not Collapsed then
-        Width:= FWidth;
-
-  ArrangePanels;
+    WriteRelevantOrthogonalSize(TMyRollOut(PanelArray[i]), FOrthogonalSize);
 end;
 
 
 
 
-{==============================================================================
-  Procedure:    setBehaviour
-  Belongs to:   TExpandPanels
-  Result:       None
-  Parameters:
-                  value : TExpandPanelsBehaviour  =
 
-  Description:
-==============================================================================}
 procedure TExpandPanels.setBehaviour(value:TExpandPanelsBehaviour);
 var i:Integer;
     isAlreadyOneExpand:boolean;
@@ -609,104 +598,111 @@ begin
 
   for I := 0 to PanelArray.Count - 1 do
     with TMyRollOut(PanelArray[i]) do
-      if (Behaviour<>EPMultipanel)and  not Collapsed then
+      if (Behaviour<>EPMultipanel)and  not Collapsed then   //leave only the first open, if it is not MultiPanel
         if not isAlreadyOneExpand then
           isAlreadyOneExpand:=true
         else
           Collapsed:=true;
-
-  ArrangePanels;
 end;
 
+
+
 procedure TExpandPanels.CollapseIfTooHigh;
-var i,h:integer;
+var i,h,max:integer;
     tempanimated:boolean;
 begin
   if Count<=1 then
     exit;
 
-  h:=Panel(0).Top;
-  for i := 0 to Count-1 do
-    h:=h+ Panel(i).Height;
 
-  if h>Panel(i).Parent.Height then
-    for i := 0 to Count-1 do
+  h:=RelevantAbove(Panel(0));
+  max:=RelevantSize(Panel(0).Parent);
+
+  for i := 0 to Count-1 do
+    if h+ RelevantSize(Panel(i))> max then
       with Panel(i) do
         begin
         tempanimated:=Animated;
         Animated:=false;
         Collapsed:=true;
         Animated:=tempanimated;
-        end;
+
+        h:=h+ TMyRollOut(Panel(i)).ButtonSize;
+        end
+    else
+      h:=h+ RelevantSize(Panel(i));
 end;
 
 
 
 procedure TExpandPanels.RollOutOnAnimate(sender: TObject; deltaLeft, deltaTop, deltaWidth, deltaHeight: integer);
 var idx,
-    i:integer;
+    i,size:integer;
 begin
   idx:=PanelArray.IndexOf(sender);
-  
+
   for i:= idx+1 to PanelArray.Count-1 do
-    with TMyRollOut(PanelArray[i]) do
-      begin
-      //if (deltaLeft<>0) or (deltaWidth<>0) then
-        //Left:=Left+deltaLeft+deltaWidth;
-      if (deltaTop<>0) or (deltaHeight<>0) then
-        Top:=Top+deltaTop+deltaHeight;
-      end;
+    begin
+    size:=RelevantAbove(TMyRollOut(PanelArray[i]));
+    case FDirection of
+      EPVertical:     size := size+ deltaTop + deltaHeight;
+      EPHorizontal:   size := size+ deltaLeft + deltaWidth;
+    end;
+
+    WriteRelevantAbove(TMyRollOut(PanelArray[i]),size );
+
+    end;
 end;
 
 
 
 
-procedure TExpandPanels.SetCorrectSize;
-const plus=1;   //extra Anstand
-var
-    i, exSize,
-    countexpanded,
-    SumSize, closedSize:Integer;
-begin
-  if PanelArray.Count<=0 then
-    exit;
-    
-  SumSize:=FFixedSize;
-  if FUseClientSize then
-    SumSize:=TMyRollOut(PanelArray[0]).Parent.Height;
-    
-
-  countexpanded:=0;
-  closedSize:=0;
-  for I := 0 to PanelArray.count-1 do
-    with TMyRollOut(PanelArray[i]) do
-      begin
-      if not Collapsed and not Animating         //error producer!!!   animating does not neccessairily mean that it is expanding
-       or Collapsed and Animating then
-        inc(countexpanded)
-      else
-        closedSize:=closedSize+Height;
-      end;
-        
-  exSize:=SumSize- FTop- closedSize;
-
-  case Behaviour of
-    EPMultipanel:
-      if countexpanded>0 then
-        exSize:=trunc(exSize/countexpanded)
-      else
-        exSize:=400;
-  end;
-
-  for I := 0 to PanelArray.count-1 do
-    with TMyRollOut(PanelArray[i]) do
-      begin
-      if not FUseFixedSize and not FUseClientSize then
-        ExpandedSize:=200
-      else
-        ExpandedSize:=exSize;
-      end;
-end;
+//procedure TExpandPanels.SetCorrectSize;
+//const plus=1;   //extra Anstand
+//var
+//    i, exSize,
+//    countexpanded,
+//    SumSize, closedSize:Integer;
+//begin
+//  if PanelArray.Count<=0 then
+//    exit;
+//
+//  SumSize:=FFixedSize;
+//  if FUseClientSize then
+//    SumSize:=TMyRollOut(PanelArray[0]).Parent.Height;
+//
+//
+//  countexpanded:=0;
+//  closedSize:=0;
+//  for I := 0 to PanelArray.count-1 do
+//    with TMyRollOut(PanelArray[i]) do
+//      begin
+//      if not Collapsed and not Animating         //error producer!!!   animating does not neccessairily mean that it is expanding
+//       or Collapsed and Animating then
+//        inc(countexpanded)
+//      else
+//        closedSize:=closedSize+Height;
+//      end;
+//
+//  exSize:=SumSize- FTop- closedSize;
+//
+//  case Behaviour of
+//    EPMultipanel:
+//      if countexpanded>0 then
+//        exSize:=trunc(exSize/countexpanded)
+//      else
+//        exSize:=400;
+//  end;
+//
+//  for I := 0 to PanelArray.count-1 do
+//    with TMyRollOut(PanelArray[i]) do
+//      begin
+//      if not FUseFixedSize and not FUseClientSize then
+//        ExpandedSize:=200
+//      else
+//        ExpandedSize:=exSize;
+//      end;
+//end;
 
 
 
@@ -721,24 +717,26 @@ end;
 procedure TExpandPanels.ArrangePanels;
 const plus=1;   //extra Anstand
 var i,
-    oben:Integer;
+    t:Integer;
 begin
   if Count<=0 then
     exit;
 
-  SetCorrectSize;
 
-  oben:=Top+ plus;
+  //left setzen!!!
+//  SetCorrectSize;
+
+  t:=FAbove+ plus;
 
   for I := 0 to PanelArray.count-1 do
-    with TMyRollOut(PanelArray[i]) do
-      begin
-      if not Visible then
-        continue;
-        
-      Top:=oben;
-      oben:=oben+Height+plus;
-      end;
+    begin
+    if not TMyRollOut(PanelArray[i]).Visible then
+      continue;
+
+    WriteRelevantAbove( TMyRollOut(PanelArray[i]), t );
+    WriteRelevantOrthogonalAbove(TMyRollOut(PanelArray[i]), OrthogonalAbove);
+    t:=t + plus + self.RelevantSize(TMyRollOut(PanelArray[i]));
+    end;
 
   if FAutoCollapseIfTooHigh then
     CollapseIfTooHigh;
@@ -779,10 +777,7 @@ procedure TExpandPanels.RollOutClick(Sender: TObject);
 begin
   if  (Behaviour<>EPMultipanel) then
     HotTrackSetActivePanel(TBoundButton(Sender).Tag);
-    
-  SetCorrectSize;
-  
-//  ArrangePanels;
+
 end;
 
 
@@ -803,8 +798,6 @@ var i:Integer;
 begin
   for I := PanelArray.count-1 downto 0 do
     TMyRollOut(PanelArray[i]).Collapsed:=not (value=i);
-
-//  ArrangePanels;
 end;
 
 
@@ -942,8 +935,8 @@ begin
 
     SetBounds(Left+delta.Left, Top+delta.Top, Width+delta.Right, Height+delta.Bottom);
 
-    if assigned(FOnExpandAnimate) then
-      FOnExpandAnimate(self, delta.Left, delta.Top, delta.Right, delta.Bottom);
+    if assigned(FOnAnimate) then
+      FOnAnimate(self, delta.Left, delta.Top, delta.Right, delta.Bottom);
     end;
 
 
@@ -1227,7 +1220,6 @@ begin
   collapsesize:=FButtonSize;  // RelevantSize(FButton, FCollapseKind)
   TargetAnimationSize:=collapsesize;
 
-  Button.Caption:=IntToStr(TargetAnimationSize);
 
   if assigned(OnPreCollapse) then
     OnPreCollapse(self);
@@ -1254,8 +1246,6 @@ end;
 procedure TMyRollOut.DoExpand;
 begin
   TargetAnimationSize:=FExpandedSize;
-  Button.Caption:=IntToStr(TargetAnimationSize);
-
 
   if assigned(OnPreExpand) then
     OnPreExpand(self);

@@ -15,6 +15,7 @@ type
   TForm1 = class(TForm)
     CClientSize: TCheckBox;
     RBehaviour: TRadioGroup;
+    RDirection: TRadioGroup;
     RColl: TRadioGroup;
     RButt: TRadioGroup;
     procedure FormCreate(Sender: TObject);
@@ -22,6 +23,7 @@ type
     procedure RBehaviourClick(Sender: TObject);
     procedure RButtClick(Sender: TObject);
     procedure RCollClick(Sender: TObject);
+    procedure RDirectionClick(Sender: TObject);
   private
     { private declarations }
   public
@@ -84,13 +86,16 @@ end;
 procedure TForm1.RButtClick(Sender: TObject);
 begin
   ex1.ButtonPosition:=TAnchorKind(RButt.ItemIndex);
-  p1.ButtonPosition:=TAnchorKind(RButt.ItemIndex);
 end;
 
 procedure TForm1.RCollClick(Sender: TObject);
 begin
   ex1.CollapseKind:=TAnchorKind(RColl.ItemIndex);
-  p1.CollapseKind:=TAnchorKind(RColl.ItemIndex);
+end;
+
+procedure TForm1.RDirectionClick(Sender: TObject);
+begin
+  ex1.Direction:=TExpandPanelsDirection(RDirection.ItemIndex);
 end;
 
 initialization
