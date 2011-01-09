@@ -32,6 +32,9 @@ unit ExpandPanels;
 
 {$mode objfpc}{$H+}
 
+{$DEFINE DebugInfo}
+
+
 interface
 uses
   controls,Classes, ExtCtrls, Graphics,math,ComCtrls,
@@ -851,6 +854,11 @@ end;
 
 procedure TMyRollOut.setCollapsed(Collapsed: boolean);
 begin
+{$IFDEF DebugInfo}
+  writeln('TMyRollOut.setCollapsed');
+writeln(BoolToStr(Collapsed,true));
+{$ENDIF}
+
   if FCollapsed=Collapsed   and  not Animating then
     exit;
 
@@ -975,9 +983,6 @@ begin
   if assigned(OnCollapse) then
     OnCollapse(self);
 
-  //for i:=0 to ControlCount-1 do
-    //if Controls[i] <> FButton then
-      //Controls[i].Visible:=false;
 
   UpdateAll;
 end;
@@ -1008,9 +1013,18 @@ end;
 
 procedure TMyRollOut.setExpandedSize(value: integer);
 begin
+  {$IFDEF DebugInfo}
+    writeln('TMyRollOut.setExpandedSize');
+  writeln(IntToStr(value));
+  {$ENDIF}
+
+
   if FExpandedSize=ExpandedSize then exit;
 
   FExpandedSize:=value;
+
+  if not Collapsed then
+    Animate(FExpandedSize);
 end;
 
 
@@ -1024,62 +1038,6 @@ begin
 end;
 
 
-
-
-//procedure TMyRollOut.ButtonOnSetBounds(sender: TObject; ALeft, ATop, AWidth,AHeight: integer);
-//var    newLeft, newTop, newWidth, newHeight: integer;
-//begin
-////  if StopCircleActions then
-    //exit;
-
-  //StopCircleActions:=true;
-  //newLeft:=Left;
-  //newTop:=Top;
-  //newWidth:=Width;
-  //newHeight:=Height;
-
-
-  //case ButtonPosition of
-    //akTop, akBottom:
-      //begin
-      //newLeft  := ALeft;
-      //newWidth := AWidth;
-      //end;
-    //akLeft, akRight:
-      //begin
-      //newTop    := ATop;
-      //newHeight := AHeight;
-      //end;
-  //end;
-
-
-  //case ButtonPosition of
-    //akTop:
-      //if Collapsed and (CollapseKind=CKCollapseToOppositeOfButton) then
-        //newTop:=ATop+AHeight-ExpandedHeight
-      //else
-        //newTop:=ATop+AHeight;
-    //akBottom:
-      //if Collapsed and (CollapseKind=CKCollapseToOppositeOfButton) then
-        //newTop:=ATop
-      //else
-        //newTop:=ATop-ExpandedHeight;
-    //akLeft:
-      //if Collapsed and (CollapseKind=CKCollapseToOppositeOfButton) then
-        //newLeft:=ALeft+AWidth-ExpandedWidth
-      //else
-        //newLeft:=ALeft+AWidth;
-    //akRight:
-      //if Collapsed and (CollapseKind=CKCollapseToOppositeOfButton) then
-        //newLeft:=ALeft
-      //else
-        //newLeft:=ALeft-ExpandedWidth;
-  //end;
-
-  //SetBounds(newLeft, newTop, newWidth, newHeight);
-
-  //StopCircleActions:=false;
-//end;
 
 
 
