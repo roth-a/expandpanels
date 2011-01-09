@@ -32,7 +32,7 @@ unit ExpandPanels;
 
 {$mode objfpc}{$H+}
 
-//{$DEFINE DebugInfo}  // for debugging purposes
+{$DEFINE DebugInfo}  // for debugging purposes
 
 
 interface
@@ -51,7 +51,6 @@ type
 
   TBoundButton = class(TButton)
   private
-    procedure Click; override;
   public
     constructor Create(TheOwner: TComponent); override;
   end;
@@ -63,6 +62,7 @@ type
 
   TMyRollOut = class(TPanel)
   private
+    FEPManagesCollapsing: TNotifyEvent;
     FButton:TBoundButton;
     FButtonSize: integer;
     FCollapseKind:TAnchorKind;
@@ -124,6 +124,7 @@ type
     procedure AdjustClientRect(var ARect: TRect); override;
   
     property InternalOnAnimate: TAnimationEvent read FInternalOnAnimate write FInternalOnAnimate;
+    property EPManagesCollapsing: TNotifyEvent read FEPManagesCollapsing write FEPManagesCollapsing;
   public
     property Animating:boolean read FAnimating;
 
@@ -182,6 +183,7 @@ type
     FUseClientSize:boolean;
 
     function RelevantAbove(comp:TControl):integer;
+    function RelevantOrthogonalAbove(comp:TControl):integer;
     function RelevantSize(comp:TControl):integer;
     function RelevantOrthogonalSize(comp:TControl):integer;
     procedure WriteRelevantAbove(comp:TMyRollOut; above:integer);
@@ -200,6 +202,8 @@ type
     procedure setAbove(value:Integer);
     procedure setOrthogonalSize(value:Integer);
     procedure setBehaviour(value:TExpandPanelsBehaviour);
+
+    procedure MakeCorrectButtonClickPointers;
     
     procedure RollOutOnAnimate(sender:TObject; deltaLeft, deltaTop, deltaWidth, deltaHeight: integer);
 
@@ -277,14 +281,6 @@ end;
 
 { TBoundButton }
 
-
-procedure TBoundButton.Click;
-begin
-  inherited Click;
-  
-  if Owner is TMyRollOut then
-    TMyRollOut(Owner).ButtonClick(self);
-end;
 
 constructor TBoundButton.Create(TheOwner: TComponent);
 begin
@@ -370,18 +366,24 @@ end;
 
 procedure TExpandPanels.InsertPanel(idx: integer; rollout: TMyRollOut);
 begin
-  WriteRelevantAbove(rollout, FAbove);
-  WriteRelevantOrthogonalAbove(rollout, FOrthogonalAbove);
-  WriteRelevantOrthogonalSize(rollout, FOrthogonalSize);
+  if Count<=0 then
+    begin
+    FAbove:=RelevantAbove(rollout);
+    FOrthogonalAbove:=RelevantOrthogonalAbove(rollout);
+    FOrthogonalSize:=RelevantOrthogonalSize(rollout);
+    end
+  else
+    begin
+    WriteRelevantAbove(rollout, FAbove);
+    WriteRelevantOrthogonalAbove(rollout, FOrthogonalAbove);
+    WriteRelevantOrthogonalSize(rollout, FOrthogonalSize);
+    end;
+
   with rollout do
     begin
-    CollapseKind:=FCollapseKind;
-    ButtonPosition:=akTop;
     Tag:=Idx;
     FButton.Tag:=Idx;
 
-
-    FButton.OnClick:=@RollOutClick;
     FButton.OnMouseMove:=@RollOut1MouseMove;
     InternalOnAnimate:=@RollOutOnAnimate;
     end;
@@ -393,6 +395,7 @@ begin
     HotTrackSetActivePanel(0);  //damit das erste ausgeklappt ist
 
   ArrangePanels;
+  MakeCorrectButtonClickPointers;
 end;
 
 
@@ -442,6 +445,14 @@ begin
   case FArrangeKind of
     akLeft: Result:=comp.Left;
     akTop: Result:=comp.Top;
+  end;
+end;
+
+function TExpandPanels.RelevantOrthogonalAbove(comp: TControl): integer;
+begin
+  case FArrangeKind of
+    akTop: Result:=comp.Left;
+    akLeft: Result:=comp.Top;
   end;
 end;
 
@@ -607,6 +618,9 @@ begin
   isAlreadyOneExpand:=false;
   FBehaviour:=value;
 
+  MakeCorrectButtonClickPointers;
+
+  // look if more then one is open
   for I := 0 to PanelArray.Count - 1 do
     with TMyRollOut(PanelArray[i]) do
       if (Behaviour<>EPMultipanel)and  not Collapsed then   //leave only the first open, if it is not MultiPanel
@@ -614,6 +628,18 @@ begin
           isAlreadyOneExpand:=true
         else
           Collapsed:=true;
+end;
+
+procedure TExpandPanels.MakeCorrectButtonClickPointers;
+var i :integer;
+begin
+  // set correct pointers
+  for I := 0 to PanelArray.Count - 1 do
+    with TMyRollOut(PanelArray[i]) do
+      if FBehaviour <> EPMultipanel then
+        EPManagesCollapsing:=@RollOutClick
+      else
+        EPManagesCollapsing:=nil;
 end;
 
 
@@ -788,7 +814,6 @@ procedure TExpandPanels.RollOutClick(Sender: TObject);
 begin
   if  (Behaviour<>EPMultipanel) then
     HotTrackSetActivePanel(TBoundButton(Sender).Tag);
-
 end;
 
 
@@ -799,7 +824,7 @@ procedure TExpandPanels.HotTrackSetActivePanel(value:integer);
 var i:Integer;
 begin
   for I := PanelArray.count-1 downto 0 do
-    TMyRollOut(PanelArray[i]).Collapsed:=not (value=i);
+    TMyRollOut(PanelArray[i]).Collapsed:=value<>i;
 end;
 
 
@@ -1077,6 +1102,15 @@ begin
 
   FCollapseKind:=value;
 
+
+  //switsch sizes
+
+  case FCollapseKind of
+    akLeft, akRight: FExpandedSize:=Width;
+    akTop, akBottom: FExpandedSize:=Height;
+  end;
+
+
   Collapsed := wascollpased;
 
 
@@ -1144,9 +1178,12 @@ end;
 
 procedure TMyRollOut.ButtonClick(Sender: TObject);
 begin
-  Collapsed:=not Collapsed;
+  if Assigned(FEPManagesCollapsing) then
+    FEPManagesCollapsing(self)
+  else
+    Collapsed:=not Collapsed;
 
-  if OnButtonClick<>nil then
+  if Assigned(OnButtonClick) then
     OnButtonClick(self);
 end;
 
@@ -1271,6 +1308,7 @@ begin
   Height:=FExpandedSize;
   Width:=200;
   FAnimationSpeed:=20;
+  Caption:='';
 
 
   Timer:=TTimer.Create(self);
@@ -1286,6 +1324,7 @@ begin
     Caption:='Caption';
     Color:=ExpandedButtonColor;
     ControlStyle := ControlStyle + [csNoFocus, csNoDesignSelectable];
+    FButton.OnClick:=@self.ButtonClick;
     end;
 
   StopCircleActions:=false;

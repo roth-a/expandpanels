@@ -22,7 +22,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akBottom
-    ExpandedSize = 300
+    ExpandedSize = 200
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -58,7 +58,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akBottom
-    ExpandedSize = 300
+    ExpandedSize = 200
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -81,7 +81,7 @@ object Form1: TForm1
     end
   end
   object MyRollOut8: TMyRollOut
-    Left = 0
+    Left = 240
     Height = 27
     Top = 760
     Width = 216
@@ -94,7 +94,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akBottom
-    ExpandedSize = 300
+    ExpandedSize = 200
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -129,7 +129,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
-    ExpandedSize = 300
+    ExpandedSize = 200
     ButtonPosition = akBottom
     ButtonSize = 27
     Button.Left = 0
@@ -164,7 +164,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
-    ExpandedSize = 500
+    ExpandedSize = 200
     ButtonPosition = akBottom
     ButtonSize = 27
     Button.Left = 0
@@ -187,7 +187,7 @@ object Form1: TForm1
     end
   end
   object MyRollOut11: TMyRollOut
-    Left = 72
+    Left = 216
     Height = 27
     Top = 0
     Width = 216
@@ -199,7 +199,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
-    ExpandedSize = 300
+    ExpandedSize = 200
     ButtonPosition = akBottom
     ButtonSize = 27
     Button.Left = 0
@@ -222,9 +222,9 @@ object Form1: TForm1
     end
   end
   object MyRollOut12: TMyRollOut
-    Left = 0
+    Left = 208
     Height = 300
-    Top = 112
+    Top = 88
     Width = 27
     BevelOuter = bvNone
     Caption = 'MyRollOut1'
@@ -234,7 +234,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akLeft
-    ExpandedSize = 300
+    ExpandedSize = 200
     ButtonPosition = akRight
     ButtonSize = 27
     Button.Left = 0
@@ -257,9 +257,9 @@ object Form1: TForm1
     end
   end
   object MyRollOut13: TMyRollOut
-    Left = 0
+    Left = 208
     Height = 300
-    Top = 416
+    Top = 392
     Width = 27
     BevelOuter = bvNone
     Caption = 'MyRollOut1'
@@ -269,7 +269,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akLeft
-    ExpandedSize = 368
+    ExpandedSize = 200
     ButtonPosition = akRight
     ButtonSize = 27
     Button.Left = 0
@@ -305,7 +305,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akRight
-    ExpandedSize = 298
+    ExpandedSize = 200
     ButtonPosition = akLeft
     ButtonSize = 27
     Button.Left = 0
@@ -328,18 +328,17 @@ object Form1: TForm1
     end
   end
   object MyRollOut1: TMyRollOut
-    Left = 299
-    Height = 211
-    Top = 117
+    Left = 448
+    Height = 150
+    Top = 262
     Width = 242
-    Caption = 'MyRollOut1'
-    ClientHeight = 211
+    ClientHeight = 150
     ClientWidth = 242
     TabOrder = 9
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
-    ExpandedSize = 211
+    ExpandedSize = 150
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -388,21 +387,21 @@ object Form1: TForm1
       Caption = 'RadioButton1'
       Checked = True
       TabOrder = 4
+      TabStop = True
     end
   end
   object MyRollOut2: TMyRollOut
-    Left = 299
-    Height = 200
-    Top = 344
+    Left = 512
+    Height = 150
+    Top = 312
     Width = 242
-    Caption = 'MyRollOut1'
-    ClientHeight = 200
+    ClientHeight = 150
     ClientWidth = 242
     TabOrder = 10
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
-    ExpandedSize = 200
+    ExpandedSize = 150
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -416,7 +415,7 @@ object Form1: TForm1
     AnimationSpeed = 20
     object Calendar2: TCalendar
       Left = 1
-      Height = 171
+      Height = 121
       Top = 28
       Width = 240
       Align = alClient
@@ -424,18 +423,17 @@ object Form1: TForm1
     end
   end
   object MyRollOut3: TMyRollOut
-    Left = 288
-    Height = 200
-    Top = 488
+    Left = 512
+    Height = 150
+    Top = 448
     Width = 242
-    Caption = 'MyRollOut1'
-    ClientHeight = 200
+    ClientHeight = 150
     ClientWidth = 242
     TabOrder = 11
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
-    ExpandedSize = 200
+    ExpandedSize = 150
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -449,7 +447,7 @@ object Form1: TForm1
     AnimationSpeed = 20
     object Calendar3: TCalendar
       Left = 1
-      Height = 171
+      Height = 121
       Top = 28
       Width = 240
       Align = alClient
@@ -470,7 +468,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akRight
-    ExpandedSize = 298
+    ExpandedSize = 200
     ButtonPosition = akLeft
     ButtonSize = 27
     Button.Left = 0
@@ -492,28 +490,193 @@ object Form1: TForm1
       DateTime = 40552
     end
   end
-  object ExpandPanels1: TExpandPanels
-    ArrangeKind = akTop
-    CollapseKind = akLeft
+  object Shape2: TShape
+    Left = 200
+    Height = 788
+    Top = 0
+    Width = 7
+    Anchors = [akTop, akLeft, akBottom]
+    Brush.Color = clBlack
+  end
+  object Label1: TLabel
+    Left = 8
+    Height = 29
+    Top = 8
+    Width = 175
+    Caption = 'Einzelnes Panel'
+    Font.Height = -24
+    ParentColor = False
+    ParentFont = False
+  end
+  object myrolloutsingle: TMyRollOut
+    Left = 16
+    Height = 221
+    Top = 73
+    Width = 157
+    Caption = 'myrolloutsingle'
+    ClientHeight = 221
+    ClientWidth = 157
+    TabOrder = 13
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akTop
+    ExpandedSize = 221
     ButtonPosition = akTop
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 27
+    Button.Top = 0
+    Button.Width = 157
+    Button.Anchors = [akTop, akLeft, akRight]
+    Button.Caption = 'Caption'
+    Button.Color = 16287767
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    object Calendar1: TCalendar
+      Left = 1
+      Height = 192
+      Top = 28
+      Width = 155
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object RColl: TRadioGroup
+    Left = 16
+    Height = 73
+    Top = 352
+    Width = 158
+    AutoFill = True
+    Caption = 'Collapse To'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 2
+    ClientHeight = 57
+    ClientWidth = 154
+    Columns = 2
+    ItemIndex = 0
+    Items.Strings = (
+      'top'
+      'left'
+      'right'
+      'bottom'
+    )
+    OnClick = RCollClick
+    TabOrder = 14
+  end
+  object RButt: TRadioGroup
+    Left = 15
+    Height = 73
+    Top = 440
+    Width = 158
+    AutoFill = True
+    Caption = 'Button Position'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 2
+    ClientHeight = 57
+    ClientWidth = 154
+    Columns = 2
+    ItemIndex = 0
+    Items.Strings = (
+      'top'
+      'left'
+      'right'
+      'bottom'
+    )
+    OnClick = RButtClick
+    TabOrder = 15
+  end
+  object RBehaviour: TRadioGroup
+    Left = 776
+    Height = 91
+    Top = 297
+    Width = 155
+    AutoFill = True
+    Caption = 'Behaviour'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 75
+    ClientWidth = 151
+    ItemIndex = 1
+    Items.Strings = (
+      'HotMouse'
+      'Multipanel'
+      'SinglePanel'
+    )
+    OnClick = RBehaviourClick
+    TabOrder = 16
+  end
+  object RDirection: TRadioGroup
+    Left = 776
+    Height = 73
+    Top = 400
+    Width = 158
+    AutoFill = True
+    Caption = 'Direction'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 57
+    ClientWidth = 154
+    ItemIndex = 0
+    Items.Strings = (
+      'Vertical'
+      'Horizontal'
+    )
+    OnClick = RDirectionClick
+    TabOrder = 17
+  end
+  object CheckBox2: TCheckBox
+    Left = 776
+    Height = 38
+    Top = 128
+    Width = 183
+    Caption = 'Show the Panels on the '#10'Border of the Form'
+    Checked = True
+    Font.Height = -14
+    Font.Style = [fsBold]
+    ParentFont = False
+    State = cbChecked
+    TabOrder = 18
+  end
+  object ExpandPanels1: TExpandPanels
+    ArrangeKind = akLeft
     Behaviour = EPMultipanel
     left = 755
     top = 743
   end
   object ExpandPanels2: TExpandPanels
-    ArrangeKind = akTop
-    CollapseKind = akLeft
-    ButtonPosition = akBottom
+    ArrangeKind = akLeft
     Behaviour = EPMultipanel
     left = 835
     top = 1
   end
   object ExpandPanels3: TExpandPanels
     ArrangeKind = akTop
-    CollapseKind = akTop
-    ButtonPosition = akTop
     Behaviour = EPMultipanel
-    left = 566
+    left = 774
     top = 212
   end
 end
