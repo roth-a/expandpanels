@@ -6,12 +6,14 @@ object Form1: TForm1
   Caption = 'Form1'
   ClientHeight = 789
   ClientWidth = 1034
+  OnCreate = FormCreate
   LCLVersion = '0.9.31'
   object MyRollOut6: TMyRollOut
-    Left = 184
+    Left = 520
     Height = 27
-    Top = 533
+    Top = 760
     Width = 216
+    Anchors = [akLeft, akBottom]
     BevelOuter = bvNone
     Caption = 'MyRollOut1'
     ClientHeight = 27
@@ -20,7 +22,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akBottom
-    ExpandedSize = 280
+    ExpandedSize = 300
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -41,5 +43,477 @@ object Form1: TForm1
       Align = alClient
       DateTime = 40552
     end
+  end
+  object MyRollOut7: TMyRollOut
+    Left = 296
+    Height = 27
+    Top = 760
+    Width = 216
+    Anchors = [akLeft, akBottom]
+    BevelOuter = bvNone
+    Caption = 'MyRollOut1'
+    ClientHeight = 27
+    ClientWidth = 216
+    TabOrder = 1
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akBottom
+    ExpandedSize = 300
+    ButtonPosition = akTop
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 27
+    Button.Top = 0
+    Button.Width = 216
+    Button.Anchors = [akTop, akLeft, akRight]
+    Button.Caption = 'Caption'
+    Button.Color = clSkyBlue
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    Collapsed = True
+    object Calendar7: TCalendar
+      Left = 0
+      Height = 1
+      Top = 27
+      Width = 216
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object MyRollOut8: TMyRollOut
+    Left = 0
+    Height = 27
+    Top = 760
+    Width = 216
+    Anchors = [akLeft, akBottom]
+    BevelOuter = bvNone
+    Caption = 'MyRollOut1'
+    ClientHeight = 27
+    ClientWidth = 216
+    TabOrder = 2
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akBottom
+    ExpandedSize = 300
+    ButtonPosition = akTop
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 27
+    Button.Top = 0
+    Button.Width = 216
+    Button.Anchors = [akTop, akLeft, akRight]
+    Button.Caption = 'Caption'
+    Button.Color = clSkyBlue
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    Collapsed = True
+    object Calendar8: TCalendar
+      Left = 0
+      Height = 1
+      Top = 27
+      Width = 216
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object MyRollOut9: TMyRollOut
+    Left = 592
+    Height = 27
+    Top = 0
+    Width = 216
+    BevelOuter = bvNone
+    Caption = 'MyRollOut1'
+    ClientHeight = 27
+    ClientWidth = 216
+    TabOrder = 3
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akTop
+    ExpandedSize = 300
+    ButtonPosition = akBottom
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 27
+    Button.Top = 0
+    Button.Width = 216
+    Button.Anchors = [akLeft, akRight, akBottom]
+    Button.Caption = 'Caption'
+    Button.Color = clSkyBlue
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    Collapsed = True
+    object Calendar9: TCalendar
+      Left = 0
+      Height = 1
+      Top = 0
+      Width = 216
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object MyRollOut10: TMyRollOut
+    Left = 368
+    Height = 27
+    Top = 0
+    Width = 216
+    BevelOuter = bvNone
+    Caption = 'MyRollOut1'
+    ClientHeight = 27
+    ClientWidth = 216
+    TabOrder = 4
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akTop
+    ExpandedSize = 500
+    ButtonPosition = akBottom
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 27
+    Button.Top = 0
+    Button.Width = 216
+    Button.Anchors = [akLeft, akRight, akBottom]
+    Button.Caption = 'Caption'
+    Button.Color = clSkyBlue
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    Collapsed = True
+    object Calendar10: TCalendar
+      Left = 0
+      Height = 1
+      Top = 0
+      Width = 216
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object MyRollOut11: TMyRollOut
+    Left = 72
+    Height = 27
+    Top = 0
+    Width = 216
+    BevelOuter = bvNone
+    Caption = 'MyRollOut1'
+    ClientHeight = 27
+    ClientWidth = 216
+    TabOrder = 5
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akTop
+    ExpandedSize = 300
+    ButtonPosition = akBottom
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 27
+    Button.Top = 0
+    Button.Width = 216
+    Button.Anchors = [akLeft, akRight, akBottom]
+    Button.Caption = 'Caption'
+    Button.Color = clSkyBlue
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    Collapsed = True
+    object Calendar11: TCalendar
+      Left = 0
+      Height = 1
+      Top = 0
+      Width = 216
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object MyRollOut12: TMyRollOut
+    Left = 0
+    Height = 300
+    Top = 112
+    Width = 27
+    BevelOuter = bvNone
+    Caption = 'MyRollOut1'
+    ClientHeight = 300
+    ClientWidth = 27
+    TabOrder = 6
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akLeft
+    ExpandedSize = 300
+    ButtonPosition = akRight
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 300
+    Button.Top = 0
+    Button.Width = 27
+    Button.Anchors = [akTop, akRight, akBottom]
+    Button.Caption = 'Caption'
+    Button.Color = clSkyBlue
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    Collapsed = True
+    object Calendar12: TCalendar
+      Left = 0
+      Height = 300
+      Top = 0
+      Width = 1
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object MyRollOut13: TMyRollOut
+    Left = 0
+    Height = 300
+    Top = 416
+    Width = 27
+    BevelOuter = bvNone
+    Caption = 'MyRollOut1'
+    ClientHeight = 300
+    ClientWidth = 27
+    TabOrder = 7
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akLeft
+    ExpandedSize = 368
+    ButtonPosition = akRight
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 300
+    Button.Top = 0
+    Button.Width = 27
+    Button.Anchors = [akTop, akRight, akBottom]
+    Button.Caption = 'Caption'
+    Button.Color = clSkyBlue
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    Collapsed = True
+    object Calendar13: TCalendar
+      Left = 0
+      Height = 300
+      Top = 0
+      Width = 1
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object MyRollOut14: TMyRollOut
+    Left = 1007
+    Height = 300
+    Top = 56
+    Width = 27
+    Anchors = [akTop, akRight]
+    BevelOuter = bvNone
+    Caption = 'MyRollOut1'
+    ClientHeight = 300
+    ClientWidth = 27
+    TabOrder = 8
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akRight
+    ExpandedSize = 298
+    ButtonPosition = akLeft
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 300
+    Button.Top = 0
+    Button.Width = 27
+    Button.Anchors = [akTop, akLeft, akBottom]
+    Button.Caption = 'Caption'
+    Button.Color = clSkyBlue
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    Collapsed = True
+    object Calendar14: TCalendar
+      Left = 27
+      Height = 300
+      Top = 0
+      Width = 1
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object MyRollOut1: TMyRollOut
+    Left = 299
+    Height = 211
+    Top = 117
+    Width = 242
+    Caption = 'MyRollOut1'
+    ClientHeight = 211
+    ClientWidth = 242
+    TabOrder = 9
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akTop
+    ExpandedSize = 211
+    ButtonPosition = akTop
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 27
+    Button.Top = 0
+    Button.Width = 242
+    Button.Anchors = [akTop, akLeft, akRight]
+    Button.Caption = 'Caption'
+    Button.Color = 16287767
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    object SpinEdit1: TSpinEdit
+      Left = 39
+      Height = 22
+      Top = 38
+      Width = 50
+      TabOrder = 1
+    end
+    object Shape1: TShape
+      Left = 132
+      Height = 65
+      Top = 45
+      Width = 65
+    end
+    object BitBtn1: TBitBtn
+      Left = 16
+      Height = 30
+      Top = 85
+      Width = 75
+      Caption = 'BitBtn1'
+      TabOrder = 2
+    end
+    object CheckBox1: TCheckBox
+      Left = 40
+      Height = 23
+      Top = 128
+      Width = 81
+      Caption = 'CheckBox1'
+      TabOrder = 3
+    end
+    object RadioButton1: TRadioButton
+      Left = 38
+      Height = 23
+      Top = 172
+      Width = 97
+      Caption = 'RadioButton1'
+      Checked = True
+      TabOrder = 4
+    end
+  end
+  object MyRollOut2: TMyRollOut
+    Left = 299
+    Height = 200
+    Top = 344
+    Width = 242
+    Caption = 'MyRollOut1'
+    ClientHeight = 200
+    ClientWidth = 242
+    TabOrder = 10
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akTop
+    ExpandedSize = 200
+    ButtonPosition = akTop
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 27
+    Button.Top = 0
+    Button.Width = 242
+    Button.Anchors = [akTop, akLeft, akRight]
+    Button.Caption = 'Caption'
+    Button.Color = 16287767
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    object Calendar2: TCalendar
+      Left = 1
+      Height = 171
+      Top = 28
+      Width = 240
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object MyRollOut3: TMyRollOut
+    Left = 288
+    Height = 200
+    Top = 488
+    Width = 242
+    Caption = 'MyRollOut1'
+    ClientHeight = 200
+    ClientWidth = 242
+    TabOrder = 11
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akTop
+    ExpandedSize = 200
+    ButtonPosition = akTop
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 27
+    Button.Top = 0
+    Button.Width = 242
+    Button.Anchors = [akTop, akLeft, akRight]
+    Button.Caption = 'Caption'
+    Button.Color = 16287767
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    object Calendar3: TCalendar
+      Left = 1
+      Height = 171
+      Top = 28
+      Width = 240
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object MyRollOut15: TMyRollOut
+    Left = 1007
+    Height = 140
+    Top = 360
+    Width = 27
+    Anchors = [akTop, akRight]
+    BevelOuter = bvNone
+    Caption = 'MyRollOut1'
+    ClientHeight = 140
+    ClientWidth = 27
+    TabOrder = 12
+    ExpandedButtonColor = 16287767
+    CollapsedButtonColor = clSkyBlue
+    CollapseKind = akRight
+    ExpandedSize = 298
+    ButtonPosition = akLeft
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 140
+    Button.Top = 0
+    Button.Width = 27
+    Button.Anchors = [akTop, akLeft, akBottom]
+    Button.Caption = 'Caption'
+    Button.Color = clSkyBlue
+    Button.TabOrder = 0
+    AnimationSpeed = 20
+    Collapsed = True
+    object Calendar15: TCalendar
+      Left = 27
+      Height = 140
+      Top = 0
+      Width = 1
+      Align = alClient
+      DateTime = 40552
+    end
+  end
+  object ExpandPanels1: TExpandPanels
+    ArrangeKind = akTop
+    CollapseKind = akLeft
+    ButtonPosition = akTop
+    Behaviour = EPMultipanel
+    left = 755
+    top = 743
+  end
+  object ExpandPanels2: TExpandPanels
+    ArrangeKind = akTop
+    CollapseKind = akLeft
+    ButtonPosition = akBottom
+    Behaviour = EPMultipanel
+    left = 835
+    top = 1
+  end
+  object ExpandPanels3: TExpandPanels
+    ArrangeKind = akTop
+    CollapseKind = akTop
+    ButtonPosition = akTop
+    Behaviour = EPMultipanel
+    left = 566
+    top = 212
   end
 end

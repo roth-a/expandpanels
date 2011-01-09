@@ -230,6 +230,9 @@ type
     function Count:integer;
     function Panel(idx:integer):TMyRollOut;
 
+    property CollapseKind:TAnchorKind read FCollapseKind write setCollapseKind;
+    property ButtonPosition:TAnchorKind read FButtonPosition write setButtonPosition;
+
     constructor create(AOwner: TComponent); override;
     destructor destroy;  override;
   published
@@ -240,10 +243,8 @@ type
 //    property UseClientHeight:boolean read FUseClientHeight write setUseClientSize;
 //    property AutoCollapseIfTooHigh:boolean read FAutoCollapseIfTooHigh write setAutoCollapseIfTooHigh;
     property ArrangeKind:TAnchorKind read FArrangeKind write setArrangeKind;
-    property CollapseKind:TAnchorKind read FCollapseKind write setCollapseKind;
-    property ButtonPosition:TAnchorKind read FButtonPosition write setButtonPosition;
     property OnArrangePanels: TNotifyEvent read FOnArrangePanels write FOnArrangePanels;
-    property  Behaviour:TExpandPanelsBehaviour read FBehaviour write setBehaviour;
+    property Behaviour:TExpandPanelsBehaviour read FBehaviour write setBehaviour;
   end;
 
 procedure Register;
@@ -324,6 +325,8 @@ begin
 
   PanelArray:=TList.create;
 
+  FCollapseKind:=akTop;
+  FButtonPosition:=akTop;
   FArrangeKind:=akTop;
   FUseFixedSize:=false;
   FUseClientSize:=false;
