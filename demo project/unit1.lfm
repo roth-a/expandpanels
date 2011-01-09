@@ -20,7 +20,7 @@ object Form1: TForm1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akBottom
-    ExpandedSize = 248
+    ExpandedSize = 280
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0

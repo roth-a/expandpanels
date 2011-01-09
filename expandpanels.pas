@@ -32,7 +32,7 @@ unit ExpandPanels;
 
 {$mode objfpc}{$H+}
 
-{$DEFINE DebugInfo}
+//{$DEFINE DebugInfo}  // for debugging purposes
 
 
 interface
@@ -101,11 +101,11 @@ type
     procedure setButtonPosition(value:TAnchorKind);
     procedure setCollapseKind(value:TAnchorKind);
     procedure setAnimationSpeed(value:real);
+    procedure setCollapsed(value:boolean);
 
     procedure PositionButton;
 
-    procedure setCollapsed(Collapsed:boolean);
-    
+
     function RelevantSize(comp:TControl; akind:TAnchorKind):integer;
     function RelevantOrthogonalSize(comp:TControl; akind:TAnchorKind):integer;
     function DeltaCoordinates(deltaMove, deltaSize:integer):TRect;  // the outpot (left,top right, bottom) has all the information: left and top encode the movement. rigth and bottom the size changes
@@ -852,21 +852,21 @@ end;
 { TMyRollOut }
 
 
-procedure TMyRollOut.setCollapsed(Collapsed: boolean);
+procedure TMyRollOut.setCollapsed(value: boolean);
 begin
 {$IFDEF DebugInfo}
   writeln('TMyRollOut.setCollapsed');
-writeln(BoolToStr(Collapsed,true));
+  writeln(BoolToStr(Collapsed,true));
 {$ENDIF}
 
-  if FCollapsed=Collapsed   and  not Animating then
-    exit;
+  if FCollapsed=value then  exit;
+  FCollapsed:=value;
 
 
-  if not Collapsed then    // Collapsed erst der Zustand ist der gesetzt werden soll, nicht die gelesene Property
-    DoExpand
+  if FCollapsed then
+    DoCollapse
   else
-    DoCollapse;
+    DoExpand;
 end;
 
 function TMyRollOut.RelevantSize(comp: TControl; akind: TAnchorKind): integer;
@@ -877,8 +877,7 @@ begin
   end;
 end;
 
-function TMyRollOut.RelevantOrthogonalSize(comp: TControl; akind: TAnchorKind
-  ): integer;
+function TMyRollOut.RelevantOrthogonalSize(comp: TControl; akind: TAnchorKind): integer;
 begin
   case akind of
     akTop, akBottom: Result:=comp.Width;
@@ -975,8 +974,6 @@ end;
 procedure TMyRollOut.EndTimerCollapse;
 var i:integer;
 begin
-  FCollapsed:=true;
-
   StoredBevelOuter:=BevelOuter;
   BevelOuter:=bvNone;
 
@@ -989,8 +986,6 @@ end;
 
 procedure TMyRollOut.EndTimerExpand;
 begin
-  FCollapsed:=false;
-
   BevelOuter := StoredBevelOuter;
 
   if assigned(OnExpand) then
@@ -1018,8 +1013,7 @@ begin
   writeln(IntToStr(value));
   {$ENDIF}
 
-
-  if FExpandedSize=ExpandedSize then exit;
+  if (FExpandedSize=ExpandedSize)   then exit;
 
   FExpandedSize:=value;
 
@@ -1045,7 +1039,7 @@ procedure TMyRollOut.SetBounds(ALeft, ATop, AWidth, AHeight: integer);
 begin
   inherited SetBounds(ALeft, ATop, AWidth, AHeight);
   
-  if not Collapsed and not Animating then
+  if not Collapsed and not Animating and (ComponentState * [csLoading] = []) then
     FExpandedSize:=RelevantSize(self,FCollapseKind);
 end;
 
@@ -1168,10 +1162,7 @@ end;
 
 procedure TMyRollOut.ButtonClick(Sender: TObject);
 begin
-  if Collapsed then
-    DoExpand
-  else
-    DoCollapse;
+  Collapsed:=not Collapsed;
 
   if OnButtonClick<>nil then
     OnButtonClick(self);
@@ -1227,6 +1218,12 @@ begin
 
 
   Animate(FButtonSize);
+
+{$IFDEF DebugInfo}
+  writeln('TMyRollOut.DoCollapse');
+  writeln('FButtonSize '+inttostr(FButtonSize));
+{$ENDIF}
+
 end;
 
 
@@ -1246,6 +1243,12 @@ begin
   EndProcedureOfAnimation:=@EndTimerExpand;
 
   Animate(FExpandedSize);
+
+{$IFDEF DebugInfo}
+  writeln('TMyRollOut.DoExpand');
+  writeln('FExpandedSize '+inttostr(FExpandedSize));
+{$ENDIF}
+
 end;
 
 
@@ -1279,16 +1282,13 @@ begin
   FCollapseKind:=akTop;
   FVisibleTotal:=true;
   FCollapsed:=false;
-//  BorderStyle:=bsSingle;
-//  BevelOuter:=bvNone;
   FButtonPosition:=akTop;
   FCollapsedButtonColor:=clSkyBlue;
   FExpandedButtonColor:=RGBToColor(23, 136,248);
   FExpandedSize:=200;
-  Height:=ExpandedSize;
+  Height:=FExpandedSize;
   Width:=200;
   FAnimationSpeed:=20;
-//  AutoScroll:=false;
 
 
   Timer:=TTimer.Create(self);
