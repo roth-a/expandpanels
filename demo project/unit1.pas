@@ -13,50 +13,37 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    BitBtn1: TBitBtn;
     Calendar1: TCalendar;
     Calendar10: TCalendar;
     Calendar11: TCalendar;
-    Calendar12: TCalendar;
-    Calendar13: TCalendar;
     Calendar14: TCalendar;
     Calendar15: TCalendar;
     Calendar2: TCalendar;
     Calendar3: TCalendar;
-    Calendar6: TCalendar;
-    Calendar7: TCalendar;
-    Calendar8: TCalendar;
     Calendar9: TCalendar;
-    CheckBox1: TCheckBox;
     CheckBox2: TCheckBox;
-    ExpandPanels1: TExpandPanels;
     ExpandPanels2: TExpandPanels;
     ExpandPanels3: TExpandPanels;
     Label1: TLabel;
     MyRollOut1: TMyRollOut;
     MyRollOut10: TMyRollOut;
     MyRollOut11: TMyRollOut;
-    MyRollOut12: TMyRollOut;
-    MyRollOut13: TMyRollOut;
     MyRollOut14: TMyRollOut;
     MyRollOut15: TMyRollOut;
     MyRollOut2: TMyRollOut;
     MyRollOut3: TMyRollOut;
     myrolloutsingle: TMyRollOut;
-    MyRollOut6: TMyRollOut;
-    MyRollOut7: TMyRollOut;
-    MyRollOut8: TMyRollOut;
     MyRollOut9: TMyRollOut;
     RadioButton1: TRadioButton;
+    RadioGroup1: TRadioGroup;
     RBehaviour: TRadioGroup;
     RButt: TRadioGroup;
     RColl: TRadioGroup;
     RDirection: TRadioGroup;
-    Shape1: TShape;
     Shape2: TShape;
-    SpinEdit1: TSpinEdit;
     procedure CheckBox2Change(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure RadioGroup1Click(Sender: TObject);
     procedure RBehaviourClick(Sender: TObject);
     procedure RButtClick(Sender: TObject);
     procedure RCollClick(Sender: TObject);
@@ -87,26 +74,21 @@ begin
   ExpandPanels3.AddPanel(MyRollOut3);
 
 
-  ExpandPanels1.AddPanel(MyRollOut8);  // the first one added set the position
-  ExpandPanels1.AddPanel(MyRollOut6);
-  ExpandPanels1.AddPanel(MyRollOut7);
-
-
   ExpandPanels2.AddPanel(MyRollOut11);
   ExpandPanels2.AddPanel(MyRollOut9);
   ExpandPanels2.AddPanel(MyRollOut10);
 end;
 
+procedure TForm1.RadioGroup1Click(Sender: TObject);
+begin
+
+end;
+
 procedure TForm1.CheckBox2Change(Sender: TObject);
 begin
-  MyRollOut8.Visible:=CheckBox2.Checked;
-  MyRollOut6.Visible:=CheckBox2.Checked;
-  MyRollOut7.Visible:=CheckBox2.Checked;
   MyRollOut11.Visible:=CheckBox2.Checked;
   MyRollOut9.Visible:=CheckBox2.Checked;
   MyRollOut10.Visible:=CheckBox2.Checked;
-  MyRollOut12.Visible:=CheckBox2.Checked;
-  MyRollOut13.Visible:=CheckBox2.Checked;
   MyRollOut14.Visible:=CheckBox2.Checked;
   MyRollOut15.Visible:=CheckBox2.Checked;
 end;
@@ -131,6 +113,17 @@ begin
   ExpandPanels3.ArrangeKind:=TAnchorKind(RDirection.ItemIndex);
   ExpandPanels3.CollapseKind:=ExpandPanels3.ArrangeKind;
   ExpandPanels3.ButtonPosition:=ExpandPanels3.ArrangeKind;
+
+  if RDirection.ItemIndex=0 then
+    begin
+    ExpandPanels3.Above:=100;
+    ExpandPanels3.OrthogonalAbove:=208;
+    end
+  else
+    begin
+    ExpandPanels3.OrthogonalAbove:=Height-ExpandPanels3.Panel(0).Height;
+    ExpandPanels3.Above:=208;
+    end;
 end;
 
 end.

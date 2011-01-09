@@ -8,124 +8,16 @@ object Form1: TForm1
   ClientWidth = 1034
   OnCreate = FormCreate
   LCLVersion = '0.9.31'
-  object MyRollOut6: TMyRollOut
-    Left = 520
-    Height = 27
-    Top = 760
-    Width = 216
-    Anchors = [akLeft, akBottom]
-    BevelOuter = bvNone
-    Caption = 'MyRollOut1'
-    ClientHeight = 27
-    ClientWidth = 216
-    TabOrder = 0
-    ExpandedButtonColor = 16287767
-    CollapsedButtonColor = clSkyBlue
-    CollapseKind = akBottom
-    ExpandedSize = 200
-    ButtonPosition = akTop
-    ButtonSize = 27
-    Button.Left = 0
-    Button.Height = 27
-    Button.Top = 0
-    Button.Width = 216
-    Button.Anchors = [akTop, akLeft, akRight]
-    Button.Caption = 'Caption'
-    Button.Color = clSkyBlue
-    Button.TabOrder = 0
-    AnimationSpeed = 20
-    Collapsed = True
-    object Calendar6: TCalendar
-      Left = 0
-      Height = 1
-      Top = 27
-      Width = 216
-      Align = alClient
-      DateTime = 40552
-    end
-  end
-  object MyRollOut7: TMyRollOut
-    Left = 296
-    Height = 27
-    Top = 760
-    Width = 216
-    Anchors = [akLeft, akBottom]
-    BevelOuter = bvNone
-    Caption = 'MyRollOut1'
-    ClientHeight = 27
-    ClientWidth = 216
-    TabOrder = 1
-    ExpandedButtonColor = 16287767
-    CollapsedButtonColor = clSkyBlue
-    CollapseKind = akBottom
-    ExpandedSize = 200
-    ButtonPosition = akTop
-    ButtonSize = 27
-    Button.Left = 0
-    Button.Height = 27
-    Button.Top = 0
-    Button.Width = 216
-    Button.Anchors = [akTop, akLeft, akRight]
-    Button.Caption = 'Caption'
-    Button.Color = clSkyBlue
-    Button.TabOrder = 0
-    AnimationSpeed = 20
-    Collapsed = True
-    object Calendar7: TCalendar
-      Left = 0
-      Height = 1
-      Top = 27
-      Width = 216
-      Align = alClient
-      DateTime = 40552
-    end
-  end
-  object MyRollOut8: TMyRollOut
-    Left = 240
-    Height = 27
-    Top = 760
-    Width = 216
-    Anchors = [akLeft, akBottom]
-    BevelOuter = bvNone
-    Caption = 'MyRollOut1'
-    ClientHeight = 27
-    ClientWidth = 216
-    TabOrder = 2
-    ExpandedButtonColor = 16287767
-    CollapsedButtonColor = clSkyBlue
-    CollapseKind = akBottom
-    ExpandedSize = 200
-    ButtonPosition = akTop
-    ButtonSize = 27
-    Button.Left = 0
-    Button.Height = 27
-    Button.Top = 0
-    Button.Width = 216
-    Button.Anchors = [akTop, akLeft, akRight]
-    Button.Caption = 'Caption'
-    Button.Color = clSkyBlue
-    Button.TabOrder = 0
-    AnimationSpeed = 20
-    Collapsed = True
-    object Calendar8: TCalendar
-      Left = 0
-      Height = 1
-      Top = 27
-      Width = 216
-      Align = alClient
-      DateTime = 40552
-    end
-  end
   object MyRollOut9: TMyRollOut
-    Left = 592
+    Left = 712
     Height = 27
-    Top = 0
-    Width = 216
+    Top = 8
+    Width = 150
     BevelOuter = bvNone
     Caption = 'MyRollOut1'
     ClientHeight = 27
-    ClientWidth = 216
-    TabOrder = 3
+    ClientWidth = 150
+    TabOrder = 0
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
@@ -135,7 +27,7 @@ object Form1: TForm1
     Button.Left = 0
     Button.Height = 27
     Button.Top = 0
-    Button.Width = 216
+    Button.Width = 150
     Button.Anchors = [akLeft, akRight, akBottom]
     Button.Caption = 'Caption'
     Button.Color = clSkyBlue
@@ -146,21 +38,21 @@ object Form1: TForm1
       Left = 0
       Height = 1
       Top = 0
-      Width = 216
+      Width = 150
       Align = alClient
       DateTime = 40552
     end
   end
   object MyRollOut10: TMyRollOut
-    Left = 368
+    Left = 568
     Height = 27
-    Top = 0
-    Width = 216
+    Top = 56
+    Width = 150
     BevelOuter = bvNone
     Caption = 'MyRollOut1'
     ClientHeight = 27
-    ClientWidth = 216
-    TabOrder = 4
+    ClientWidth = 150
+    TabOrder = 1
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
@@ -170,7 +62,7 @@ object Form1: TForm1
     Button.Left = 0
     Button.Height = 27
     Button.Top = 0
-    Button.Width = 216
+    Button.Width = 150
     Button.Anchors = [akLeft, akRight, akBottom]
     Button.Caption = 'Caption'
     Button.Color = clSkyBlue
@@ -181,21 +73,21 @@ object Form1: TForm1
       Left = 0
       Height = 1
       Top = 0
-      Width = 216
+      Width = 150
       Align = alClient
       DateTime = 40552
     end
   end
   object MyRollOut11: TMyRollOut
-    Left = 216
+    Left = 464
     Height = 27
     Top = 0
-    Width = 216
+    Width = 150
     BevelOuter = bvNone
     Caption = 'MyRollOut1'
     ClientHeight = 27
-    ClientWidth = 216
-    TabOrder = 5
+    ClientWidth = 150
+    TabOrder = 2
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
@@ -205,7 +97,7 @@ object Form1: TForm1
     Button.Left = 0
     Button.Height = 27
     Button.Top = 0
-    Button.Width = 216
+    Button.Width = 150
     Button.Anchors = [akLeft, akRight, akBottom]
     Button.Caption = 'Caption'
     Button.Color = clSkyBlue
@@ -216,77 +108,7 @@ object Form1: TForm1
       Left = 0
       Height = 1
       Top = 0
-      Width = 216
-      Align = alClient
-      DateTime = 40552
-    end
-  end
-  object MyRollOut12: TMyRollOut
-    Left = 208
-    Height = 300
-    Top = 88
-    Width = 27
-    BevelOuter = bvNone
-    Caption = 'MyRollOut1'
-    ClientHeight = 300
-    ClientWidth = 27
-    TabOrder = 6
-    ExpandedButtonColor = 16287767
-    CollapsedButtonColor = clSkyBlue
-    CollapseKind = akLeft
-    ExpandedSize = 200
-    ButtonPosition = akRight
-    ButtonSize = 27
-    Button.Left = 0
-    Button.Height = 300
-    Button.Top = 0
-    Button.Width = 27
-    Button.Anchors = [akTop, akRight, akBottom]
-    Button.Caption = 'Caption'
-    Button.Color = clSkyBlue
-    Button.TabOrder = 0
-    AnimationSpeed = 20
-    Collapsed = True
-    object Calendar12: TCalendar
-      Left = 0
-      Height = 300
-      Top = 0
-      Width = 1
-      Align = alClient
-      DateTime = 40552
-    end
-  end
-  object MyRollOut13: TMyRollOut
-    Left = 208
-    Height = 300
-    Top = 392
-    Width = 27
-    BevelOuter = bvNone
-    Caption = 'MyRollOut1'
-    ClientHeight = 300
-    ClientWidth = 27
-    TabOrder = 7
-    ExpandedButtonColor = 16287767
-    CollapsedButtonColor = clSkyBlue
-    CollapseKind = akLeft
-    ExpandedSize = 200
-    ButtonPosition = akRight
-    ButtonSize = 27
-    Button.Left = 0
-    Button.Height = 300
-    Button.Top = 0
-    Button.Width = 27
-    Button.Anchors = [akTop, akRight, akBottom]
-    Button.Caption = 'Caption'
-    Button.Color = clSkyBlue
-    Button.TabOrder = 0
-    AnimationSpeed = 20
-    Collapsed = True
-    object Calendar13: TCalendar
-      Left = 0
-      Height = 300
-      Top = 0
-      Width = 1
+      Width = 150
       Align = alClient
       DateTime = 40552
     end
@@ -301,7 +123,7 @@ object Form1: TForm1
     Caption = 'MyRollOut1'
     ClientHeight = 300
     ClientWidth = 27
-    TabOrder = 8
+    TabOrder = 3
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akRight
@@ -328,17 +150,17 @@ object Form1: TForm1
     end
   end
   object MyRollOut1: TMyRollOut
-    Left = 448
-    Height = 150
-    Top = 262
+    Left = 208
+    Height = 200
+    Top = 100
     Width = 242
-    ClientHeight = 150
+    ClientHeight = 200
     ClientWidth = 242
-    TabOrder = 9
+    TabOrder = 4
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
-    ExpandedSize = 150
+    ExpandedSize = 200
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -350,35 +172,6 @@ object Form1: TForm1
     Button.Color = 16287767
     Button.TabOrder = 0
     AnimationSpeed = 20
-    object SpinEdit1: TSpinEdit
-      Left = 39
-      Height = 22
-      Top = 38
-      Width = 50
-      TabOrder = 1
-    end
-    object Shape1: TShape
-      Left = 132
-      Height = 65
-      Top = 45
-      Width = 65
-    end
-    object BitBtn1: TBitBtn
-      Left = 16
-      Height = 30
-      Top = 85
-      Width = 75
-      Caption = 'BitBtn1'
-      TabOrder = 2
-    end
-    object CheckBox1: TCheckBox
-      Left = 40
-      Height = 23
-      Top = 128
-      Width = 81
-      Caption = 'CheckBox1'
-      TabOrder = 3
-    end
     object RadioButton1: TRadioButton
       Left = 38
       Height = 23
@@ -386,22 +179,56 @@ object Form1: TForm1
       Width = 97
       Caption = 'RadioButton1'
       Checked = True
-      TabOrder = 4
+      TabOrder = 1
       TabStop = True
+    end
+    object RadioGroup1: TRadioGroup
+      Left = 1
+      Height = 171
+      Top = 28
+      Width = 240
+      Align = alClient
+      AutoFill = True
+      Caption = 'RadioGroup1'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.TopBottomSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 3
+      ClientHeight = 155
+      ClientWidth = 236
+      Columns = 3
+      Items.Strings = (
+        '1'
+        '2'
+        '3'
+        '4'
+        '5'
+        '6'
+        '7'
+        '8'
+        '9'
+        '10'
+      )
+      OnClick = RadioGroup1Click
+      TabOrder = 2
     end
   end
   object MyRollOut2: TMyRollOut
-    Left = 512
-    Height = 150
-    Top = 312
+    Left = 216
+    Height = 200
+    Top = 232
     Width = 242
-    ClientHeight = 150
+    ClientHeight = 200
     ClientWidth = 242
-    TabOrder = 10
+    TabOrder = 5
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
-    ExpandedSize = 150
+    ExpandedSize = 200
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -415,7 +242,7 @@ object Form1: TForm1
     AnimationSpeed = 20
     object Calendar2: TCalendar
       Left = 1
-      Height = 121
+      Height = 171
       Top = 28
       Width = 240
       Align = alClient
@@ -423,17 +250,17 @@ object Form1: TForm1
     end
   end
   object MyRollOut3: TMyRollOut
-    Left = 512
-    Height = 150
-    Top = 448
+    Left = 240
+    Height = 200
+    Top = 384
     Width = 242
-    ClientHeight = 150
+    ClientHeight = 200
     ClientWidth = 242
-    TabOrder = 11
+    TabOrder = 6
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
-    ExpandedSize = 150
+    ExpandedSize = 200
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -447,7 +274,7 @@ object Form1: TForm1
     AnimationSpeed = 20
     object Calendar3: TCalendar
       Left = 1
-      Height = 121
+      Height = 171
       Top = 28
       Width = 240
       Align = alClient
@@ -456,15 +283,15 @@ object Form1: TForm1
   end
   object MyRollOut15: TMyRollOut
     Left = 1007
-    Height = 140
+    Height = 272
     Top = 360
     Width = 27
     Anchors = [akTop, akRight]
     BevelOuter = bvNone
     Caption = 'MyRollOut1'
-    ClientHeight = 140
+    ClientHeight = 272
     ClientWidth = 27
-    TabOrder = 12
+    TabOrder = 7
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akRight
@@ -472,7 +299,7 @@ object Form1: TForm1
     ButtonPosition = akLeft
     ButtonSize = 27
     Button.Left = 0
-    Button.Height = 140
+    Button.Height = 272
     Button.Top = 0
     Button.Width = 27
     Button.Anchors = [akTop, akLeft, akBottom]
@@ -483,7 +310,7 @@ object Form1: TForm1
     Collapsed = True
     object Calendar15: TCalendar
       Left = 27
-      Height = 140
+      Height = 272
       Top = 0
       Width = 1
       Align = alClient
@@ -516,7 +343,7 @@ object Form1: TForm1
     Caption = 'myrolloutsingle'
     ClientHeight = 221
     ClientWidth = 157
-    TabOrder = 13
+    TabOrder = 8
     ExpandedButtonColor = 16287767
     CollapsedButtonColor = clSkyBlue
     CollapseKind = akTop
@@ -567,7 +394,7 @@ object Form1: TForm1
       'bottom'
     )
     OnClick = RCollClick
-    TabOrder = 14
+    TabOrder = 9
   end
   object RButt: TRadioGroup
     Left = 15
@@ -595,13 +422,13 @@ object Form1: TForm1
       'bottom'
     )
     OnClick = RButtClick
-    TabOrder = 15
+    TabOrder = 10
   end
   object RBehaviour: TRadioGroup
-    Left = 776
+    Left = 496
     Height = 91
-    Top = 297
-    Width = 155
+    Top = 264
+    Width = 150
     AutoFill = True
     Caption = 'Behaviour'
     ChildSizing.LeftRightSpacing = 6
@@ -613,7 +440,7 @@ object Form1: TForm1
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
     ClientHeight = 75
-    ClientWidth = 151
+    ClientWidth = 146
     ItemIndex = 1
     Items.Strings = (
       'HotMouse'
@@ -621,13 +448,13 @@ object Form1: TForm1
       'SinglePanel'
     )
     OnClick = RBehaviourClick
-    TabOrder = 16
+    TabOrder = 11
   end
   object RDirection: TRadioGroup
-    Left = 776
+    Left = 496
     Height = 73
-    Top = 400
-    Width = 158
+    Top = 368
+    Width = 160
     AutoFill = True
     Caption = 'Direction'
     ChildSizing.LeftRightSpacing = 6
@@ -639,19 +466,19 @@ object Form1: TForm1
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
     ClientHeight = 57
-    ClientWidth = 154
+    ClientWidth = 156
     ItemIndex = 0
     Items.Strings = (
       'Vertical'
       'Horizontal'
     )
     OnClick = RDirectionClick
-    TabOrder = 17
+    TabOrder = 12
   end
   object CheckBox2: TCheckBox
-    Left = 776
+    Left = 496
     Height = 38
-    Top = 128
+    Top = 208
     Width = 183
     Caption = 'Show the Panels on the '#10'Border of the Form'
     Checked = True
@@ -660,13 +487,7 @@ object Form1: TForm1
     OnChange = CheckBox2Change
     ParentFont = False
     State = cbChecked
-    TabOrder = 18
-  end
-  object ExpandPanels1: TExpandPanels
-    ArrangeKind = akLeft
-    Behaviour = EPMultipanel
-    left = 755
-    top = 743
+    TabOrder = 13
   end
   object ExpandPanels2: TExpandPanels
     ArrangeKind = akLeft
@@ -677,7 +498,7 @@ object Form1: TForm1
   object ExpandPanels3: TExpandPanels
     ArrangeKind = akTop
     Behaviour = EPMultipanel
-    left = 774
-    top = 212
+    left = 496
+    top = 240
   end
 end
