@@ -3,16 +3,21 @@
   <Package Version="3">
     <Name Value="Pexpandpanels"/>
     <CompilerOptions>
-      <Version Value="8"/>
+      <Version Value="9"/>
       <SearchPaths>
-        <OtherUnitFiles Value="$(LazarusDir)/components/gradbutton/package/"/>
+        <OtherUnitFiles Value="$(LazarusDir)/components/gradbutton/package"/>
         <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
       </SearchPaths>
+      <Parsing>
+        <SyntaxOptions>
+          <UseAnsiStrings Value="False"/>
+        </SyntaxOptions>
+      </Parsing>
       <Other>
         <CompilerPath Value="$(CompPath)"/>
       </Other>
     </CompilerOptions>
-    <Version Major="1" Minor="98"/>
+    <Version Major="2"/>
     <Files Count="1">
       <Item1>
         <Filename Value="expandpanels.pas"/>
@@ -32,7 +37,7 @@
       </Item2>
     </RequiredPkgs>
     <UsageOptions>
-      <UnitPath Value="$(PkgOutDir)/"/>
+      <UnitPath Value="$(PkgOutDir)"/>
     </UsageOptions>
     <PublishOptions>
       <Version Value="2"/>
