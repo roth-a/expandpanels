@@ -7,8 +7,10 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms
-  { you can add units after this }, Unit1, Pexpandpanels;
+  Forms, Unit1, pexpandpanels
+  { you can add units after this };
+
+{$R *.res}
 
 begin
   Application.Initialize;

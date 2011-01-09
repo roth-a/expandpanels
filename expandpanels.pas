@@ -11,10 +11,7 @@
 Please send comments and ideas directly to:
         admin@alexanderroth.spacequadrat.de
 
-You can access this unit over the subversion repository:
-        http://forge.lazarusforum.de/projects/show/expandpanels
-You can check out the repository (in linux) with the command:
-        svn co http://svn.lazarusforum.de/svn/expandpanels expandpanels
+For Instructions and Infos look up the Readme.txt
 }
 //////////////////////////////
 //  ExpandPanels   Version 1.994
@@ -24,8 +21,6 @@ You can check out the repository (in linux) with the command:
 Todo  List
 
 
-- Every animation sould be equal and a standarised way to execute it
-- A new animation should kill an old one (so at least the last animation is done correctly)
 - simplyfy everything with verctor addition and scalar multiplication (orthogonal basis vectors... and so on)
       if horizonatal and vertical would be described by a unity vector, I could calculate if a certain operation should be performed
       and I could just multiply the basis vector  with an operation to get a delta movement (or none)
@@ -93,25 +88,27 @@ type
     Timer:TTimer;
 
 
-    procedure WriteFExpandedSize(value:integer);
-
-    procedure WriteFButtonSize(value:integer);
+    procedure setExpandedSize(value:integer);
+    procedure setButtonSize(value:integer);
 
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
 
-    procedure WriteFCollapsedButtonColor(value:TColor);
-    procedure WriteFExpandedButtonColor(value:TColor);
-    procedure WriteFButtonPosition(value:TAnchorKind);
-    procedure WriteFCollapseKind(value:TAnchorKind);
-    procedure writeFAnimationSpeed(value:real);
+    procedure setCollapsedButtonColor(value:TColor);
+    procedure setExpandedButtonColor(value:TColor);
+    procedure setButtonPosition(value:TAnchorKind);
+    procedure setCollapseKind(value:TAnchorKind);
+    procedure setAnimationSpeed(value:real);
 
     procedure PositionButton;
 
-    procedure WriteFCollapsed(Collapsed:boolean);
+    procedure setCollapsed(Collapsed:boolean);
     
     function RelevantSize(comp:TControl; akind:TAnchorKind):integer;
     function RelevantOrthogonalSize(comp:TControl; akind:TAnchorKind):integer;
     function DeltaCoordinates(deltaMove, deltaSize:integer):TRect;  // the outpot (left,top right, bottom) has all the information: left and top encode the movement. rigth and bottom the size changes
+
+
+    procedure Animate(aTargetSize:integer);
 
     procedure TimerAnimateSize(Sender: TObject);
     procedure EndTimerCollapse;
@@ -124,24 +121,24 @@ type
     procedure AdjustClientRect(var ARect: TRect); override;
   
     property InternalOnAnimate: TAnimationEvent read FInternalOnAnimate write FInternalOnAnimate;
-public
+  public
     property Animating:boolean read FAnimating;
 
     constructor Create(TheOwner: TComponent); override;
     destructor destroy; override;
   published
-    property ExpandedButtonColor:TColor read FExpandedButtonColor write WriteFExpandedButtonColor;
-    property CollapsedButtonColor:TColor read FCollapsedButtonColor write WriteFCollapsedButtonColor;
-    property CollapseKind:TAnchorKind read FCollapseKind write WriteFCollapseKind;   //To where should it collapse?
-    property ExpandedSize:integer read FExpandedSize write WriteFExpandedSize;
-    property ButtonPosition:TAnchorKind read FButtonPosition write WriteFButtonPosition;
-    property ButtonSize:integer read FButtonSize write WriteFButtonSize;
+    property ExpandedButtonColor:TColor read FExpandedButtonColor write setExpandedButtonColor;
+    property CollapsedButtonColor:TColor read FCollapsedButtonColor write setCollapsedButtonColor;
+    property CollapseKind:TAnchorKind read FCollapseKind write setCollapseKind;   //To where should it collapse?
+    property ExpandedSize:integer read FExpandedSize write setExpandedSize;
+    property ButtonPosition:TAnchorKind read FButtonPosition write setButtonPosition;
+    property ButtonSize:integer read FButtonSize write setButtonSize;
 
     property Button:TBoundButton read FButton;
 
-    property AnimationSpeed:real read FAnimationSpeed write writeFAnimationSpeed;
+    property AnimationSpeed:real read FAnimationSpeed write setAnimationSpeed;
     property Animated:boolean read FAnimated write FAnimated default true;
-    property Collapsed:boolean read FCollapsed write WriteFCollapsed default false;
+    property Collapsed:boolean read FCollapsed write setCollapsed default false;
     property OnAnimate: TAnimationEvent read FOnAnimate write FOnAnimate;
     property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
     property OnPreExpand: TNotifyEvent read FOnPreExpand write FOnPreExpand;
@@ -235,10 +232,10 @@ public
   published
     { Published-Deklarationen }
 
-//    property FixedHeight:integer read FFixedHeight write WriteFFixedSize;
-//    property UseFixedHeight:boolean read FUseFixedHeight write WriteFUseFixedSize;
-//    property UseClientHeight:boolean read FUseClientHeight write WriteFUseClientSize;
-//    property AutoCollapseIfTooHigh:boolean read FAutoCollapseIfTooHigh write WriteFAutoCollapseIfTooHigh;
+//    property FixedHeight:integer read FFixedHeight write setFixedSize;
+//    property UseFixedHeight:boolean read FUseFixedHeight write setUseFixedSize;
+//    property UseClientHeight:boolean read FUseClientHeight write setUseClientSize;
+//    property AutoCollapseIfTooHigh:boolean read FAutoCollapseIfTooHigh write setAutoCollapseIfTooHigh;
     property ArrangeKind:TAnchorKind read FArrangeKind write setArrangeKind;
     property CollapseKind:TAnchorKind read FCollapseKind write setCollapseKind;
     property ButtonPosition:TAnchorKind read FButtonPosition write setButtonPosition;
@@ -852,10 +849,11 @@ end;
 { TMyRollOut }
 
 
-procedure TMyRollOut.WriteFCollapsed(Collapsed: boolean);
+procedure TMyRollOut.setCollapsed(Collapsed: boolean);
 begin
   if FCollapsed=Collapsed   and  not Animating then
     exit;
+
 
   if not Collapsed then    // Collapsed erst der Zustand ist der gesetzt werden soll, nicht die gelesene Property
     DoExpand
@@ -894,7 +892,6 @@ end;
 
 
 
-
 procedure TMyRollOut.TimerAnimateSize(Sender: TObject);
 var step:real;
     originalsize, size:integer;
@@ -927,6 +924,8 @@ begin
       step:=3;
     end;
 
+
+  //now actually do something
 
   if Abs(Size-TargetAnimationSize)>0 then
     begin
@@ -1007,7 +1006,7 @@ end;
 
 
 
-procedure TMyRollOut.WriteFExpandedSize(value: integer);
+procedure TMyRollOut.setExpandedSize(value: integer);
 begin
   if FExpandedSize=ExpandedSize then exit;
 
@@ -1015,7 +1014,7 @@ begin
 end;
 
 
-procedure TMyRollOut.WriteFButtonSize(value: integer);
+procedure TMyRollOut.setButtonSize(value: integer);
 begin
   if FButtonSize=value then exit;
 
@@ -1094,7 +1093,7 @@ end;
 
 
 
-procedure TMyRollOut.WriteFCollapsedButtonColor(value: TColor);
+procedure TMyRollOut.setCollapsedButtonColor(value: TColor);
 begin
   FCollapsedButtonColor:=value;
   
@@ -1102,7 +1101,7 @@ begin
     FButton.Color:=FCollapsedButtonColor;
 end;
 
-procedure TMyRollOut.WriteFExpandedButtonColor(value: TColor);
+procedure TMyRollOut.setExpandedButtonColor(value: TColor);
 begin
   FExpandedButtonColor:=value;
 
@@ -1110,7 +1109,7 @@ begin
     FButton.Color:=FExpandedButtonColor;
 end;
 
-procedure TMyRollOut.WriteFButtonPosition(value: TAnchorKind);
+procedure TMyRollOut.setButtonPosition(value: TAnchorKind);
 var wasanimated, wascollpased:boolean;
 begin
   if FButtonPosition=value then    exit;
@@ -1129,7 +1128,7 @@ begin
 end;
 
 
-procedure TMyRollOut.WriteFCollapseKind(value: TAnchorKind);
+procedure TMyRollOut.setCollapseKind(value: TAnchorKind);
 var wasanimated, wascollpased:boolean;
 begin
   if FCollapseKind=value then
@@ -1150,7 +1149,7 @@ begin
   Animated := wasanimated;
 end;
 
-procedure TMyRollOut.writeFAnimationSpeed(value: real);
+procedure TMyRollOut.setAnimationSpeed(value: real);
 begin
   korrigiere(value, 3, 1000);
   FAnimationSpeed:=value;
@@ -1224,25 +1223,29 @@ end;
 
 
 
-procedure TMyRollOut.DoCollapse;
-var collapsesize:integer;
+
+
+
+procedure TMyRollOut.Animate(aTargetSize: integer);
+var storAnimated:boolean;
 begin
-  collapsesize:=FButtonSize;  // RelevantSize(FButton, FCollapseKind)
-  TargetAnimationSize:=collapsesize;
+//  FinishLastAnimationFast
+  storAnimated:=Animated;
+  Animated:=false;
+  TimerAnimateSize(self);
+  Animated:=storAnimated;
 
 
-  if assigned(OnPreCollapse) then
-    OnPreCollapse(self);
-
-  FButton.Color:=FCollapsedButtonColor;
-  FButton.Brush.Color:=FCollapsedButtonColor;
+// Now do animation
+  TargetAnimationSize:=aTargetSize;
 
 
-  EndProcedureOfAnimation:=@EndTimerCollapse;
+
   if (ComponentState * [csLoading, csDesigning] = []) and Animated then
     begin
-    Timer.OnTimer:=@TimerAnimateSize;
     Timer.Enabled:=true;
+    Timer.OnTimer:=@TimerAnimateSize;
+    EndProcedureOfAnimation:=nil;
     end
   else
     begin
@@ -1253,10 +1256,25 @@ end;
 
 
 
+
+procedure TMyRollOut.DoCollapse;
+begin
+  if assigned(OnPreCollapse) then
+    OnPreCollapse(self);
+
+  FButton.Color:=FCollapsedButtonColor;
+  FButton.Brush.Color:=FCollapsedButtonColor;
+
+  EndProcedureOfAnimation:=@EndTimerCollapse;
+
+
+  Animate(FButtonSize);
+end;
+
+
+
 procedure TMyRollOut.DoExpand;
 begin
-  TargetAnimationSize:=FExpandedSize;
-
   if assigned(OnPreExpand) then
     OnPreExpand(self);
 
@@ -1269,16 +1287,7 @@ begin
 
   EndProcedureOfAnimation:=@EndTimerExpand;
 
-  if (ComponentState * [csLoading, csDesigning] = []) and Animated then
-    begin
-    Timer.OnTimer:=@TimerAnimateSize;
-    Timer.Enabled:=true;
-    end
-  else
-    begin
-    TimerAnimateSize(self);
-    TimerAnimateSize(self);
-    end;
+  Animate(FExpandedSize);
 end;
 
 
