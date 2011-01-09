@@ -1,0 +1,128 @@
+object Form1: TForm1
+  Left = 238
+  Height = 552
+  Top = 104
+  Width = 787
+  ActiveControl = RColl.RadioButton0
+  Caption = 'Form1'
+  ClientHeight = 552
+  ClientWidth = 787
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '0.9.28.2'
+  object RColl: TRadioGroup
+    Left = 296
+    Height = 73
+    Top = 208
+    Width = 158
+    AutoFill = True
+    Caption = 'Collapse To'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 2
+    ClientHeight = 57
+    ClientWidth = 154
+    Columns = 2
+    ItemIndex = 0
+    Items.Strings = (
+      'top'
+      'left'
+      'right'
+      'bottom'
+    )
+    OnClick = RCollClick
+    TabOrder = 0
+  end
+  object RButt: TRadioGroup
+    Left = 296
+    Height = 73
+    Top = 304
+    Width = 158
+    AutoFill = True
+    Caption = 'Button Position'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 2
+    ClientHeight = 57
+    ClientWidth = 154
+    Columns = 2
+    ItemIndex = 0
+    Items.Strings = (
+      'top'
+      'left'
+      'right'
+      'bottom'
+    )
+    OnClick = RButtClick
+    TabOrder = 1
+  end
+  object RBehaviour: TRadioGroup
+    Left = 480
+    Height = 91
+    Top = 208
+    Width = 155
+    AutoFill = True
+    Caption = 'Behaviour'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 75
+    ClientWidth = 151
+    ItemIndex = 1
+    Items.Strings = (
+      'HotMouse'
+      'Multipanel'
+      'SinglePanel'
+    )
+    OnClick = RBehaviourClick
+    TabOrder = 2
+  end
+  object CClientSize: TCheckBox
+    Left = 409
+    Height = 23
+    Top = 480
+    Width = 94
+    Caption = 'UseClientSize'
+    TabOrder = 3
+  end
+  object RDirection: TRadioGroup
+    Left = 481
+    Height = 73
+    Top = 312
+    Width = 158
+    AutoFill = True
+    Caption = 'Direction'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 1
+    ClientHeight = 57
+    ClientWidth = 154
+    ItemIndex = 0
+    Items.Strings = (
+      'Vertical'
+      'Horizontal'
+    )
+    OnClick = RDirectionClick
+    TabOrder = 4
+  end
+end
