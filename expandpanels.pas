@@ -17,7 +17,7 @@ You can check out the repository (in linux) with the command:
         svn co http://svn.lazarusforum.de/svn/expandpanels expandpanels
 }
 //////////////////////////////
-//  ExpandPanels   Version 1.993
+//  ExpandPanels   Version 1.994
 //////////////////////////////
 
     {
@@ -142,7 +142,6 @@ public
     property AnimationSpeed:real read FAnimationSpeed write writeFAnimationSpeed;
     property Animated:boolean read FAnimated write FAnimated default true;
     property Collapsed:boolean read FCollapsed write WriteFCollapsed default false;
-    property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
     property OnAnimate: TAnimationEvent read FOnAnimate write FOnAnimate;
     property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
     property OnPreExpand: TNotifyEvent read FOnPreExpand write FOnPreExpand;
@@ -379,7 +378,7 @@ begin
     FButton.Tag:=Idx;
 
 
-    FButton.OnButtonClick:=@RollOutClick;
+    FButton.OnClick:=@RollOutClick;
     FButton.OnMouseMove:=@RollOut1MouseMove;
     InternalOnAnimate:=@RollOutOnAnimate;
     end;
