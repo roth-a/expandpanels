@@ -14,7 +14,7 @@ Please send comments and ideas directly to:
 For Instructions and Infos look up the Readme.txt
 }
 //////////////////////////////
-//  ExpandPanels   Version 1.994
+//  ExpandPanels   Version 1.995
 //////////////////////////////
 
     {
@@ -792,15 +792,6 @@ end;
 
 
 
-{==============================================================================
-  Procedure:    HotTrackSetActivePanel
-  Belongs to:   TExpandPanels
-  Result:       None
-  Parameters:
-                  value : integer  =
-
-  Description:
-==============================================================================}
 procedure TExpandPanels.HotTrackSetActivePanel(value:integer);
 var i:Integer;
 begin
@@ -814,18 +805,6 @@ end;
 
 
 
-{==============================================================================
-  Procedure:    RollOut1MouseMove
-  Belongs to:   TExpandPanels
-  Result:       None
-  Parameters:
-                  Sender : TObject  =
-                  Shift : TShiftState  =
-                  X : Integer  =
-                  Y : Integer  =
-
-  Description:
-==============================================================================}
 procedure TExpandPanels.RollOut1MouseMove(Sender: TObject; Shift: TShiftState; X,  Y: Integer);
 begin
   if  (Behaviour= EPHotMouse)and( TMyRollOut(PanelArray[TBoundButton(Sender).Tag]).Collapsed) then
@@ -1013,7 +992,7 @@ begin
   writeln(IntToStr(value));
   {$ENDIF}
 
-  if (FExpandedSize=ExpandedSize)   then exit;
+  if (FExpandedSize=value)   then exit;
 
   FExpandedSize:=value;
 
