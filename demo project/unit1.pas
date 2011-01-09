@@ -55,6 +55,7 @@ type
     Shape1: TShape;
     Shape2: TShape;
     SpinEdit1: TSpinEdit;
+    procedure CheckBox2Change(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure RBehaviourClick(Sender: TObject);
     procedure RButtClick(Sender: TObject);
@@ -94,6 +95,20 @@ begin
   ExpandPanels2.AddPanel(MyRollOut11);
   ExpandPanels2.AddPanel(MyRollOut9);
   ExpandPanels2.AddPanel(MyRollOut10);
+end;
+
+procedure TForm1.CheckBox2Change(Sender: TObject);
+begin
+  MyRollOut8.Visible:=CheckBox2.Checked;
+  MyRollOut6.Visible:=CheckBox2.Checked;
+  MyRollOut7.Visible:=CheckBox2.Checked;
+  MyRollOut11.Visible:=CheckBox2.Checked;
+  MyRollOut9.Visible:=CheckBox2.Checked;
+  MyRollOut10.Visible:=CheckBox2.Checked;
+  MyRollOut12.Visible:=CheckBox2.Checked;
+  MyRollOut13.Visible:=CheckBox2.Checked;
+  MyRollOut14.Visible:=CheckBox2.Checked;
+  MyRollOut15.Visible:=CheckBox2.Checked;
 end;
 
 procedure TForm1.RBehaviourClick(Sender: TObject);

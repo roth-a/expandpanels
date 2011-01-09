@@ -657,6 +657,7 @@ object Form1: TForm1
     Checked = True
     Font.Height = -14
     Font.Style = [fsBold]
+    OnChange = CheckBox2Change
     ParentFont = False
     State = cbChecked
     TabOrder = 18
