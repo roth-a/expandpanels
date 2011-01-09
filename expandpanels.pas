@@ -76,6 +76,7 @@ type
     FOnCollapse: TNotifyEvent;
     FOnPreCollapse: TNotifyEvent;
     FOnButtonClick: TNotifyEvent;
+    FInternalOnAnimate: TAnimationEvent;
     FButtonPosition:TAnchorKind;
     FExpandedButtonColor:TColor;
     FCollapsedButtonColor:TColor;
@@ -121,7 +122,9 @@ type
     procedure DoCollapse;
     procedure DoExpand;
     procedure AdjustClientRect(var ARect: TRect); override;
-  public
+  
+    property InternalOnAnimate: TAnimationEvent read FInternalOnAnimate write FInternalOnAnimate;
+public
     property Animating:boolean read FAnimating;
 
     constructor Create(TheOwner: TComponent); override;
@@ -140,9 +143,10 @@ type
     property Animated:boolean read FAnimated write FAnimated default true;
     property Collapsed:boolean read FCollapsed write WriteFCollapsed default false;
     property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
+    property OnAnimate: TAnimationEvent read FOnAnimate write FOnAnimate;
+    property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
     property OnPreExpand: TNotifyEvent read FOnPreExpand write FOnPreExpand;
     property OnExpand: TNotifyEvent read FOnExpand write FOnExpand;
-    property OnAnimate: TAnimationEvent read FOnAnimate write FOnAnimate;
     property OnCollapse: TNotifyEvent read FOnCollapse write FOnCollapse;
     property OnPreCollapse: TNotifyEvent read FOnPreCollapse write FOnPreCollapse;
   end;
@@ -375,9 +379,9 @@ begin
     FButton.Tag:=Idx;
 
 
-    OnButtonClick:=@RollOutClick;
+    FButton.OnButtonClick:=@RollOutClick;
     FButton.OnMouseMove:=@RollOut1MouseMove;
-    OnAnimate:=@RollOutOnAnimate;
+    InternalOnAnimate:=@RollOutOnAnimate;
     end;
 
 
@@ -940,6 +944,8 @@ begin
 
     SetBounds(Left+delta.Left, Top+delta.Top, Width+delta.Right, Height+delta.Bottom);
 
+    if assigned(FInternalOnAnimate) then
+      FInternalOnAnimate(self, delta.Left, delta.Top, delta.Right, delta.Bottom);
     if assigned(FOnAnimate) then
       FOnAnimate(self, delta.Left, delta.Top, delta.Right, delta.Bottom);
     end;
@@ -986,7 +992,7 @@ begin
 
   if assigned(OnExpand) then
     OnExpand(self);
-    
+
   UpdateAll;
 end;
 
