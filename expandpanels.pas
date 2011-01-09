@@ -8,23 +8,24 @@
 
 
 {
-Please send comments and ideas directly to:
-        admin@alexanderroth.spacequadrat.de
-
 For Instructions and Infos look up the Readme.txt
 }
+
+
 //////////////////////////////
-//  ExpandPanels   Version 1.995
+//  ExpandPanels   Version 2.0
 //////////////////////////////
 
-    {
+
+
+
+{
 Todo  List
-
 
 - simplyfy everything with verctor addition and scalar multiplication (orthogonal basis vectors... and so on)
       if horizonatal and vertical would be described by a unity vector, I could calculate if a certain operation should be performed
       and I could just multiply the basis vector  with an operation to get a delta movement (or none)
-- the TExpandPanels lacks a arrange on bottom
+- the TExpandPanels lacks a arrange on bottom and right
      }
 
 unit ExpandPanels;
