@@ -13,7 +13,7 @@ For Instructions and Infos look up the Readme.txt
 
 
  //////////////////////////////
- //  ExpandPanels   Version 2.0
+ //  ExpandPanels   Version 2.0.1
  //////////////////////////////
 
 
@@ -33,7 +33,7 @@ unit ExpandPanels;
 
 {$mode objfpc}{$H+}
 
-{$DEFINE DebugInfo}// for debugging purposes
+//{$DEFINE DebugInfo}// for debugging purposes
 
 
 interface
