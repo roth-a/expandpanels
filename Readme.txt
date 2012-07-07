@@ -14,7 +14,7 @@ Clone the repository with:
   git clone git://github.com/roth-a/expandpanels.git
 
 
-A video tutorial for installation in Lazarus and demonstration of the functionallity:
+A video tutorial for installation in Lazarus and demonstration of the functionality:
   https://student.physik.uni-mainz.de/~rothalex/?q=de/node/98
 
 
