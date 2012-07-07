@@ -32,3 +32,10 @@ Usage notes for grouping myrollout in an expandpanel:
     p1.Parent:=self;
     ex1.AddPanel(p1);
 
+
+
+
+
+
+
+PS: For everyone who want to learn git: http://githowto.com
