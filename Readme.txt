@@ -8,7 +8,7 @@ Contact me here: admin@alexanderroth.spacequadrat.de
 
 
 Download the latest version from:
-  https://github.com/roth-a/expandpanels/tarball/master
+  https://github.com/roth-a/expandpanels/zipball/master
 
 Clone the repository with:
   git clone git://github.com/roth-a/expandpanels.git
