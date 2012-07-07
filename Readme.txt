@@ -3,7 +3,7 @@ This is the Readme for the component package (TMyRollOut+ExpandPanels) for Lazar
 The package contains two components. The visual TMyRollOut and the non-visual ExpandPanels. TMyRollOut is a collapsable panel. Two or more TMyRollOut's can be automatically put beneath each other with ExpandPanels.
 
 
-Contact me here: admin@alexanderroth.spacequadrat.de
+Contact me here: roth-a :a:t:  gmx.de
 
 
 
@@ -13,9 +13,8 @@ Download the latest version from:
 Clone the repository with:
   git clone git://github.com/roth-a/expandpanels.git
 
-
-A video tutorial for installation in Lazarus and demonstration of the functionality:
-  https://student.physik.uni-mainz.de/~rothalex/?q=de/node/98
+Screenshots and a video tutorial for installation in Lazarus and demonstration of the functionality:
+  http://student.physik.uni-mainz.de/~rothalex/?q=content/expandpanels
 
 
 
@@ -40,4 +39,4 @@ Usage notes for grouping myrollout in an expandpanel:
 
 
 
-PS: For everyone who want to learn git: http://githowto.com
+PS: For everyone who wants to learn git: http://githowto.com
