@@ -13,7 +13,7 @@ For Instructions and Infos look up the Readme.txt
 
 
  //////////////////////////////
- //  ExpandPanels   Version 2.0.1
+ //  ExpandPanels   Version 2.0.2
  //////////////////////////////
 
 
@@ -39,7 +39,7 @@ unit ExpandPanels;
 interface
 
 uses
-  Controls, Classes, ExtCtrls, Graphics, Math, ComCtrls,
+  Controls, Classes, ExtCtrls, Graphics, Math,
   LResources, StdCtrls, Dialogs, SysUtils;
 
 type
@@ -415,8 +415,12 @@ end;
 
 function TExpandPanels.DeltePanel(idx: integer): boolean;
 begin
+  Result := False;
   if (idx >= 0) and (idx <= PanelArray.Count - 1) then
+    begin
     PanelArray.Delete(idx);
+    Result := True;
+    end;
   ArrangePanels;
 end;
 
@@ -583,8 +587,6 @@ end;
 
 
 procedure TExpandPanels.setOrthogonalAbove(Value: integer);
-var
-  i: integer;
 begin
   if FOrthogonalAbove = Value then
     exit;
@@ -987,8 +989,6 @@ end;
 
 
 procedure TMyRollOut.EndTimerCollapse;
-var
-  i: integer;
 begin
   StoredBevelOuter := BevelOuter;
   BevelOuter := bvNone;
@@ -1358,4 +1358,6 @@ begin
   RegisterComponents('Misc', [TExpandPanels]);
 end;
 
+initialization
+              {$I pexpandpanels.lrs}
 end.

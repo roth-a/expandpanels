@@ -11,8 +11,6 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   pexpandpanels,
   LResources { you can add units after this };
 
-{$IFDEF WINDOWS}{$R project1.rc}{$ENDIF}
-
 begin
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);

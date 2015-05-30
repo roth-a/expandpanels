@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 238
   Height = 552
-  Top = 104
+  Top = 126
   Width = 787
   ActiveControl = RColl.RadioButton0
   Caption = 'Form1'
@@ -9,7 +9,7 @@ object Form1: TForm1
   ClientWidth = 787
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '0.9.31'
+  LCLVersion = '1.5'
   object RColl: TRadioGroup
     Left = 296
     Height = 73
@@ -25,7 +25,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 2
-    ClientHeight = 57
+    ClientHeight = 42
     ClientWidth = 154
     Columns = 2
     ItemIndex = 0
@@ -53,7 +53,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 2
-    ClientHeight = 57
+    ClientHeight = 42
     ClientWidth = 154
     Columns = 2
     ItemIndex = 0
@@ -81,7 +81,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 75
+    ClientHeight = 60
     ClientWidth = 151
     ItemIndex = 1
     Items.Strings = (
@@ -107,7 +107,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 57
+    ClientHeight = 42
     ClientWidth = 154
     ItemIndex = 0
     Items.Strings = (
@@ -131,7 +131,7 @@ object Form1: TForm1
       'bo 8qg7z'
       ' bcnoq'
     )
-    ItemHeight = 20
+    ItemHeight = 25
     TabOrder = 4
   end
   object Calendar1: TCalendar
@@ -140,6 +140,7 @@ object Form1: TForm1
     Top = 64
     Width = 145
     DateTime = 40552
+    TabOrder = 5
   end
   object Button1: TButton
     Left = 144

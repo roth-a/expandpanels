@@ -14,7 +14,7 @@ Clone the repository with:
   git clone git://github.com/roth-a/expandpanels.git
 
 Screenshots and a video tutorial for installation in Lazarus and demonstration of the functionality:
-  http://student.physik.uni-mainz.de/~rothalex/?q=content/expandpanels
+  http://wiki.lazarus.freepascal.org/TMyRollOut_and_ExpandPanel
 
 
 

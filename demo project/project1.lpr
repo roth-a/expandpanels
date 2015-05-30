@@ -7,8 +7,7 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   Interfaces, // this includes the LCL widgetset
   Forms,
   Unit1,
-  pexpandpanels,
-  coloredbox { you can add units after this };
+  pexpandpanels;
 
 {$R *.res}
 

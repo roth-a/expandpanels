@@ -5,8 +5,8 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, ExpandPanels, UColoredBox, FileUtil, Forms, Controls,
-  Graphics, Dialogs, Calendar, Spin, ExtCtrls, Buttons, StdCtrls, PairSplitter;
+  Classes, SysUtils, ExpandPanels,  FileUtil, Forms, Controls,
+  Graphics, Dialogs, Calendar, ExtCtrls, Buttons, StdCtrls;
 
 type
 
