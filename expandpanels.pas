@@ -16,7 +16,11 @@ For Instructions and Infos look up the Readme.txt
  //  ExpandPanels   Version 2.0.2
  //////////////////////////////
 
-
+//23-07-2015 MaxM :
+//             Added Owner Draw of Button so we can Draw Vertically when ButtonPosition is akLeft or akRight
+//             Added Glyphs Support (Automatically Loaded from Resources or User Passed)
+//             Solved Bugs About BevelOuter and Starting in Collapsed State
+//             Moved Colors inside Button
 
 
 {
@@ -40,7 +44,7 @@ interface
 
 uses
   Controls, Classes, ExtCtrls, Graphics, Math,
-  LResources, StdCtrls, Dialogs, SysUtils;
+  LResources, StdCtrls, Dialogs, SysUtils, Buttons, Themes, Types, Menus;
 
 type
   TExpandPanelsBehaviour = (EPHotMouse, EPMultipanel, EPSinglePanel);
@@ -51,14 +55,83 @@ type
 
   { TBoundButton }
 
-  TBoundButton = class(TButton)
+  TGlyphLayout =
+  (
+    glLeft,
+    glRight,
+    glNone
+  );
+
+  TTextLayout =
+  (
+    tlLeft,
+    tlRight,
+    tlCenter,
+    tlNone
+  );
+
+  TBoundButton = class(TCustomSpeedButton)
   private
+    rColorExpanded: TColor;
+    rColorHighlight: TColor;
+    rColorShadow: TColor;
+    rGlyphLayout: TGlyphLayout;
+    rLineShow: Boolean;
+    rShowCaptionVertical: Boolean;
+    rTextLayout: TTextLayout;
+
+    procedure setColorExpanded(AValue: TColor);
+    procedure SetColorHighlight(AValue: TColor);
+    procedure SetColorShadow(AValue: TColor);
+    procedure SetGlyphLayout(AValue: TGlyphLayout);
+    procedure SetLineShow(AValue: Boolean);
+    procedure SetShowCaptionVertical(AValue: Boolean);
+    procedure SetTextLayout(AValue: TTextLayout);
+  protected
+    rGlyph :TButtonGlyph;
+    rUserGlyphExpanded,
+    rUserGlyphCollapsed,
+    rGlyphExpanded,
+    rGlyphCollapsed :TBitmap;
+
+    procedure SetGlyphCollapsed(AValue: TBitmap);
+    procedure SetGlyphExpanded(AValue: TBitmap);
+    procedure LoadGlyph(GlyphDST :TBitmap; ResName :String);
+    procedure BuildGlyphs;
+    procedure Paint; override;
+    procedure Loaded; override;
+
+    property AllowAllUp;
+    property Down;
+    property Flat;
+    property Glyph;
+    property GroupIndex;
+    property Layout;
+    property Margin;
+    property NumGlyphs;
+    property Spacing;
+    property ShowCaption;
+    property Transparent;
   public
-    constructor Create(TheOwner: TComponent); override;
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+
+  published
+    property Color;
+    property ColorExpanded: TColor read rColorExpanded write setColorExpanded;
+    property ColorHighlight: TColor read rColorHighlight write SetColorHighlight default clDefault;
+    property ColorShadow: TColor read rColorShadow write SetColorShadow default clDefault;
+    property GlyphExpanded: TBitmap read rUserGlyphExpanded write SetGlyphExpanded;
+    property GlyphCollapsed: TBitmap read rUserGlyphCollapsed write SetGlyphCollapsed;
+
+    //Creating at RUNTIME Set in the Last Line of your Code else Glyphs is not Loaded correctly
+    property GlyphLayout: TGlyphLayout read rGlyphLayout write SetGlyphLayout default glNone;
+
+    //property LineShow: Boolean read rLineShow write SetLineShow default False; In The Next Future
+    property ShowAccelChar;
+    property ShowCaptionVertical: Boolean read rShowCaptionVertical write SetShowCaptionVertical default False;
+    property TextLayout: TTextLayout read rTextLayout write SetTextLayout default tlLeft;
   end;
-
-
-
 
   { TMyRollOut }
 
@@ -83,7 +156,8 @@ type
     FExpandedSize: integer;
     FAnimationSpeed: real;
     StopCircleActions: boolean;
-    StoredBevelOuter: TPanelBevel;
+    StoredBevelOuter,
+    StoredBevelInner: TPanelBevel;
     FAnimating:   boolean;
     FVisibleTotal: boolean;
 
@@ -93,13 +167,17 @@ type
     Timer: TTimer;
 
 
+    function GetBevelInner: TPanelBevel;
+    function GetBevelOuter: TPanelBevel;
+    function GetEnabled: Boolean;
+    procedure SetBevelInner(AValue: TPanelBevel);
+    procedure SetBevelOuter(AValue: TPanelBevel);
+    procedure SetEnabled(AValue: Boolean);
     procedure setExpandedSize(Value: integer);
     procedure setButtonSize(Value: integer);
 
     procedure SetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
 
-    procedure setCollapsedButtonColor(Value: TColor);
-    procedure setExpandedButtonColor(Value: TColor);
     procedure setButtonPosition(Value: TAnchorKind);
     procedure setCollapseKind(Value: TAnchorKind);
     procedure setAnimationSpeed(Value: real);
@@ -127,14 +205,17 @@ type
 
     property InternalOnAnimate: TAnimationEvent read FInternalOnAnimate write FInternalOnAnimate;
     property EPManagesCollapsing: TNotifyEvent read FEPManagesCollapsing write FEPManagesCollapsing;
+  protected
+    procedure Loaded; override;
   public
     property Animating: boolean read FAnimating;
 
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
   published
-    property ExpandedButtonColor: TColor read FExpandedButtonColor write setExpandedButtonColor;
-    property CollapsedButtonColor: TColor read FCollapsedButtonColor write setCollapsedButtonColor;
+    property BevelInner: TPanelBevel read GetBevelInner write SetBevelInner default bvNone;
+    property BevelOuter: TPanelBevel read GetBevelOuter write SetBevelOuter default bvRaised;
+    property Enabled: Boolean read GetEnabled write SetEnabled;
     property CollapseKind: TAnchorKind read FCollapseKind write setCollapseKind;   //To where should it collapse?
     property ExpandedSize: integer read FExpandedSize write setExpandedSize;
     property ButtonPosition: TAnchorKind read FButtonPosition write setButtonPosition;
@@ -255,7 +336,11 @@ procedure Register;
 
 implementation
 
-
+const
+  //GrayScale a Color : Taken from BGRABitmap package
+  redWeightShl10   = 306; // = 0.299
+  greenWeightShl10 = 601; // = 0.587
+  blueWeightShl10  = 117; // = 0.114
 
 
 procedure korrigiere(var w: real; min, max: real);
@@ -276,17 +361,541 @@ begin
 end;
 
 
-
-
 { TBoundButton }
 
+//Function copied from BGRABitmap package may work ;-)
+function Grayscale(AColor :TColor):TColor;
+Var
+  rColor, gray :Integer;
 
-constructor TBoundButton.Create(TheOwner: TComponent);
 begin
-  inherited Create(TheOwner);
+  rColor :=ColorToRGB(AColor);
+  gray  := (Red(rColor) * redWeightShl10 + Green(rColor) * greenWeightShl10 + Blue(rColor) * blueWeightShl10 + 512) shr 10;
+  Result :=RGBToColor(gray, gray, gray);
+end;
 
-  SetSubComponent(True);
-  //  ControlStyle := ControlStyle + [csNoFocus, csNoDesignSelectable];
+function GetHighlightColor(BaseColor: TColor; Value:Integer): TColor;
+Var
+  rColor :Integer;
+
+begin
+  rColor :=ColorToRGB(BaseColor);
+  Result := RGBToColor(
+       Min(Red(rColor) + Value, $FF),
+       Min(Green(rColor) + Value, $FF),
+       Min(Blue(rColor) + Value, $FF));
+end;
+
+function GetShadowColor(BaseColor: TColor; Value:Integer): TColor;
+Var
+  rColor :Integer;
+
+begin
+  rColor :=ColorToRGB(BaseColor);
+  Result := RGBToColor(
+       Max(Red(rColor) - Value, $22),
+       Max(Green(rColor) - Value, $22),
+       Max(Blue(rColor) - Value, $22));
+end;
+
+
+procedure TBoundButton.SetColorHighlight(AValue: TColor);
+begin
+  if (rColorHighlight <> AValue) then
+  begin
+       rColorHighlight := AValue;
+       if not(csLoading in ComponentState)
+       then Invalidate;
+  end;
+end;
+
+procedure TBoundButton.setColorExpanded(AValue: TColor);
+begin
+  if (rColorExpanded <> AValue) then
+  begin
+       rColorExpanded := AValue;
+       if not(csLoading in ComponentState)
+       then Invalidate;
+  end;
+end;
+
+procedure TBoundButton.SetColorShadow(AValue: TColor);
+begin
+  if (rColorShadow <> AValue) then
+  begin
+       rColorShadow := AValue;
+       if not(csLoading in ComponentState)
+       then Invalidate;
+  end;
+end;
+
+procedure TBoundButton.SetGlyphLayout(AValue: TGlyphLayout);
+begin
+  if (rGlyphLayout <> AValue) then
+  begin
+       rGlyphLayout := AValue;
+
+       if not(csLoading in ComponentState) then
+       begin
+            BuildGlyphs;
+            Invalidate;
+        end;
+  end;
+end;
+
+procedure TBoundButton.SetLineShow(AValue: Boolean);
+begin
+  if (rLineShow <> AValue) then
+  begin
+       rLineShow := AValue;
+       if not(csLoading in ComponentState)
+       then Invalidate;
+  end;
+end;
+
+procedure TBoundButton.SetShowCaptionVertical(AValue: Boolean);
+begin
+  if (rShowCaptionVertical <> AValue) then
+  begin
+       rShowCaptionVertical := AValue;
+       if not(csLoading in ComponentState)
+       then Invalidate;
+  end;
+end;
+
+procedure TBoundButton.SetTextLayout(AValue: TTextLayout);
+begin
+  if (rTextLayout <> AValue) then
+  begin
+       rTextLayout := AValue;
+       if not(csLoading in ComponentState)
+       then Invalidate;
+  end;
+end;
+
+procedure TBoundButton.SetGlyphCollapsed(AValue: TBitmap);
+begin
+     rUserGlyphCollapsed.Assign(AValue);
+     if not(csLoading in ComponentState) then
+     begin
+          BuildGlyphs;
+          Invalidate;
+      end;
+end;
+
+procedure TBoundButton.SetGlyphExpanded(AValue: TBitmap);
+begin
+     rUserGlyphExpanded.Assign(AValue);
+     if not(csLoading in ComponentState) then
+     begin
+          BuildGlyphs;
+          Invalidate;
+      end;
+end;
+
+procedure TBoundButton.LoadGlyph(GlyphDST: TBitmap; ResName: String);
+Var
+   rGlyphO: TPortableNetworkGraphic;
+
+begin
+  rGlyphO :=TPortableNetworkGraphic.Create;
+  rGlyphO.LoadFromLazarusResource(ResName);
+  GlyphDST.Assign(rGlyphO);
+  FreeAndNil(rGlyphO);
+end;
+
+procedure TBoundButton.BuildGlyphs;
+begin
+  if (rGlyphLayout <> glNone) then
+  begin
+       if (rUserGlyphCollapsed.Empty)
+       then begin
+                 case TMyRollOut(Owner).CollapseKind of
+                 akTop: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_BOTTOM');
+                 akLeft: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_RIGHT');
+                 akRight: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_LEFT');
+                 akBottom: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_TOP');
+                 end;
+            end
+       else rGlyphCollapsed.Assign(rUserGlyphCollapsed);
+
+       if (rUserGlyphExpanded.Empty)
+       then begin
+                 case TMyRollOut(Owner).CollapseKind of
+                 akTop: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_TOP');
+                 akLeft: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_LEFT');
+                 akRight: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_RIGHT');
+                 akBottom: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_BOTTOM');
+                 end;
+             end
+       else rGlyphExpanded.Assign(rUserGlyphExpanded);
+  end;
+end;
+
+procedure TBoundButton.Paint;
+var
+  paintRect :TRect;
+  xColor,
+  xHColor,
+  xSColor  :TColor;
+  middleX,
+  middleY,
+  glyphLeft,
+  glyphTop :Integer;
+
+
+  procedure drawButton(Collapsed :Boolean; var ATop, ALeft :Integer);
+  begin
+    if Collapsed
+    then rGlyph.Glyph.Assign(rGlyphCollapsed)
+    else rGlyph.Glyph.Assign(rGlyphExpanded);
+
+    //We must Calculate the Real Position of the Glyph
+    Case TMyRollOut(Owner).FButtonPosition of
+    akTop,
+    akBottom : begin
+                    if (rGlyphLayout = glLeft)
+                    then begin
+                              ALeft :=2;
+                              ATop :=middleY-(rGlyph.Glyph.Height div 2);
+                          end
+                    else begin
+                              ALeft :=paintRect.Right-2-rGlyph.Glyph.Width;
+                              ATop :=middleY-(rGlyph.Glyph.Height div 2);
+                          end;
+                end;
+    akLeft :begin
+                 if (rGlyphLayout = glLeft)
+                 then begin  //Really on Bottom of paintRect
+                           ALeft :=middleX-(rGlyph.Glyph.Width div 2);
+                           ATop :=paintRect.Bottom-2-rGlyph.Glyph.Height;
+                       end
+                 else begin  //Really on Top of paintRect
+                           ALeft :=middleX-(rGlyph.Glyph.Width div 2);
+                           ATop :=2;
+                       end;
+             end;
+    akRight :begin
+                 if (rGlyphLayout = glLeft)
+                 then begin  //Really on Top of paintRect
+                           ALeft :=middleX-(rGlyph.Glyph.Width div 2);
+                           ATop :=2;
+                       end
+                 else begin  //Really on Bottom of paintRect
+                           ALeft :=middleX-(rGlyph.Glyph.Width div 2);
+                           ATop :=paintRect.Bottom-2-rGlyph.Glyph.Height;
+                       end;
+             end;
+    end;
+
+    rGlyph.Draw(Canvas, paintRect, point(ALeft, ATop), FState, true, 0);
+  end;
+
+  procedure drawUP;
+  begin
+       inc(paintRect.Left,1); inc(paintRect.Top,1);
+       Canvas.Brush.Color :=xSColor; //clbtnShadow;
+       Canvas.Brush.Style :=bsSolid;
+       Canvas.Pen.Color := clNone;
+       Canvas.Pen.Width := 1;
+       Canvas.Pen.Style := psClear;
+       Canvas.RoundRect(paintRect, 5,5);
+
+       dec(paintRect.Left,1); dec(paintRect.Top,1);
+       dec(paintRect.Right,2); dec(paintRect.Bottom,2);
+       Canvas.Brush.Color :=xColor;
+       Canvas.Brush.Style :=bsSolid;
+       Canvas.Pen.Color :=xHColor; //clbtnHighlight;
+       Canvas.Pen.Width := 1;
+       Canvas.Pen.Style := psSolid;
+       Canvas.RoundRect(paintRect, 5,5);
+  end;
+
+  procedure drawFLAT;
+  begin
+       Canvas.Brush.Color := xColor;
+       Canvas.Brush.Style :=bsSolid;
+       Canvas.Pen.Color := clNone;
+       Canvas.Pen.Width := 1;
+       Canvas.Pen.Style := psClear;
+       Canvas.RoundRect(paintRect, 5,5);
+  end;
+
+  procedure drawDOWN;
+  begin
+       Canvas.Brush.Color :=xSColor; //clbtnShadow;
+       Canvas.Brush.Style :=bsSolid;
+       Canvas.Pen.Color := clNone;
+       Canvas.Pen.Width := 1;
+       Canvas.Pen.Style := psClear;
+       Canvas.RoundRect(paintRect, 5,5);
+
+       inc(paintRect.Left,1); inc(paintRect.Top,1);
+       Canvas.Brush.Color :=xColor;
+       Canvas.Brush.Style :=bsSolid;
+       Canvas.Pen.Color :=xHColor; //clbtnHighlight;
+       Canvas.Pen.Width := 1;
+       Canvas.Pen.Style := psSolid;
+       Canvas.RoundRect(paintRect, 5,5);
+  end;
+
+  procedure drawText;
+  Var
+     txtMaxChars,
+     ATop, ALeft,
+     DTop, DLeft,
+     AWidth, AHeight,
+     txtW, txtH   :Integer;
+     xCaption :String;
+
+  begin
+    xCaption :=Caption;
+    txtW :=Canvas.TextWidth(xCaption);
+    txtH :=Canvas.TextHeight(xCaption);
+    AWidth :=paintRect.Right-4;
+    AHeight :=paintRect.Bottom;
+
+    Case TMyRollOut(Owner).FButtonPosition of
+    akTop,
+    akBottom : begin
+                    Canvas.Font.Orientation := 0;
+
+                    ATop :=middleY-(txtH div 2);
+
+                    if (rGlyphLayout <> glNone)
+                    then dec(AWidth, rGlyph.Glyph.Width+2);
+
+                    if (txtW > AWidth)
+                    then begin
+                              txtMaxChars :=Canvas.TextFitInfo(xCaption, AWidth);
+                              xCaption :=Copy(xCaption, 0, txtMaxChars-3)+'...';
+                              txtW :=Canvas.TextWidth(xCaption);
+                          end;
+
+                    Case rTextLayout of
+                    tlLeft :begin
+                                  ALeft :=4;
+                                  if (rGlyphLayout = glLeft)
+                                  then inc(ALeft, rGlyph.Glyph.Width+2);
+                             end;
+                    tlRight:begin
+                                 ALeft :=AWidth-txtW;
+                                 if (rGlyphLayout = glLeft)
+                                 then inc(ALeft, rGlyph.Glyph.Width+2);
+                             end;
+                    tlCenter:begin
+                                  ALeft :=middleX-(txtW div 2);
+                              end;
+                    end;
+
+                    //Disabled Position
+                    DTop :=ATop+1;
+                    DLeft :=ALeft+1;
+                end;
+    akLeft : begin
+                  //Vertically from Bottom to Top
+                  Canvas.Font.Orientation := 900;
+
+                  ALeft:=middleX-(txtH div 2);
+
+                  if (rGlyphLayout <> glNone)
+                  then dec(AHeight, rGlyph.Glyph.Height+2);
+
+                  //Vertically the Max Width is Height
+                  if (txtW > AHeight)
+                  then begin
+                            txtMaxChars :=Canvas.TextFitInfo(xCaption, AHeight);
+                            xCaption :=Copy(xCaption, 0, txtMaxChars-3)+'...';
+                            txtW :=Canvas.TextWidth(xCaption);
+                        end;
+
+                  Case rTextLayout of
+                  tlLeft :begin   //To Bottom of the ClientRect
+                               ATop :=AHeight-4;
+
+                               if (rGlyphLayout = glRight)
+                               then inc(ATop, rGlyph.Glyph.Height+2);
+                           end;
+                  tlRight:begin  //To Top of the ClientRect
+                               ATop :=txtW+4;
+                               if (rGlyphLayout = glRight)
+                               then inc(ATop, rGlyph.Glyph.Height+2);
+                           end;
+                  tlCenter:begin
+                                ATop :=middleY+(txtW div 2);
+                            end;
+                  end;
+
+                  //Disabled Position
+                  DTop :=ATop-1;
+                  DLeft :=ALeft+1;
+              end;
+    akRight : begin
+                  //Vertically from Top to Bottom
+                  Canvas.Font.Orientation := -900;
+
+                  ALeft:=middleX+(txtH div 2);
+
+                  if (rGlyphLayout <> glNone)
+                  then dec(AHeight, rGlyph.Glyph.Height+2);
+
+                  if (txtW > AHeight)
+                  then begin
+                            txtMaxChars :=Canvas.TextFitInfo(xCaption, AHeight);
+                            xCaption :=Copy(xCaption, 0, txtMaxChars-3)+'...';
+                            txtW :=Canvas.TextWidth(xCaption);
+                        end;
+
+                  Case rTextLayout of
+                  tlLeft :begin  //To Top of the ClientRect
+                               ATop :=4;
+
+                               if (rGlyphLayout = glLeft)
+                               then inc(ATop, rGlyph.Glyph.Height+2);
+                           end;
+                  tlRight:begin  //To Bottom of the ClientRect
+                               ATop :=AHeight-txtW-4;
+                               if (rGlyphLayout = glLeft)
+                               then inc(ATop, rGlyph.Glyph.Height+2);
+                           end;
+                  tlCenter:begin
+                                ATop :=middleY-(txtW div 2);
+                            end;
+                  end;
+
+                  //Disabled Position
+                  DTop :=ATop+1;
+                  DLeft :=ALeft-1;
+              end;
+    end;
+
+    if (FState = bsDisabled)
+    then begin
+              Canvas.Font.Color := clBtnHighlight;
+              Canvas.TextOut(DLeft, DTop, xCaption);
+              Canvas.Font.Color := clBtnShadow;
+          end
+    else Canvas.Font.Color := Font.Color;
+
+    Canvas.TextOut(ALeft, ATop, xCaption);
+  end;
+
+begin
+  paintRect :=ClientRect;
+  middleY :=paintRect.Top+((paintRect.Bottom-paintRect.Top) div 2);
+  middleX :=paintRect.Left+((paintRect.Right-paintRect.Left) div 2);
+
+  if TMyRollOut(Owner).FCollapsed
+  then xColor :=Self.Color
+  else xColor :=rColorExpanded;
+
+  Case FState of
+  Buttons.bsHot:begin
+                     if (rColorHighlight = clDefault)
+                     then xHColor :=GetHighlightColor(xColor, 120)
+                     else xHColor :=rColorHighlight;
+
+                     if (rColorShadow = clDefault)
+                     then xSColor :=GetShadowColor(xColor, 40)
+                     else xSColor :=rColorShadow;
+
+                     xColor :=GetHighlightColor(xColor, 20);
+                     drawUP;
+                end;
+  Buttons.bsDown:begin
+                      if (rColorHighlight = clDefault)
+                      then xHColor :=GetHighlightColor(xColor, 60)
+                      else xHColor :=rColorHighlight;
+
+                      if (rColorShadow = clDefault)
+                      then xSColor :=GetShadowColor(xColor, 60)
+                      else xSColor :=rColorShadow;
+
+                      xColor :=GetHighlightColor(xColor, 20);
+                      drawDOWN;
+
+                  end;
+  else begin
+            if (FState = bsDisabled)
+            then xColor :=GrayScale(xColor);
+
+            if (rColorHighlight = clDefault)
+            then xHColor :=GetHighlightColor(xColor, 60)
+            else xHColor :=rColorHighlight;
+
+            if (rColorShadow = clDefault)
+            then xSColor :=GetShadowColor(xColor, 60)
+            else xSColor :=rColorShadow;
+
+            if Flat
+            then drawFLAT
+            else drawUP;
+        end;
+  end;
+
+  if (rGlyphLayout <> glNone)
+  then drawButton(TMyRollOut(Owner).Collapsed, glyphTop, glyphLeft)
+  else begin
+            glyphTop :=0;
+            glyphLeft:=0;
+        end;
+
+  if (rTextLayout <> tlNone)
+  then drawText;
+end;
+
+procedure TBoundButton.Loaded;
+begin
+  inherited Loaded;
+
+  if not(csDesigning in ComponentState) then
+  begin
+       //IF Used Outside TMyRollout
+       if not(Owner is TMyRollout)
+       then BuildGlyphs;
+  end;
+end;
+
+constructor TBoundButton.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  Color :=clSkyBlue;
+  rColorExpanded := RGBToColor(23, 136, 248);
+  rColorHighlight :=clDefault;
+  rColorShadow :=clDefault;
+  rGlyphLayout :=glNone;
+  rTextLayout :=tlLeft;
+  rLineShow :=False;
+  rShowCaptionVertical :=False;
+  Flat :=False;
+
+  //Why FGlyph is Private in ancestor?????
+  rGlyph := TButtonGlyph.Create;
+  rGlyph.IsDesigning := csDesigning in ComponentState;
+  rGlyph.ShowMode := gsmAlways;
+
+  rGlyphExpanded :=TBitmap.Create;
+  rGlyphExpanded.Transparent := True;
+  rGlyphCollapsed :=TBitmap.Create;
+  rGlyphCollapsed.Transparent := True;
+  rUserGlyphExpanded :=TBitmap.Create;
+  rUserGlyphExpanded.Transparent := True;
+  rUserGlyphCollapsed :=TBitmap.Create;
+  rUserGlyphCollapsed.Transparent := True;
+
+  SetSubComponent((Owner is TMyRollout));
+//  ControlStyle := ControlStyle + [csNoFocus, csNoDesignSelectable];
+end;
+
+destructor TBoundButton.Destroy;
+begin
+  FreeAndNil(rGlyphExpanded);
+  FreeAndNil(rGlyphCollapsed);
+  FreeAndNil(rUserGlyphExpanded);
+  FreeAndNil(rUserGlyphCollapsed);
+  FreeAndNil(rGlyph);
+  inherited Destroy;
 end;
 
 
@@ -878,7 +1487,6 @@ begin
     exit;
   FCollapsed := Value;
 
-
   if FCollapsed then
     DoCollapse
   else
@@ -990,8 +1598,12 @@ end;
 
 procedure TMyRollOut.EndTimerCollapse;
 begin
-  StoredBevelOuter := BevelOuter;
-  BevelOuter := bvNone;
+  //When Starting as Collapsed don't Set Bevels during Loading (Designing??)
+  if (ComponentState * [csLoading, csDesigning] = []) then
+  begin
+       inherited BevelOuter := bvNone;
+       inherited BevelInner := bvNone;
+  end;
 
   if assigned(OnCollapse) then
     OnCollapse(self);
@@ -1002,7 +1614,11 @@ end;
 
 procedure TMyRollOut.EndTimerExpand;
 begin
-  BevelOuter := StoredBevelOuter;
+  if (ComponentState * [csLoading, csDesigning] = []) then
+  begin
+       inherited BevelOuter := StoredBevelOuter;
+       inherited BevelInner := StoredBevelInner;
+  end;
 
   if assigned(OnExpand) then
     OnExpand(self);
@@ -1015,7 +1631,7 @@ end;
 procedure TMyRollOut.UpdateAll;
 begin
   Update;
-  //  FButton.Update;
+  //FButton.Update;
 end;
 
 
@@ -1037,6 +1653,70 @@ begin
     Animate(FExpandedSize);
 end;
 
+function TMyRollOut.GetEnabled: Boolean;
+begin
+     Result :=inherited Enabled;
+     if (FButton.Enabled <> Result) //Paranoic Think
+     then FButton.Enabled :=Result;
+end;
+
+procedure TMyRollOut.SetBevelInner(AValue: TPanelBevel);
+begin
+     if (csDesigning in ComponentState) or (csLoading in ComponentState)
+     then inherited BevelInner :=AValue
+     else begin
+               if (AValue <> StoredBevelInner) then
+               begin
+                    StoredBevelInner :=AValue;
+                    if not(FCollapsed)
+                    then inherited BevelInner :=AValue;
+                    Update;
+               end;
+           end;
+end;
+
+function TMyRollOut.GetBevelOuter: TPanelBevel;
+begin
+     if (csDesigning in ComponentState) or (csLoading in ComponentState)
+     then Result :=inherited BevelOuter
+     else begin
+               if FCollapsed
+               then Result :=bvNone
+               else Result :=StoredBevelOuter;
+           end;
+end;
+
+function TMyRollOut.GetBevelInner: TPanelBevel;
+begin
+     if (csDesigning in ComponentState) or (csLoading in ComponentState)
+     then Result :=inherited BevelInner
+     else begin
+               if FCollapsed
+               then Result :=bvNone
+               else Result :=StoredBevelInner;
+           end;
+end;
+
+procedure TMyRollOut.SetBevelOuter(AValue: TPanelBevel);
+begin
+     if (csDesigning in ComponentState) or (csLoading in ComponentState)
+     then inherited BevelOuter :=AValue
+     else begin
+               if (AValue <> StoredBevelOuter) then
+               begin
+                    StoredBevelOuter :=AValue;
+                    if not(FCollapsed)
+                    then inherited BevelOuter :=AValue;
+                    Update;
+               end;
+           end;
+end;
+
+procedure TMyRollOut.SetEnabled(AValue: Boolean);
+begin
+     inherited Enabled :=AValue;
+     FButton.Enabled :=AValue;
+end;
 
 procedure TMyRollOut.setButtonSize(Value: integer);
 begin
@@ -1059,23 +1739,6 @@ begin
     FExpandedSize := RelevantSize(self, FCollapseKind);
 end;
 
-
-
-procedure TMyRollOut.setCollapsedButtonColor(Value: TColor);
-begin
-  FCollapsedButtonColor := Value;
-
-  if Collapsed then
-    FButton.Color := FCollapsedButtonColor;
-end;
-
-procedure TMyRollOut.setExpandedButtonColor(Value: TColor);
-begin
-  FExpandedButtonColor := Value;
-
-  if not Collapsed then
-    FButton.Color := FExpandedButtonColor;
-end;
 
 procedure TMyRollOut.setButtonPosition(Value: TAnchorKind);
 var
@@ -1122,9 +1785,8 @@ begin
     akTop, akBottom: FExpandedSize := Height;
     end;
 
-
+  FButton.BuildGlyphs;
   Collapsed := wascollpased;
-
 
   Animated := wasanimated;
 end;
@@ -1216,7 +1878,7 @@ begin
     begin
     Timer.Enabled := True;
     Timer.OnTimer := @TimerAnimateSize;
-    EndProcedureOfAnimation := nil;
+    //EndProcedureOfAnimation := nil; On Collapse then EndTimerCollapse never Executed
     end
   else
     begin
@@ -1233,8 +1895,7 @@ begin
   if assigned(OnPreCollapse) then
     OnPreCollapse(self);
 
-  FButton.Color := FCollapsedButtonColor;
-  FButton.Brush.Color := FCollapsedButtonColor;
+  //FButton.Color := FCollapsedButtonColor;
 
   EndProcedureOfAnimation := @EndTimerCollapse;
 
@@ -1258,9 +1919,7 @@ begin
   //  FButton.ControlStyle := FButton.ControlStyle + [csNoFocus, csNoDesignSelectable];
   //  FButton.Parent:=self;
 
-  FButton.Color := FExpandedButtonColor;
-  FButton.Brush.Color := FExpandedButtonColor;
-
+  //FButton.Color := FExpandedButtonColor;
 
   EndProcedureOfAnimation := @EndTimerExpand;
 
@@ -1291,6 +1950,24 @@ begin
       end;
 end;
 
+procedure TMyRollOut.Loaded;
+begin
+     inherited Loaded;
+     StoredBevelOuter := inherited BevelOuter;
+     StoredBevelInner := inherited BevelInner;
+
+     //Started as Collapsed
+     if (FCollapsed) and not(csDesigning in ComponentState)
+     then begin
+               inherited BevelOuter :=bvNone;
+               inherited BevelInner :=bvNone;
+           end;
+
+     //if not(csDesigning in ComponentState)
+     //then
+     FButton.BuildGlyphs; //Button Loaded is called Before Self.Loaded and cannot Build Glyphs
+end;
+
 
 
 constructor TMyRollOut.Create(TheOwner: TComponent);
@@ -1312,7 +1989,8 @@ begin
   Width   := 200;
   FAnimationSpeed := 20;
   Caption := '';
-
+  StoredBevelOuter :=bvRaised;
+  StoredBevelInner :=bvNone;
 
   Timer      := TTimer.Create(self);
   Timer.Enabled := False;
@@ -1325,7 +2003,6 @@ begin
     Parent  := self;
     Name    := 'Button';
     Caption := 'Caption';
-    Color   := ExpandedButtonColor;
     ControlStyle := ControlStyle + [csNoFocus, csNoDesignSelectable];
     FButton.OnClick := @self.ButtonClick;
     end;
@@ -1360,4 +2037,5 @@ end;
 
 initialization
               {$I pexpandpanels.lrs}
+              {$I expandpanels_glyphs.lrs}
 end.
