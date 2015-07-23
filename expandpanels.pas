@@ -77,7 +77,6 @@ type
     rColorShadow: TColor;
     rGlyphLayout: TGlyphLayout;
     rLineShow: Boolean;
-    rShowCaptionVertical: Boolean;
     rTextLayout: TTextLayout;
 
     procedure setColorExpanded(AValue: TColor);
@@ -85,8 +84,8 @@ type
     procedure SetColorShadow(AValue: TColor);
     procedure SetGlyphLayout(AValue: TGlyphLayout);
     procedure SetLineShow(AValue: Boolean);
-    procedure SetShowCaptionVertical(AValue: Boolean);
     procedure SetTextLayout(AValue: TTextLayout);
+
   protected
     rGlyph :TButtonGlyph;
     rUserGlyphExpanded,
@@ -101,26 +100,38 @@ type
     procedure Paint; override;
     procedure Loaded; override;
 
-    property AllowAllUp;
+  (*  property AllowAllUp;
     property Down;
     property Flat;
     property Glyph;
     property GroupIndex;
+    property Height;            //Don't Decrease visibility :-O
+    property HelpContext;
+    property HelpKeyword;
+    property HelpType;
     property Layout;
+    property Left;
     property Margin;
+    property Name;
     property NumGlyphs;
     property Spacing;
     property ShowCaption;
+    property Tag;
+    property Top;
+    property Width;
     property Transparent;
+    *)
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
 
   published
+    property Caption;
     property Color;
     property ColorExpanded: TColor read rColorExpanded write setColorExpanded;
     property ColorHighlight: TColor read rColorHighlight write SetColorHighlight default clDefault;
     property ColorShadow: TColor read rColorShadow write SetColorShadow default clDefault;
+    property Font;
     property GlyphExpanded: TBitmap read rUserGlyphExpanded write SetGlyphExpanded;
     property GlyphCollapsed: TBitmap read rUserGlyphCollapsed write SetGlyphCollapsed;
 
@@ -129,7 +140,6 @@ type
 
     //property LineShow: Boolean read rLineShow write SetLineShow default False; In The Next Future
     property ShowAccelChar;
-    property ShowCaptionVertical: Boolean read rShowCaptionVertical write SetShowCaptionVertical default False;
     property TextLayout: TTextLayout read rTextLayout write SetTextLayout default tlLeft;
   end;
 
@@ -448,16 +458,6 @@ begin
   if (rLineShow <> AValue) then
   begin
        rLineShow := AValue;
-       if not(csLoading in ComponentState)
-       then Invalidate;
-  end;
-end;
-
-procedure TBoundButton.SetShowCaptionVertical(AValue: Boolean);
-begin
-  if (rShowCaptionVertical <> AValue) then
-  begin
-       rShowCaptionVertical := AValue;
        if not(csLoading in ComponentState)
        then Invalidate;
   end;
@@ -867,7 +867,6 @@ begin
   rGlyphLayout :=glNone;
   rTextLayout :=tlLeft;
   rLineShow :=False;
-  rShowCaptionVertical :=False;
   Flat :=False;
 
   //Why FGlyph is Private in ancestor?????
