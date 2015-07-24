@@ -17,12 +17,14 @@ type
     Calendar1:  TCalendar;
     ListBox1:   TListBox;
     RBehaviour: TRadioGroup;
+    RButt1: TRadioGroup;
     RDirection: TRadioGroup;
     RColl:      TRadioGroup;
     RButt:      TRadioGroup;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure RBehaviourClick(Sender: TObject);
+    procedure RButt1Click(Sender: TObject);
     procedure RButtClick(Sender: TObject);
     procedure RCollClick(Sender: TObject);
     procedure RDirectionClick(Sender: TObject);
@@ -68,6 +70,8 @@ begin
   ex1.ButtonPosition := TAnchorKind(RButt.ItemIndex);
   ex1.CollapseKind   := TAnchorKind(RColl.ItemIndex);
   ex1.Behaviour      := TExpandPanelsBehaviour(RBehaviour.ItemIndex);
+
+  RButt1Click(nil);
 end;
 
 
@@ -82,6 +86,13 @@ end;
 procedure TForm1.RBehaviourClick(Sender: TObject);
 begin
   ex1.Behaviour := TExpandPanelsBehaviour(RBehaviour.ItemIndex);
+end;
+
+procedure TForm1.RButt1Click(Sender: TObject);
+begin
+  p1.Button.GlyphLayout:=TGlyphLayout(RButt1.ItemIndex);
+  p2.Button.GlyphLayout:=TGlyphLayout(RButt1.ItemIndex);
+  p3.Button.GlyphLayout:=TGlyphLayout(RButt1.ItemIndex);
 end;
 
 

@@ -1,19 +1,22 @@
-{==============================================================================
- Lizenshinweise:  Diese Komponente wurde geschrieben von Alexander Roth
+{
+    Copyright Alexander Roth
 
-    Dieses Programm ist freie Software. Sie können es unter den Bedingungen
-    der GNU General Public License, wie von der Free Software Foundation
-    veröffentlicht, weitergeben und/oder modifizieren, gemäß Version 2 der Lizenz.
-==============================================================================}
+    This component is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 2 of the License.
+    It is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY;
+    The GNU General Public License is available at <http://www.gnu.org/licenses/>.
+}
 
 
 {
-For Instructions and Infos look up the Readme.txt
+Instructions and Infos: Readme.txt
 }
 
 
  //////////////////////////////
- //  ExpandPanels   Version 2.0.2
+ //  ExpandPanels   Version 2.1
  //////////////////////////////
 
 //23-07-2015 MaxM :
@@ -44,7 +47,7 @@ interface
 
 uses
   Controls, Classes, ExtCtrls, Graphics, Math,
-  LResources, StdCtrls, Dialogs, SysUtils, Buttons, Themes, Types, Menus;
+  LResources,  Dialogs, SysUtils, Buttons, Themes, Types, Menus;
 
 type
   TExpandPanelsBehaviour = (EPHotMouse, EPMultipanel, EPSinglePanel);
