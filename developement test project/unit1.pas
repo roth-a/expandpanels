@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, Calendar, StdCtrls, ExpandPanels;
+  ExtCtrls, Calendar, StdCtrls, Buttons, ExpandPanels, StrUtils;
 
 type
 
@@ -15,19 +15,26 @@ type
   TForm1 = class(TForm)
     Button1:    TButton;
     Calendar1:  TCalendar;
+    Edit1: TEdit;
+    GroupBox1: TGroupBox;
     ListBox1:   TListBox;
     RBehaviour: TRadioGroup;
     RButt1: TRadioGroup;
+    RButt2: TRadioGroup;
     RDirection: TRadioGroup;
     RColl:      TRadioGroup;
     RButt:      TRadioGroup;
+    SpeedButton1: TSpeedButton;
+    procedure Edit1Change(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure RBehaviourClick(Sender: TObject);
     procedure RButt1Click(Sender: TObject);
+    procedure RButt2Click(Sender: TObject);
     procedure RButtClick(Sender: TObject);
     procedure RCollClick(Sender: TObject);
     procedure RDirectionClick(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
   private
     { private declarations }
   public
@@ -74,6 +81,13 @@ begin
   RButt1Click(nil);
 end;
 
+procedure TForm1.Edit1Change(Sender: TObject);
+begin
+   p1.Button.Caption := Edit1.Text;
+   p2.Button.Caption := Edit1.Text;
+   p3.Button.Caption := Edit1.Text;
+end;
+
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
@@ -95,6 +109,13 @@ begin
   p3.Button.GlyphLayout:=TGlyphLayout(RButt1.ItemIndex);
 end;
 
+procedure TForm1.RButt2Click(Sender: TObject);
+begin
+     p1.Button.TextLayout:=TTextLayout(RButt2.ItemIndex);
+     p2.Button.TextLayout:=TTextLayout(RButt2.ItemIndex);
+     p3.Button.TextLayout:=TTextLayout(RButt2.ItemIndex);
+end;
+
 
 procedure TForm1.RButtClick(Sender: TObject);
 begin
@@ -109,6 +130,13 @@ end;
 procedure TForm1.RDirectionClick(Sender: TObject);
 begin
   ex1.ArrangeKind := TAnchorKind(RDirection.ItemIndex);
+end;
+
+procedure TForm1.SpeedButton1Click(Sender: TObject);
+begin
+     p1.Button.Caption := DupeString(Edit1.Caption, 10);
+     p2.Button.Caption := DupeString(Edit1.Caption, 10);
+     p3.Button.Caption := DupeString(Edit1.Caption, 10);
 end;
 
 initialization
