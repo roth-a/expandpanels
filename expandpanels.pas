@@ -545,6 +545,7 @@ var
   middleY,
   glyphLeft,
   glyphTop :Integer;
+  xCaption :String;
 
 
   procedure drawButton(Collapsed :Boolean; var ATop, ALeft :Integer);
@@ -642,21 +643,37 @@ var
        Canvas.RoundRect(paintRect, 5,5);
   end;
 
+  procedure CalcCuttedCaption(var ACaption :String; var txtW :Integer; MaxWidth :Integer);
+  Var
+     txtMaxChars  :Integer;
+
+  begin
+       txtW :=0;
+       if (MaxWidth < Canvas.TextWidth('...'))
+       then ACaption :=''
+       else begin
+                 txtMaxChars :=Canvas.TextFitInfo(ACaption, MaxWidth);
+                 txtW :=Canvas.TextWidth(ACaption);
+                 while (txtW > MaxWidth) do
+                 begin
+                      dec(txtMaxChars, 3);    //-1 Chars fit better, -3 Chars for more speed
+                      ACaption :=Copy(ACaption, 0, txtMaxChars)+'...';
+                      txtW :=Canvas.TextWidth(ACaption);
+                 end;
+             end;
+  end;
+
   procedure drawText;
   Var
-     txtMaxChars,
      ATop, ALeft,
      DTop, DLeft,
      AWidth, AHeight,
      txtW, txtH   :Integer;
-     xCaption :String;
 
   begin
-    xCaption :=Caption;
-    txtW :=Canvas.TextWidth(xCaption);
     txtH :=Canvas.TextHeight(xCaption);
-    AWidth :=paintRect.Right-4;
-    AHeight :=paintRect.Bottom;
+    AWidth :=paintRect.Right-2;
+    AHeight :=paintRect.Bottom-2;
 
     Case TMyRollOut(Owner).FButtonPosition of
     akTop,
@@ -665,16 +682,24 @@ var
 
                     ATop :=middleY-(txtH div 2);
 
-                    if (rGlyphLayout <> glNone)
-                    then dec(AWidth, rGlyph.Glyph.Width+2);
+                    if (rGlyphLayout <> glNone) then
+                    begin
+                        if (rTextLayout = tlCenter)
+                        then dec(AWidth, rGlyph.Glyph.Width*2+4)
+                        else dec(AWidth, rGlyph.Glyph.Width+2)
+                     end;
 
+                    CalcCuttedCaption(xCaption, txtW, AWidth);
+                    (* Original Code, Test Speed
                     if (txtW > AWidth)
                     then begin
                               txtMaxChars :=Canvas.TextFitInfo(xCaption, AWidth);
                               xCaption :=Copy(xCaption, 0, txtMaxChars-3)+'...';
                               txtW :=Canvas.TextWidth(xCaption);
+                              if (txtW > AWidth)
+                              then xCaption :='';
                           end;
-
+                    *)
                     Case rTextLayout of
                     tlLeft :begin
                                   ALeft :=4;
@@ -701,20 +726,19 @@ var
 
                   ALeft:=middleX-(txtH div 2);
 
-                  if (rGlyphLayout <> glNone)
-                  then dec(AHeight, rGlyph.Glyph.Height+2);
+                  if (rGlyphLayout <> glNone) then
+                  begin
+                     if (rTextLayout = tlCenter)
+                     then dec(AHeight, rGlyph.Glyph.Height*2+4)
+                     else dec(AHeight, rGlyph.Glyph.Height+2)
+                  end;
 
                   //Vertically the Max Width is Height
-                  if (txtW > AHeight)
-                  then begin
-                            txtMaxChars :=Canvas.TextFitInfo(xCaption, AHeight);
-                            xCaption :=Copy(xCaption, 0, txtMaxChars-3)+'...';
-                            txtW :=Canvas.TextWidth(xCaption);
-                        end;
+                  CalcCuttedCaption(xCaption, txtW, AHeight);
 
                   Case rTextLayout of
                   tlLeft :begin   //To Bottom of the ClientRect
-                               ATop :=AHeight-4;
+                               ATop :=AHeight;
 
                                if (rGlyphLayout = glRight)
                                then inc(ATop, rGlyph.Glyph.Height+2);
@@ -739,15 +763,14 @@ var
 
                   ALeft:=middleX+(txtH div 2);
 
-                  if (rGlyphLayout <> glNone)
-                  then dec(AHeight, rGlyph.Glyph.Height+2);
+                  if (rGlyphLayout <> glNone) then
+                  begin
+                     if (rTextLayout = tlCenter)
+                     then dec(AHeight, rGlyph.Glyph.Height*2+4)
+                     else dec(AHeight, rGlyph.Glyph.Height+2)
+                  end;
 
-                  if (txtW > AHeight)
-                  then begin
-                            txtMaxChars :=Canvas.TextFitInfo(xCaption, AHeight);
-                            xCaption :=Copy(xCaption, 0, txtMaxChars-3)+'...';
-                            txtW :=Canvas.TextWidth(xCaption);
-                        end;
+                  CalcCuttedCaption(xCaption, txtW, AHeight);
 
                   Case rTextLayout of
                   tlLeft :begin  //To Top of the ClientRect
@@ -757,7 +780,7 @@ var
                                then inc(ATop, rGlyph.Glyph.Height+2);
                            end;
                   tlRight:begin  //To Bottom of the ClientRect
-                               ATop :=AHeight-txtW-4;
+                               ATop :=AHeight-txtW;
                                if (rGlyphLayout = glLeft)
                                then inc(ATop, rGlyph.Glyph.Height+2);
                            end;
@@ -772,15 +795,18 @@ var
               end;
     end;
 
-    if (FState = bsDisabled)
-    then begin
-              Canvas.Font.Color := clBtnHighlight;
-              Canvas.TextOut(DLeft, DTop, xCaption);
-              Canvas.Font.Color := clBtnShadow;
-          end
-    else Canvas.Font.Color := Font.Color;
+    if (xCaption <> '') then
+    begin
+         if (FState = bsDisabled)
+         then begin
+                   Canvas.Font.Color := clBtnHighlight;
+                   Canvas.TextOut(DLeft, DTop, xCaption);
+                   Canvas.Font.Color := clBtnShadow;
+               end
+         else Canvas.Font.Color := Font.Color;
 
-    Canvas.TextOut(ALeft, ATop, xCaption);
+         Canvas.TextOut(ALeft, ATop, xCaption);
+    end;
   end;
 
 begin
@@ -791,6 +817,8 @@ begin
   if TMyRollOut(Owner).FCollapsed
   then xColor :=Self.Color
   else xColor :=rColorExpanded;
+
+  xCaption :=Caption;
 
   Case FState of
   Buttons.bsHot:begin
@@ -843,7 +871,7 @@ begin
             glyphLeft:=0;
         end;
 
-  if (rTextLayout <> tlNone)
+  if (rTextLayout <> tlNone) and (xCaption <> '')
   then drawText;
 end;
 
@@ -1787,7 +1815,12 @@ begin
     akTop, akBottom: FExpandedSize := Height;
     end;
 
-  FButton.BuildGlyphs;
+  if not(csLoading in ComponentState) then
+  begin
+       FButton.BuildGlyphs;
+       FButton.Invalidate;
+  end;
+
   Collapsed := wascollpased;
 
   Animated := wasanimated;
