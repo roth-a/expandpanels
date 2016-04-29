@@ -1,15 +1,15 @@
 object Form1: TForm1
-  Left = 238
-  Height = 563
-  Top = 126
+  Left = 218
+  Height = 605
+  Top = 93
   Width = 822
   ActiveControl = RColl.RadioButton0
   Caption = 'Form1'
-  ClientHeight = 563
+  ClientHeight = 605
   ClientWidth = 822
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '1.5'
+  LCLVersion = '1.7'
   object RColl: TRadioGroup
     Left = 280
     Height = 107
@@ -25,8 +25,8 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 2
-    ClientHeight = 77
-    ClientWidth = 165
+    ClientHeight = 88
+    ClientWidth = 167
     Columns = 2
     ItemIndex = 0
     Items.Strings = (
@@ -53,8 +53,8 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 2
-    ClientHeight = 56
-    ClientWidth = 165
+    ClientHeight = 67
+    ClientWidth = 167
     Columns = 2
     ItemIndex = 0
     Items.Strings = (
@@ -81,8 +81,8 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 77
-    ClientWidth = 164
+    ClientHeight = 88
+    ClientWidth = 166
     ItemIndex = 1
     Items.Strings = (
       'HotMouse'
@@ -107,8 +107,8 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 56
-    ClientWidth = 165
+    ClientHeight = 67
+    ClientWidth = 167
     ItemIndex = 0
     Items.Strings = (
       'Vertical'
@@ -131,8 +131,8 @@ object Form1: TForm1
       'bo 8qg7z'
       ' bcnoq'
     )
-    ItemHeight = 20
-    ScrollWidth = 143
+    ItemHeight = 22
+    ScrollWidth = 142
     TabOrder = 4
   end
   object Calendar1: TCalendar
@@ -166,8 +166,8 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 2
-    ClientHeight = 50
-    ClientWidth = 165
+    ClientHeight = 61
+    ClientWidth = 167
     Columns = 2
     ItemIndex = 1
     Items.Strings = (
@@ -184,12 +184,12 @@ object Form1: TForm1
     Top = 216
     Width = 169
     Caption = 'Caption'
-    ClientHeight = 146
-    ClientWidth = 165
+    ClientHeight = 157
+    ClientWidth = 167
     TabOrder = 8
     object Edit1: TEdit
       Left = 0
-      Height = 20
+      Height = 24
       Top = 0
       Width = 161
       OnChange = Edit1Change
@@ -219,8 +219,8 @@ object Form1: TForm1
       ChildSizing.ShrinkVertical = crsScaleChilds
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 2
-      ClientHeight = 50
-      ClientWidth = 157
+      ClientHeight = 61
+      ClientWidth = 159
       Columns = 2
       ItemIndex = 0
       Items.Strings = (
@@ -232,5 +232,37 @@ object Form1: TForm1
       OnClick = RButt2Click
       TabOrder = 1
     end
+  end
+  object RAnimationKind: TRadioGroup
+    Left = 464
+    Height = 121
+    Top = 416
+    Width = 321
+    AutoFill = True
+    Caption = 'Animation Effect Kind'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 2
+    ClientHeight = 102
+    ClientWidth = 319
+    Columns = 2
+    ItemIndex = 0
+    Items.Strings = (
+      'ekFoldingDouble'
+      'ekFoldingDown'
+      'ekCurtain'
+      'ekCurtainPersian'
+      'ekWaveDoubleExternal'
+      'ekWaveDoubleInternal'
+      'ekWave'
+      'ekWave2'
+      'ekNone'
+    )
+    OnClick = RAnimationKindClick
+    TabOrder = 9
   end
 end

@@ -35,13 +35,13 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="12">
+    <Units Count="20">
       <Unit0>
         <Filename Value="project1.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="24" Y="6"/>
-        <UsageCount Value="23"/>
+        <UsageCount Value="31"/>
       </Unit0>
       <Unit1>
         <Filename Value="unit1.pas"/>
@@ -51,9 +51,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="70"/>
-        <CursorPos X="25" Y="82"/>
-        <UsageCount Value="23"/>
+        <CursorPos Y="61"/>
+        <UsageCount Value="31"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -62,9 +61,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="ExpandPanels"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="202"/>
-        <CursorPos X="21" Y="196"/>
-        <UsageCount Value="23"/>
+        <CursorPos X="70" Y="8"/>
+        <UsageCount Value="31"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
@@ -127,127 +125,196 @@
         <CursorPos X="17"/>
         <UsageCount Value="10"/>
       </Unit11>
+      <Unit12>
+        <Filename Value="../../../Projects/test/effects_panel/effects_panel_main.pas"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos X="11" Y="7"/>
+        <UsageCount Value="10"/>
+      </Unit12>
+      <Unit13>
+        <Filename Value="effects_panel/effects_panel_main.pas"/>
+        <ComponentName Value="Form1"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="93"/>
+        <CursorPos Y="96"/>
+        <UsageCount Value="10"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="../expandpanels_o.pas"/>
+        <UnitName Value="ExpandPanels"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2008"/>
+        <CursorPos Y="2025"/>
+        <UsageCount Value="11"/>
+      </Unit14>
+      <Unit15>
+        <Filename Value="../../../../../Development/FreePascal/lazarus/lcl/extctrls.pp"/>
+        <UnitName Value="ExtCtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="991"/>
+        <CursorPos X="30" Y="1002"/>
+        <UsageCount Value="10"/>
+      </Unit15>
+      <Unit16>
+        <Filename Value="../../../../../Development/FreePascal/lazarus/lcl/controls.pp"/>
+        <UnitName Value="Controls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2073"/>
+        <CursorPos Y="2083"/>
+        <UsageCount Value="10"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="../../../../../Development/FreePascal/lazarus/lcl/include/wincontrol.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="7744"/>
+        <CursorPos X="3" Y="7689"/>
+        <UsageCount Value="10"/>
+      </Unit17>
+      <Unit18>
+        <Filename Value="../to-do.txt"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="2"/>
+        <CursorPos X="7"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="../changelog.txt"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="7"/>
+        <CursorPos X="6" Y="26"/>
+        <UsageCount Value="21"/>
+        <Loaded Value="True"/>
+        <DefaultSyntaxHighlighter Value="None"/>
+      </Unit19>
     </Units>
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="436" Column="20" TopLine="413"/>
+        <Caret Line="3066" TopLine="3051"/>
       </Position1>
       <Position2>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="498" Column="17" TopLine="460"/>
+        <Caret Line="3045" TopLine="3034"/>
       </Position2>
       <Position3>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="95" Column="29" TopLine="59"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="3062" TopLine="3051"/>
       </Position3>
       <Position4>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="98" Column="14" TopLine="59"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="3066" TopLine="3051"/>
       </Position4>
       <Position5>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="239" Column="63" TopLine="216"/>
+        <Caret Line="3045" TopLine="3034"/>
       </Position5>
       <Position6>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="496" Column="24" TopLine="480"/>
+        <Caret Line="2656" TopLine="2645"/>
       </Position6>
       <Position7>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="382" Column="13" TopLine="362"/>
+        <Caret Line="2658" TopLine="2645"/>
       </Position7>
       <Position8>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="962" Column="21" TopLine="935"/>
+        <Caret Line="2659" TopLine="2645"/>
       </Position8>
       <Position9>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="144" Column="20" TopLine="119"/>
+        <Caret Line="2391" TopLine="2380"/>
       </Position9>
       <Position10>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="145" TopLine="112"/>
+        <Caret Line="2394" TopLine="2380"/>
       </Position10>
       <Position11>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="68" Column="21" TopLine="55"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="2401" TopLine="2389"/>
       </Position11>
       <Position12>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="67" Column="21" TopLine="54"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="3078" TopLine="3063"/>
       </Position12>
       <Position13>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="52" Column="3" TopLine="28"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="3062" TopLine="3050"/>
       </Position13>
       <Position14>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="34" Column="13" TopLine="29"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="2303" TopLine="2299"/>
       </Position14>
       <Position15>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="35" Column="13" TopLine="30"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="3066" TopLine="3055"/>
       </Position15>
       <Position16>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="46" Column="54" TopLine="44"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="2303" TopLine="2292"/>
       </Position16>
       <Position17>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="47" Column="54" TopLine="45"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="3045" TopLine="3034"/>
       </Position17>
       <Position18>
         <Filename Value="unit1.pas"/>
-        <Caret Line="46" Column="54" TopLine="44"/>
+        <Caret Line="61" TopLine="55"/>
       </Position18>
       <Position19>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="1269" Column="8" TopLine="1253"/>
+        <Caret Line="3062" TopLine="3051"/>
       </Position19>
       <Position20>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="872" Column="8" TopLine="860"/>
+        <Caret Line="2303" TopLine="2292"/>
       </Position20>
       <Position21>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="1026" Column="10" TopLine="1006"/>
+        <Caret Line="3066" TopLine="3055"/>
       </Position21>
       <Position22>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="1244" Column="8" TopLine="1224"/>
+        <Caret Line="2303" TopLine="2292"/>
       </Position22>
       <Position23>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="1269" Column="8" TopLine="1249"/>
+        <Caret Line="3045" TopLine="3034"/>
       </Position23>
       <Position24>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="65" Column="24" TopLine="45"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="3062" TopLine="3051"/>
       </Position24>
       <Position25>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="63" Column="41" TopLine="45"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="2303" TopLine="2292"/>
       </Position25>
       <Position26>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="64" Column="41" TopLine="46"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="3066" TopLine="3055"/>
       </Position26>
       <Position27>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="63" Column="41" TopLine="45"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="2303" TopLine="2292"/>
       </Position27>
       <Position28>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="65" Column="95" TopLine="46"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="3045" TopLine="3034"/>
       </Position28>
       <Position29>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="97" Column="3" TopLine="77"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="2303" TopLine="2292"/>
       </Position29>
       <Position30>
-        <Filename Value="unit1.pas"/>
-        <Caret Line="94" TopLine="83"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="2656" TopLine="2645"/>
       </Position30>
     </JumpHistory>
   </ProjectOptions>
@@ -271,6 +338,50 @@
     </Linking>
   </CompilerOptions>
   <Debugging>
+    <BreakPoints Count="6">
+      <Item1>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="../expandpanels.pas"/>
+        <Line Value="3018"/>
+      </Item1>
+      <Item2>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="unit1.pas"/>
+        <Line Value="61"/>
+      </Item2>
+      <Item3>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="../expandpanels.pas"/>
+        <Line Value="3035"/>
+      </Item3>
+      <Item4>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="../expandpanels.pas"/>
+        <Line Value="2620"/>
+      </Item4>
+      <Item5>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="../expandpanels.pas"/>
+        <Line Value="3039"/>
+      </Item5>
+      <Item6>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="../expandpanels.pas"/>
+        <Line Value="2629"/>
+      </Item6>
+    </BreakPoints>
     <Exceptions Count="3">
       <Item1>
         <Name Value="EAbort"/>

@@ -1,0 +1,24 @@
+TO-DO:
+
+- simplyfy everything with verctor addition and scalar multiplication (orthogonal basis vectors... and so on)
+      if horizonatal and vertical would be described by a unity vector, I could calculate if a certain operation should be performed
+      and I could just multiply the basis vector  with an operation to get a delta movement (or none)
+
+
+
+Known Bugs:
+
+- the TExpandPanels lacks a arrange on bottom and right
+
+- the TExpandPanels Width of the first panel is 4 pixel too big the first time
+   maybe the Paint Rect of TMyRollout uncorrect... closing and reopening correct it
+   (see demo: the panel with calendar)
+
+- (Solved?) Button.Color Setted to clBtnFace at DesignTime -> Color = clSkyBlue in RunTime
+    (is not Loaded because is The inherited Default Color of TCustomSpeedButton)
+
+- Expand with - collapse Bottom, position Left/Right  (That is a NO Sense Use)
+                collapse Right, position Top/Bottom  have some sub-panel resize problem.
+                
+- Partial Animated Expand don' t give space to paint animation or is uncorrectly painted.
+

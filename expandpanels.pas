@@ -1,53 +1,41 @@
 {
-    Copyright Alexander Roth
+********************************************************************************
+*                         ExpandPanels   Version 2.2                           *
+*                                                                              *
+*                                                                              *
+*   (c)  Alexander Roth, Massimo Magnano                                       *
+*                                                                              *
+*   (o)                                                                        *
+*    This component is free software: you can redistribute it and/or modify    *
+*    it under the terms of the GNU General Public License as published by      *
+*    the Free Software Foundation, version 2 of the License.                   *
+*    It is distributed in the hope that it will be useful,                     *
+*    but WITHOUT ANY WARRANTY;                                                 *
+*    The GNU General Public License is available at                            *
+*    <http://www.gnu.org/licenses/>.                                           *
+*                                                                              *
+********************************************************************************
 
-    This component is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 2 of the License.
-    It is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY;
-    The GNU General Public License is available at <http://www.gnu.org/licenses/>.
-}
-
-
-{
 Instructions and Infos: Readme.txt
+Change Log: Changelog.txt
+To-do and bugs List: to-do.txt
 }
-
-
- //////////////////////////////
- //  ExpandPanels   Version 2.1
- //////////////////////////////
-
-//23-07-2015 MaxM :
-//             Added Owner Draw of Button so we can Draw Vertically when ButtonPosition is akLeft or akRight
-//             Added Glyphs Support (Automatically Loaded from Resources or User Passed)
-//             Solved Bugs About BevelOuter and Starting in Collapsed State
-//             Moved Colors inside Button
-
-
-{
-Todo  List
-
-- simplyfy everything with verctor addition and scalar multiplication (orthogonal basis vectors... and so on)
-      if horizonatal and vertical would be described by a unity vector, I could calculate if a certain operation should be performed
-      and I could just multiply the basis vector  with an operation to get a delta movement (or none)
-- the TExpandPanels lacks a arrange on bottom and right
-     }
 
 unit ExpandPanels;
 
 
 {$mode objfpc}{$H+}
 
-//{$DEFINE DebugInfo}// for debugging purposes
-
+// for debugging purposes
+//{$DEFINE DebugInfo}
+//{$DEFINE DEBUG_PAINT}
+//{$DEFINE DEBUG_PAINT_SIM_ANIM}  //Activate to Test the Animation Step by Step manually using _AnimateXXX
 
 interface
 
 uses
   Controls, Classes, ExtCtrls, Graphics, Math,
-  LResources,  Dialogs, SysUtils, Buttons, Themes, Types, Menus;
+  LResources,  Dialogs, SysUtils, Buttons, Themes, Types, Menus, Forms;
 
 type
   TExpandPanelsBehaviour = (EPHotMouse, EPMultipanel, EPSinglePanel);
@@ -130,7 +118,7 @@ type
 
   published
     property Caption;
-    property Color;
+    property Color nodefault;
     property ColorExpanded: TColor read rColorExpanded write setColorExpanded;
     property ColorHighlight: TColor read rColorHighlight write SetColorHighlight default clDefault;
     property ColorShadow: TColor read rColorShadow write SetColorShadow default clDefault;
@@ -146,12 +134,56 @@ type
     property TextLayout: TTextLayout read rTextLayout write SetTextLayout default tlLeft;
   end;
 
+  { TMyRollOutSubPanel}
+  TMyRollOut = class;
+
+  TMyRollOutSubPanel = class (TCustomPanel)
+  private
+    rBevelRounded: Boolean;
+  protected
+    rollOwner: TMyRollOut;
+    rColorHighlight: TColor;
+    rColorShadow: TColor;
+
+    procedure SetBevelRounded(AValue: Boolean);
+    procedure SetColorHighlight(AValue: TColor);
+    procedure SetColorShadow(AValue: TColor);
+
+    procedure Paint; override;
+
+    property Caption stored False;
+  public
+    constructor Create(TheOwner: TMyRollOut);
+
+  published
+    property ColorHighlight: TColor read rColorHighlight write SetColorHighlight default clBtnHighlight;
+    property ColorShadow: TColor read rColorShadow write SetColorShadow default clBtnShadow;
+    property BevelRounded: Boolean read rBevelRounded write SetBevelRounded default True;
+
+  end;
+
   { TMyRollOut }
+                             //Gradient from .. to .. (S=Shadow, H=Highlight)
+                             //           CollapseKind
+  TmrEffectKind = (          // (akTop, akLeft) (akBottom, akRight)
+  ekFoldingDouble,           //            HS-HS-SH
+  ekFoldingDown,             //            HS-SH-HS
+  ekCurtain,                 //            HS-HS-HS
+  ekCurtainPersian,          //            SH-SH-SH
+  ekWaveDoubleExternal,      //  |-> SH-SH-HS         SH-HS-HS <-|
+  ekWaveDoubleInternal,      //  |-> SH-HS-HS         SH-SH-HS <-|
+  //ekWaveInternal,          //  |-> SH-HS-SH     Don't work here|
+  ekWave,                    //             SH-HS
+  ekWave2,                   //             HS-SH
+  ekNone
+  );
 
   TMyRollOut = class(TPanel)
-  private
+  protected
+    FAnimationTotalTime: Cardinal;
     FEPManagesCollapsing: TNotifyEvent;
-    FButton:      TBoundButton;
+    FButton: TBoundButton;
+    rPanel: TMyRollOutSubPanel;
     FButtonSize:  integer;
     FCollapseKind: TAnchorKind;
     FCollapsed:   boolean;
@@ -169,76 +201,114 @@ type
     FExpandedSize: integer;
     FAnimationSpeed: real;
     StopCircleActions: boolean;
-    StoredBevelOuter,
-    StoredBevelInner: TPanelBevel;
-    FAnimating:   boolean;
+    FAnimating,
+    FAnimating_Collapsing,        //if = False is Expanding
+    FAnimating_Partial: boolean;  //so we don't hide the SubPanel the first time
+    anim_delta, anim_step: Word;
+    anim_CollapsedSize: Integer;
+    rAnimationEffectKind: TmrEffectKind;
     FVisibleTotal: boolean;
 
-    TargetAnimationSize:     integer;
-    EndProcedureOfAnimation: TNormalProcedure;
+    //TargetAnimationSize:     integer;
+    //EndProcedureOfAnimation: TNormalProcedure;
 
     Timer: TTimer;
 
-
     function GetBevelInner: TPanelBevel;
     function GetBevelOuter: TPanelBevel;
+    function GetBevelWidth: TBevelWidth;
     function GetEnabled: Boolean;
+    procedure setAnimationTotalTime(AValue: Cardinal);
     procedure SetBevelInner(AValue: TPanelBevel);
     procedure SetBevelOuter(AValue: TPanelBevel);
+    procedure SetBevelWidth(AValue: TBevelWidth);
     procedure SetEnabled(AValue: Boolean);
     procedure setExpandedSize(Value: integer);
     procedure setButtonSize(Value: integer);
-
-    procedure SetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
 
     procedure setButtonPosition(Value: TAnchorKind);
     procedure setCollapseKind(Value: TAnchorKind);
     procedure setAnimationSpeed(Value: real);
     procedure setCollapsed(Value: boolean);
 
-    procedure PositionButton;
-
+    procedure PositionButtonAndPanel;
 
     function RelevantSize(comp: TControl; akind: TAnchorKind): integer;
     function RelevantOrthogonalSize(comp: TControl; akind: TAnchorKind): integer;
     function DeltaCoordinates(deltaMove, deltaSize: integer): TRect;  // the outpot (left,top right, bottom) has all the information: left and top encode the movement. rigth and bottom the size changes
 
+    procedure SetRelevantSize(comp: TControl; AKind: TAnchorKind; ASize: Integer);
 
-    procedure Animate(aTargetSize: integer);
+    procedure EndTimerCollapse(Sender: TObject);
+    procedure EndTimerExpand(Sender: TObject);
 
-    procedure TimerAnimateSize(Sender: TObject);
-    procedure EndTimerCollapse;
-    procedure EndTimerExpand;
+    procedure CalculateAnimValues;
+
+    {$ifdef DEBUG_PAINT_SIM_ANIM}
+      public
+    {$EndIf}
+    procedure AnimateCollapse(Sender: TObject);
+    procedure AnimateExpand(Sender: TObject);
+
+    {$ifdef DEBUG_PAINT_SIM_ANIM}
+      protected
+    {$EndIf}
+
     procedure UpdateAll;
 
     procedure ButtonClick(Sender: TObject);
-    procedure DoCollapse;
-    procedure DoExpand;
+    procedure DoCollapse(isPartial: Boolean=False);
+    procedure DoExpand(isPartial: Boolean=False);
     procedure AdjustClientRect(var ARect: TRect); override;
 
     property InternalOnAnimate: TAnimationEvent read FInternalOnAnimate write FInternalOnAnimate;
     property EPManagesCollapsing: TNotifyEvent read FEPManagesCollapsing write FEPManagesCollapsing;
-  protected
-    procedure Loaded; override;
-  public
-    property Animating: boolean read FAnimating;
 
+    (*function DSGN_AddClicked(ADesigner: TIDesigner;
+                                MouseDownComponent: TComponent; Button: TMouseButton;
+                                Shift: TShiftState; X, Y: Integer;
+                                var AComponentClass: TComponentClass;
+                                var NewParent: TComponent): boolean;*)
+    procedure MoveControlsToSubPanel;
+    procedure Loaded; override;
+    procedure CreateWnd; override;
+    procedure Paint; override;
+    procedure Paint_Effect(ACanvas: TCanvas; ARect: TRect; gfDirection: TGradientDirection); virtual;
+    procedure Resize; override;
+    procedure AlignControls(AControl: TControl;
+                            var RemainingClientRect: TRect); override;
+
+  public
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
+
+    procedure SetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
+    procedure InsertControl(AControl: TControl; Index: integer); override;
+
+    property Animating: boolean read FAnimating;
+    property Animation_Step: Word read anim_step;
+
   published
     property BevelInner: TPanelBevel read GetBevelInner write SetBevelInner default bvNone;
     property BevelOuter: TPanelBevel read GetBevelOuter write SetBevelOuter default bvRaised;
+    property BevelWidth: TBevelWidth read GetBevelWidth write SetBevelWidth default 1;
     property Enabled: Boolean read GetEnabled write SetEnabled;
+
+    property Collapsed: boolean read FCollapsed write setCollapsed default False;
     property CollapseKind: TAnchorKind read FCollapseKind write setCollapseKind;   //To where should it collapse?
     property ExpandedSize: integer read FExpandedSize write setExpandedSize;
+
     property ButtonPosition: TAnchorKind read FButtonPosition write setButtonPosition;
     property ButtonSize: integer read FButtonSize write setButtonSize;
-
     property Button: TBoundButton read FButton;
 
-    property AnimationSpeed: real read FAnimationSpeed write setAnimationSpeed;
+    property Panel: TMyRollOutSubPanel read rPanel;
+
     property Animated: boolean read FAnimated write FAnimated default True;
-    property Collapsed: boolean read FCollapsed write setCollapsed default False;
+    property AnimationSpeed: real read FAnimationSpeed write setAnimationSpeed;
+    property AnimationTotalTime: Cardinal read FAnimationTotalTime write setAnimationTotalTime default 300;
+    property AnimationEffectKind: TmrEffectKind read rAnimationEffectKind write rAnimationEffectKind default ekFoldingDouble;
+
     property OnAnimate: TAnimationEvent read FOnAnimate write FOnAnimate;
     property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
     property OnPreExpand: TNotifyEvent read FOnPreExpand write FOnPreExpand;
@@ -345,9 +415,16 @@ type
     property Behaviour: TExpandPanelsBehaviour read FBehaviour write setBehaviour;
   end;
 
+var
+   AnimationMinInterval: Word = 30;   //Calculated by Processor Speed (No Idea ????)
+   AnimationMinDelta: Word = 21;      //Minimum Pixels to Add/Remove  (Multiple of 3)
+   anim_t_start, anim_t_end: QWord;   //Declared here so i can see it on Debugging
+
 procedure Register;
 
 implementation
+
+uses GraphType, LCLProc;
 
 const
   //GrayScale a Color : Taken from BGRABitmap package
@@ -373,8 +450,6 @@ begin
     w := max;
 end;
 
-
-{ TBoundButton }
 
 //Function copied from BGRABitmap package may work ;-)
 function Grayscale(AColor :TColor):TColor;
@@ -411,12 +486,206 @@ begin
        Max(Blue(rColor) - Value, $22));
 end;
 
+//Canvas Draw Functions
+procedure Frame3d_Rounded(Canvas: TCanvas;
+                          var ARect: TRect; const FrameWidth : integer; RX, RY:Integer;
+                          const Style : TGraphicsBevelCut;
+                          ShadowColor, HighlightColor, InternalColor: TColor);
+var
+   DRect: TRect;
+
+   procedure drawUP;
+   begin
+     inc(DRect.Left,1); inc(DRect.Top,1);
+
+     //is outside the Rect but in this way we don't have a hole of 1 px
+     inc(DRect.Right,1); inc(DRect.Bottom,1);
+
+     Canvas.Brush.Color :=ShadowColor;
+     Canvas.Brush.Style :=bsSolid;
+     Canvas.Pen.Color := clNone;
+     Canvas.Pen.Width := 1;         //The Shadow is always 1 Pixel
+     Canvas.Pen.Style := psClear;
+     Canvas.RoundRect(DRect, RX,RY);
+
+     dec(DRect.Left,1); dec(DRect.Top,1);
+     dec(DRect.Right,2); dec(DRect.Bottom,2);
+     Canvas.Brush.Color :=InternalColor;
+
+     if (InternalColor = clNone)
+     then Canvas.Brush.Style :=bsClear
+     else Canvas.Brush.Style :=bsSolid;
+
+     Canvas.Pen.Color :=HighlightColor;
+     Canvas.Pen.Width := FrameWidth;
+     Canvas.Pen.Style := psSolid;
+     Canvas.RoundRect(DRect, RX,RY);
+
+     Inc(ARect.Top, FrameWidth);
+     Inc(ARect.Left, FrameWidth);
+     Dec(ARect.Right, FrameWidth+1); //+The Shadow (1 Pixel) +1?
+     Dec(ARect.Bottom, FrameWidth+1);
+   end;
+
+   procedure drawFLAT;
+   begin
+     Canvas.Brush.Color := InternalColor;
+
+     if (InternalColor = clNone)
+     then Canvas.Brush.Style :=bsClear
+     else Canvas.Brush.Style :=bsSolid;
+
+     Canvas.Pen.Color := clNone;
+     Canvas.Pen.Width := FrameWidth;
+     Canvas.Pen.Style := psClear;
+     Canvas.RoundRect(DRect, RX,RY);
+
+     InflateRect(ARect, -FrameWidth, -FrameWidth); //No Shadow
+   end;
+
+   procedure drawDOWN;
+   begin
+     Canvas.Brush.Color :=ShadowColor;
+     Canvas.Brush.Style :=bsSolid;
+     Canvas.Pen.Color := clNone;
+     Canvas.Pen.Width := 1;
+     Canvas.Pen.Style := psClear;
+     Canvas.RoundRect(DRect, RX,RY);
+
+     inc(DRect.Left,1); inc(DRect.Top,1);
+     Canvas.Brush.Color :=InternalColor;
+
+     if (InternalColor = clNone)
+     then Canvas.Brush.Style :=bsClear
+     else Canvas.Brush.Style :=bsSolid;
+
+     Canvas.Pen.Color :=HighlightColor;
+     Canvas.Pen.Width := FrameWidth;
+     Canvas.Pen.Style := psSolid;
+     Canvas.RoundRect(DRect, RX,RY);
+
+     Inc(ARect.Top, FrameWidth+1); //+The Shadow (1 Pixel)
+     Inc(ARect.Left, FrameWidth+1);
+     Dec(ARect.Right, FrameWidth);
+     Dec(ARect.Bottom, FrameWidth);
+   end;
+
+begin
+     DRect :=ARect;
+     Case Style of
+     bvNone, bvSpace: drawFLAT;
+     bvRaised: drawUP;
+     bvLowered: drawDOWN;
+     end;
+end;
+
+{ TMyRollOutSubPanel }
+
+procedure TMyRollOutSubPanel.SetBevelRounded(AValue: Boolean);
+begin
+  if (rBevelRounded <> AValue) then
+  begin
+    rBevelRounded := AValue;
+
+    if not(csLoading in ComponentState)
+    then Invalidate;
+   end;
+end;
+
+procedure TMyRollOutSubPanel.SetColorHighlight(AValue: TColor);
+begin
+  if (rColorHighlight <> AValue) then
+  begin
+    rColorHighlight := AValue;
+
+    if not(csLoading in ComponentState)
+    then Invalidate;
+  end;
+end;
+
+procedure TMyRollOutSubPanel.SetColorShadow(AValue: TColor);
+begin
+  if (rColorShadow <> AValue) then
+  begin
+    rColorShadow := AValue;
+
+    if not(csLoading in ComponentState)
+    then Invalidate;
+  end;
+end;
+
+procedure TMyRollOutSubPanel.Paint;
+var
+  ARect: TRect;
+  TS : TTextStyle;
+
+begin
+  ARect := GetClientRect;
+
+  {$ifdef DEBUG_PAINT}
+    Canvas.Brush.Color:=clRed;
+    Canvas.Brush.Style:=bsSolid;
+    Canvas.FillRect(ARect);
+  {$endif}
+
+  // if BevelOuter is set then draw a frame with BevelWidth
+  if (BevelOuter <> bvNone)
+  then if rBevelRounded
+       then Frame3d_Rounded(Canvas, ARect, BevelWidth, 5, 5, BevelOuter, rColorShadow, rColorHighlight, Color)
+       else Canvas.Frame3d(ARect, BevelWidth, BevelOuter);
+
+  InflateRect(ARect, -BorderWidth, -BorderWidth);
+
+  // if BevelInner is set then skip the BorderWidth and draw a frame with BevelWidth
+  if (BevelInner <> bvNone)
+  then if rBevelRounded
+       then Frame3d_Rounded(Canvas, ARect, BevelWidth, 5, 5, BevelInner, rColorShadow, rColorHighlight, Color)
+       else Canvas.Frame3d(ARect, BevelWidth, BevelInner);
+
+  if (rollOwner.Caption <> '') then
+  begin
+    TS := Canvas.TextStyle;
+    TS.Alignment := BidiFlipAlignment(Self.Alignment, UseRightToLeftAlignment);
+    if (BiDiMode <> bdLeftToRight)
+    then TS.RightToLeft:= True;
+    TS.Layout:= Graphics.tlCenter;
+    TS.Opaque:= false;
+    TS.Clipping:= false;
+    TS.SystemFont:=Canvas.Font.IsDefault;
+    if not Enabled then
+    begin
+      Canvas.Font.Color := clBtnHighlight;
+      OffsetRect(ARect, 1, 1);
+      Canvas.TextRect(ARect, ARect.Left, ARect.Top, rollOwner.Caption, TS);
+      Canvas.Font.Color := clBtnShadow;
+      OffsetRect(ARect, -1, -1);
+     end
+    else
+     Canvas.Font.Color := Font.Color;
+
+    Canvas.TextRect(ARect,ARect.Left,ARect.Top, rollOwner.Caption, TS);
+  end;
+end;
+
+constructor TMyRollOutSubPanel.Create(TheOwner: TMyRollOut);
+begin
+  inherited Create(TheOwner);
+
+  rollOwner :=TheOwner;
+  rColorHighlight:=clBtnHighlight;
+  rColorShadow:=clBtnShadow;
+  rBevelRounded:=True;
+  SetSubComponent(True);
+end;
+
+{ TBoundButton }
 
 procedure TBoundButton.SetColorHighlight(AValue: TColor);
 begin
   if (rColorHighlight <> AValue) then
   begin
        rColorHighlight := AValue;
+
        if not(csLoading in ComponentState)
        then Invalidate;
   end;
@@ -427,6 +696,7 @@ begin
   if (rColorExpanded <> AValue) then
   begin
        rColorExpanded := AValue;
+
        if not(csLoading in ComponentState)
        then Invalidate;
   end;
@@ -437,6 +707,7 @@ begin
   if (rColorShadow <> AValue) then
   begin
        rColorShadow := AValue;
+
        if not(csLoading in ComponentState)
        then Invalidate;
   end;
@@ -598,6 +869,10 @@ var
   procedure drawUP;
   begin
        inc(paintRect.Left,1); inc(paintRect.Top,1);
+
+       //is outside the Rect but in this way we don't have a hole of 1 px
+       inc(paintRect.Right,1); inc(paintRect.Bottom,1);
+
        Canvas.Brush.Color :=xSColor; //clbtnShadow;
        Canvas.Brush.Style :=bsSolid;
        Canvas.Pen.Color := clNone;
@@ -810,7 +1085,14 @@ var
   end;
 
 begin
-  paintRect :=ClientRect;
+  paintRect :=GetClientRect;
+
+  {$ifdef DEBUG_PAINT}
+    Canvas.Brush.Color:=clYellow;
+    Canvas.Brush.Style:=bsSolid;
+    Canvas.FillRect(paintRect);
+  {$endif}
+
   middleY :=paintRect.Top+((paintRect.Bottom-paintRect.Top) div 2);
   middleX :=paintRect.Left+((paintRect.Right-paintRect.Left) div 2);
 
@@ -1301,23 +1583,23 @@ begin
   if Count <= 1 then
     exit;
 
-
-  h   := RelevantAbove(Panel(0));
-  max := RelevantSize(Panel(0).Parent);
+  //Using Self.Panel(index) avoid the compiler misundersted between the Method and TMyRollOutSubPanel
+  h   := RelevantAbove(Self.Panel(0));
+  max := RelevantSize(Self.Panel(0).Parent);
 
   for i := 0 to Count - 1 do
-    if h + RelevantSize(Panel(i)) > max then
-      with Panel(i) do
+    if h + RelevantSize(Self.Panel(i)) > max then
+      with Self.Panel(i) do
         begin
         tempanimated := Animated;
         Animated     := False;
         Collapsed    := True;
         Animated     := tempanimated;
 
-        h := h + TMyRollOut(Panel(i)).ButtonSize;
+        h := h + TMyRollOut(Self.Panel(i)).ButtonSize;
         end
     else
-      h := h + RelevantSize(Panel(i));
+      h := h + RelevantSize(Self.Panel(i));
 end;
 
 
@@ -1509,18 +1791,18 @@ end;
 procedure TMyRollOut.setCollapsed(Value: boolean);
 begin
 {$IFDEF DebugInfo}
-  writeln('TMyRollOut.setCollapsed');
-  writeln(BoolToStr(Collapsed, True));
+  debugln('TMyRollOut.setCollapsed '+BoolToStr(Collapsed, True));
 {$ENDIF}
 
   if FCollapsed = Value then
     exit;
+
   FCollapsed := Value;
 
-  if FCollapsed then
-    DoCollapse
-  else
-    DoExpand;
+  if not(csLoading in ComponentState)
+  then if Value
+       then DoCollapse
+       else DoExpand;
 end;
 
 function TMyRollOut.RelevantSize(comp: TControl; akind: TAnchorKind): integer;
@@ -1551,111 +1833,339 @@ begin
     end;
 end;
 
+procedure TMyRollOut.SetRelevantSize(comp: TControl; AKind: TAnchorKind; ASize: Integer);
+begin
+  case AKind of
+    akTop, akBottom: comp.Height :=ASize;
+    akLeft, akRight: comp.Width :=ASize;
+  end;
+end;
 
-
-procedure TMyRollOut.TimerAnimateSize(Sender: TObject);
+procedure TMyRollOut.CalculateAnimValues;
 var
-  step:  real;
-  originalsize, size: integer;
-  deltaMove, deltaSize: integer;
-  delta: TRect;
-  vorzeichen: integer;
+   tInterval: Cardinal;
+   aSteps, aSize: Word;
+
 begin
-  deltaMove := 0;
-  deltaSize := 0;
-  StopCircleActions := False;
-  FAnimating := True;
-  step := FAnimationSpeed;
+  //Calculate The Number of Steps to do given AnimationMinDelta pixels
+  aSize :=FExpandedSize-FButtonSize;
+  anim_delta :=AnimationMinDelta;
+  aSteps :=aSize div AnimationMinDelta;
+  if ((aSize mod AnimationMinDelta) > 0)
+  then inc(aSteps);
 
-
-  Size := RelevantSize(Self, FCollapseKind);
-
-  vorzeichen   := Sign(TargetAnimationSize - RelevantSize(self, FCollapseKind));  // muss ich delta addieren oder muss ich delta abziehen
-  originalsize := ExpandedSize;
-
-
-  //One huge step if not animated
-  if not FAnimated or not (ComponentState * [csLoading, csDesigning] = []) then
-    step := abs(Size - TargetAnimationSize);
-
-  //small steps if animated
-  if FAnimated and (ComponentState * [csLoading, csDesigning] = []) then
-    begin
-    step := step * originalsize / 200;
-    if step < 3 then
-      step := 3;
-    end;
-
-
-  //now actually do something
-
-  if Abs(Size - TargetAnimationSize) > 0 then
-    begin
-    if Abs(Size - TargetAnimationSize) < abs(step) then  // if there is just a little bit left to go, set delta so it can go directly to the end size
-      deltaSize := TargetAnimationSize - Size
-    else
-      deltaSize := vorzeichen * round(step);
-
-    if (CollapseKind = akBottom) or (CollapseKind = akRight) then
-      deltaMove := -deltaSize;
-
-
-    delta := DeltaCoordinates(deltaMove, deltaSize);
-
-    SetBounds(Left + delta.Left, Top + delta.Top, Width + delta.Right, Height + delta.Bottom);
-
-    if assigned(FInternalOnAnimate) then
-      FInternalOnAnimate(self, delta.Left, delta.Top, delta.Right, delta.Bottom);
-    if assigned(FOnAnimate) then
-      FOnAnimate(self, delta.Left, delta.Top, delta.Right, delta.Bottom);
-    end;
-
-
-  if Abs(Size - TargetAnimationSize) = 0 then        //it's finished  ( executes it NEXT time the timer activates!)
-    begin
-    Timer.Enabled := False;
-
-    FAnimating := False;
-
-    StopCircleActions := False;
-
-    if assigned(EndProcedureOfAnimation) then
-      EndProcedureOfAnimation;
-    end;
-end;
-
-
-
-procedure TMyRollOut.EndTimerCollapse;
-begin
-  //When Starting as Collapsed don't Set Bevels during Loading (Designing??)
-  if (ComponentState * [csLoading, csDesigning] = []) then
+  tInterval :=FAnimationTotalTime div aSteps;
+  if (tInterval < AnimationMinInterval) then
   begin
-       inherited BevelOuter := bvNone;
-       inherited BevelInner := bvNone;
+    //If the Interval is too fast for this CPU Increment the Delta
+    tInterval :=AnimationMinInterval;
+    aSteps :=FAnimationTotalTime div AnimationMinInterval;
+    anim_delta :=aSize div aSteps; //if there is a rest the Animation will last more
   end;
 
-  if assigned(OnCollapse) then
-    OnCollapse(self);
+  Timer.Interval:=tInterval;
+end;
 
+procedure TMyRollOut.AnimateCollapse(Sender: TObject);
+var
+   Stop, p_Stop: Boolean;
+   b_rect, old_b_rect, p_rect: TRect;
+
+begin
+  inc(anim_step);
+
+  b_rect :=BoundsRect;
+  p_rect :=rPanel.BoundsRect;
+  //Bottom is really the Height and Right is really the Width
+  p_rect.Bottom :=p_rect.Bottom-p_rect.Top;
+  b_rect.Bottom :=b_rect.Bottom-b_rect.Top;
+  p_rect.Right :=p_rect.Right-p_rect.Left;
+  b_rect.Right :=b_rect.Right-b_rect.Left;
+  old_b_rect :=b_rect; //Used to generate OnAnimate events with deltas
+
+  Case FCollapseKind of
+  akTop: begin
+           Stop :=((b_rect.Bottom-anim_delta) <= anim_CollapsedSize);
+           if Stop
+           then b_rect.Bottom :=anim_CollapsedSize
+           else begin
+                  //The First Time Decrease only the SubPanel Height so we have space for Animation
+                  if (Sender <> nil)
+                  then dec(b_rect.Bottom, anim_delta);
+
+                  dec(p_rect.Bottom, anim_delta);
+                  p_Stop :=(p_rect.Bottom < 2);
+                end;
+         end;
+  akBottom: begin
+              Stop :=((b_rect.Bottom-anim_delta) <= anim_CollapsedSize);
+              if Stop
+              then begin           //Return to real Bottom
+                     b_rect.Top :=(b_rect.Bottom+b_rect.Top)-anim_CollapsedSize;
+                     b_rect.Bottom :=anim_CollapsedSize;
+                    end
+              else begin
+                     //The First Time Increase only the Top of SubPanel so we have space for Animation
+                     if (Sender <> nil)
+                     then begin
+                            inc(b_rect.Top, anim_delta);
+                            dec(b_rect.Bottom, anim_delta);
+                           end
+                     else inc(p_rect.Top, anim_delta);
+
+                     dec(p_rect.Bottom, anim_delta);
+                     p_Stop :=(p_rect.Bottom < 2);
+                   end;
+            end;
+  akLeft: begin
+            Stop :=((b_rect.Right-anim_delta) <= anim_CollapsedSize);
+            if Stop
+            then b_rect.Right :=anim_CollapsedSize
+            else begin
+                   //The First Time Decrease only the SubPanel Right so we have space for Animation
+                   if (Sender <> nil)
+                   then dec(b_rect.Right, anim_delta);
+
+                   dec(p_rect.Right, anim_delta);
+                   p_Stop :=(p_rect.Right < 2);
+                 end;
+          end;
+  akRight: begin
+             Stop :=((b_rect.Right-anim_delta) <= anim_CollapsedSize);
+             if Stop
+             then begin           //Return to real Right
+                    b_rect.Left :=(b_rect.Right+b_rect.Left)-anim_CollapsedSize;
+                    b_rect.Right :=anim_CollapsedSize;
+                   end
+             else begin
+                    //The First Time Increase only the Left of SubPanel so we have space for Animation
+                    if (Sender <> nil)
+                    then begin
+                           inc(b_rect.Left, anim_delta);
+                           dec(b_rect.Right, anim_delta);
+                          end
+                    else inc(p_rect.Left, anim_delta);
+
+                    dec(p_rect.Right, anim_delta);
+                    p_Stop :=(p_rect.Right < 2);
+                  end;
+           end;
+  end;
+
+  //MaxM: Do not optimize this MUST be in this order
+  if Stop
+  then begin
+         FAnimating :=False;
+         //rPanel.Visible :=False;
+
+         //Now PositionButtonAndPanel is Called and the Panel is in the right position
+         SetBounds(b_rect.Left, b_rect.Top, b_rect.Right, b_rect.Bottom);
+         {$ifdef DEBUG_PAINT_SIM_ANIM}
+          if Assigned(Timer.OnStopTimer) then Timer.OnStopTimer(nil);
+         {$endif}
+        end
+  else begin
+         FAnimating :=True;
+
+         //if the Sub-Panel have a small size (tipically) is over the Button, make invisible to avoid Paint
+         if p_Stop
+         then rPanel.Visible :=False
+         else rPanel.SetBounds(p_rect.Left, p_rect.Top, p_rect.Right, p_rect.Bottom);
+
+         SetBounds(b_rect.Left, b_rect.Top, b_rect.Right, b_rect.Bottom);
+        end;
+
+//if (Sender <> nil) then
+//begin
+  if Assigned(FInternalOnAnimate)
+  then FInternalOnAnimate(Self, b_rect.Left-old_b_rect.Left, b_rect.Top-old_b_rect.Top,
+                          b_rect.Right-old_b_rect.Right, b_rect.Bottom-old_b_rect.Bottom);
+  if Assigned(FOnAnimate)
+  then FOnAnimate(Self, b_rect.Left-old_b_rect.Left, b_rect.Top-old_b_rect.Top,
+                  b_rect.Right-old_b_rect.Right, b_rect.Bottom-old_b_rect.Bottom);
+//end;
+
+  {$ifndef DEBUG_PAINT_SIM_ANIM}
+  Timer.Enabled :=FAnimating;
+  {$endif}
+end;
+
+procedure TMyRollOut.AnimateExpand(Sender: TObject);
+var
+   Stop, b_Stop: Boolean;
+   b_rect, old_b_rect, p_rect: TRect;
+   delta: Integer;
+
+begin
+  inc(anim_step);
+
+  b_rect :=BoundsRect;
+  p_rect :=rPanel.BoundsRect;
+  //Bottom is really the Height and Right is really the Width
+  p_rect.Bottom :=p_rect.Bottom-p_rect.Top;
+  b_rect.Bottom :=b_rect.Bottom-b_rect.Top;
+  p_rect.Right :=p_rect.Right-p_rect.Left;
+  b_rect.Right :=b_rect.Right-b_rect.Left;
+  old_b_rect :=b_rect; //Used to generate OnAnimate events with deltas
+
+  Case FCollapseKind of
+  akTop: begin
+           b_Stop :=((b_rect.Bottom+anim_delta) >= FExpandedSize);
+           Stop :=((p_rect.Bottom+anim_delta) >= (FExpandedSize-FButtonSize));
+
+           if b_Stop
+           then b_rect.Bottom :=FExpandedSize
+           else inc(b_rect.Bottom, anim_delta);
+
+           if not(Stop) then
+           begin
+             //Increase the SubPanel from the second step so we have space for Animation
+             if (Sender <> nil)
+             then begin
+                    if not(rPanel.Visible)
+                    then p_rect.Bottom :=anim_delta //When we are Collapsed the SubPanel height is 1 pixel because LCL don't accept height=0 and correct it
+                    else inc(p_rect.Bottom, anim_delta);
+                  end;
+           end;
+         end;
+  akBottom: begin
+              b_Stop :=((b_rect.Bottom+anim_delta) >= FExpandedSize);
+              Stop :=((p_rect.Bottom+anim_delta) >= (FExpandedSize-FButtonSize));
+
+              if b_Stop
+              then begin
+                     //When the ExpandedSize is not a mux of anim_delta we may have a rest
+                     delta :=FExpandedSize-b_rect.Bottom;
+                     dec(b_rect.Top, delta);
+                     b_rect.Bottom :=FExpandedSize;
+                    end
+              else begin
+                     dec(b_rect.Top, anim_delta);
+                     inc(b_rect.Bottom, anim_delta);
+                   end;
+
+              if not(Stop) then
+              begin
+                //The First Time Increase only the Top of SubPanel so we have space for Animation
+                if (Sender = nil)
+                then inc(p_rect.Top, anim_delta)
+                else begin
+                       if not(rPanel.Visible)
+                       then p_rect.Bottom :=0; //When we are Collapsed the SubPanel height is 1 pixel because LCL don't accept height=0 and correct it
+
+                       if b_Stop
+                       then p_rect.Top:=delta;
+                       inc(p_rect.Bottom, anim_delta);
+                     end;
+              end;
+            end;
+  akLeft: begin
+            b_Stop :=((b_rect.Right+anim_delta) >= FExpandedSize);
+            Stop :=((p_rect.Right+anim_delta) >= (FExpandedSize-FButtonSize));
+
+            if b_Stop
+            then b_rect.Right :=FExpandedSize
+            else inc(b_rect.Right, anim_delta);
+
+            if not(Stop) then
+            begin
+              //Increase the SubPanel from the second step so we have space for Animation
+              if (Sender <> nil)
+              then begin
+                     if not(rPanel.Visible)
+                     then p_rect.Right :=anim_delta
+                     else inc(p_rect.Right, anim_delta);
+                   end;
+            end;
+          end;
+  akRight: begin
+             b_Stop :=((b_rect.Right+anim_delta) >= FExpandedSize);
+             Stop :=((p_rect.Right+anim_delta) >= (FExpandedSize-FButtonSize));
+
+             if b_Stop
+             then begin
+                    delta :=FExpandedSize-b_rect.Right;
+                    dec(b_rect.Left, delta);
+                    b_rect.Right :=FExpandedSize;
+                   end
+             else begin
+                    dec(b_rect.Left, anim_delta);
+                    inc(b_rect.Right, anim_delta);
+                  end;
+
+             if not(Stop) then
+             begin
+               //The First Time Increase only the Left of SubPanel so we have space for Animation
+               if (Sender = nil)
+               then inc(p_rect.Left, anim_delta)
+               else begin
+                      if not(rPanel.Visible)
+                      then p_rect.Right :=0;
+
+                      if b_Stop
+                      then p_rect.Left:=delta;
+                      inc(p_rect.Right, anim_delta);
+                    end;
+             end;
+           end;
+  end;
+
+  //MaxM: Do not optimize this MUST be in this order
+  if Stop
+  then begin
+         FAnimating :=False;
+
+         //Now PositionButtonAndPanel is Called and the Panel is in the right position
+         SetBounds(b_rect.Left, b_rect.Top, b_rect.Right, b_rect.Bottom);
+
+         {$ifdef DEBUG_PAINT_SIM_ANIM}
+          if Assigned(Timer.OnStopTimer) then Timer.OnStopTimer(nil);
+         {$endif}
+        end
+  else begin
+         FAnimating :=True;
+
+         SetBounds(b_rect.Left, b_rect.Top, b_rect.Right, b_rect.Bottom);
+         rPanel.SetBounds(p_rect.Left, p_rect.Top, p_rect.Right, p_rect.Bottom);
+         rPanel.Visible :=(Sender <> nil) or FAnimating_Partial;
+       end;
+
+//if not(Stop) then
+//begin
+  if Assigned(FInternalOnAnimate)
+  then FInternalOnAnimate(Self, b_rect.Left-old_b_rect.Left, b_rect.Top-old_b_rect.Top,
+                          b_rect.Right-old_b_rect.Right, b_rect.Bottom-old_b_rect.Bottom);
+  if Assigned(FOnAnimate)
+  then FOnAnimate(Self, b_rect.Left-old_b_rect.Left, b_rect.Top-old_b_rect.Top,
+                  b_rect.Right-old_b_rect.Right, b_rect.Bottom-old_b_rect.Bottom);
+//end;
+
+  {$ifndef DEBUG_PAINT_SIM_ANIM}
+  Timer.Enabled :=FAnimating;
+  {$endif}
+end;
+
+procedure TMyRollOut.EndTimerCollapse(Sender: TObject);
+begin
+  FCollapsed :=True;
+  rPanel.Visible:=False; //Avoid Drawing Over the Button
+
+  if Assigned(FOnCollapse) then
+    FOnCollapse(Self);
 
   UpdateAll;
 end;
 
-procedure TMyRollOut.EndTimerExpand;
+procedure TMyRollOut.EndTimerExpand(Sender: TObject);
 begin
-  if (ComponentState * [csLoading, csDesigning] = []) then
-  begin
-       inherited BevelOuter := StoredBevelOuter;
-       inherited BevelInner := StoredBevelInner;
-  end;
+  FCollapsed :=False;
+  rPanel.Visible:=True;
 
-  if assigned(OnExpand) then
-    OnExpand(self);
+  if Assigned(FOnExpand) then
+    FOnExpand(Self);
 
   UpdateAll;
 end;
-
 
 
 procedure TMyRollOut.UpdateAll;
@@ -1664,23 +2174,35 @@ begin
   //FButton.Update;
 end;
 
-
-
-
 procedure TMyRollOut.setExpandedSize(Value: integer);
 begin
   {$IFDEF DebugInfo}
-  writeln('TMyRollOut.setExpandedSize');
-  writeln(IntToStr(Value));
+  debugln('TMyRollOut.setExpandedSize '+IntToStr(Value));
   {$ENDIF}
 
   if (FExpandedSize = Value) then
     exit;
 
-  FExpandedSize := Value;
-
-  if not Collapsed then
-    Animate(FExpandedSize);
+  if not(FCollapsed) and not(csLoading in ComponentState) then
+  begin
+    if (csDesigning in ComponentState)
+    then begin
+           FExpandedSize :=Value;
+           SetRelevantSize(Self, FCollapseKind, FExpandedSize);
+          end
+    else begin
+           if (Value > FExpandedSize)
+           then begin
+                  FExpandedSize :=Value;
+                  DoExpand(True);
+                end
+           else begin
+                  FExpandedSize :=Value;
+                  DoCollapse(True);
+                end;
+         end;
+   end
+  else FExpandedSize :=Value;
 end;
 
 function TMyRollOut.GetEnabled: Boolean;
@@ -1690,56 +2212,44 @@ begin
      then FButton.Enabled :=Result;
 end;
 
-procedure TMyRollOut.SetBevelInner(AValue: TPanelBevel);
+function TMyRollOut.GetBevelInner: TPanelBevel;
 begin
-     if (csDesigning in ComponentState) or (csLoading in ComponentState)
-     then inherited BevelInner :=AValue
-     else begin
-               if (AValue <> StoredBevelInner) then
-               begin
-                    StoredBevelInner :=AValue;
-                    if not(FCollapsed)
-                    then inherited BevelInner :=AValue;
-                    Update;
-               end;
-           end;
+  Result :=rPanel.BevelInner;
 end;
 
 function TMyRollOut.GetBevelOuter: TPanelBevel;
 begin
-     if (csDesigning in ComponentState) or (csLoading in ComponentState)
-     then Result :=inherited BevelOuter
-     else begin
-               if FCollapsed
-               then Result :=bvNone
-               else Result :=StoredBevelOuter;
-           end;
+  Result :=rPanel.BevelOuter;
 end;
 
-function TMyRollOut.GetBevelInner: TPanelBevel;
+function TMyRollOut.GetBevelWidth: TBevelWidth;
 begin
-     if (csDesigning in ComponentState) or (csLoading in ComponentState)
-     then Result :=inherited BevelInner
-     else begin
-               if FCollapsed
-               then Result :=bvNone
-               else Result :=StoredBevelInner;
-           end;
+  Result :=rPanel.BevelWidth;
+end;
+
+procedure TMyRollOut.SetBevelInner(AValue: TPanelBevel);
+begin
+  rPanel.BevelInner :=AValue;
 end;
 
 procedure TMyRollOut.SetBevelOuter(AValue: TPanelBevel);
 begin
-     if (csDesigning in ComponentState) or (csLoading in ComponentState)
-     then inherited BevelOuter :=AValue
-     else begin
-               if (AValue <> StoredBevelOuter) then
-               begin
-                    StoredBevelOuter :=AValue;
-                    if not(FCollapsed)
-                    then inherited BevelOuter :=AValue;
-                    Update;
-               end;
-           end;
+  rPanel.BevelOuter :=AValue;
+end;
+
+procedure TMyRollOut.SetBevelWidth(AValue: TBevelWidth);
+begin
+  rPanel.BevelWidth :=AValue;
+end;
+
+procedure TMyRollOut.setAnimationTotalTime(AValue: Cardinal);
+begin
+  if (FAnimationTotalTime <> AValue) then
+  begin
+    FAnimationTotalTime := AValue;
+    if not(csLoading in ComponentState)
+    then CalculateAnimValues;
+  end;
 end;
 
 procedure TMyRollOut.SetEnabled(AValue: Boolean);
@@ -1755,18 +2265,25 @@ begin
 
   FButtonSize := Value;
 
-  PositionButton;
+  PositionButtonAndPanel;
 end;
-
-
 
 
 procedure TMyRollOut.SetBounds(ALeft, ATop, AWidth, AHeight: integer);
 begin
   inherited SetBounds(ALeft, ATop, AWidth, AHeight);
 
-  if not Collapsed and not Animating and (ComponentState * [csLoading] = []) then
-    FExpandedSize := RelevantSize(self, FCollapseKind);
+  if not(StopCircleActions) and not(FAnimating) and not(csLoading in ComponentState) then
+  begin
+    if (csDesigning in ComponentState)
+    then begin
+           if FCollapsed
+           then FButtonSize :=RelevantSize(Self, FButtonPosition)
+           else FExpandedSize :=RelevantSize(Self, FCollapseKind);
+         end;
+
+    PositionButtonAndPanel;
+  end;
 end;
 
 
@@ -1784,10 +2301,12 @@ begin
     Collapsed := False;
 
   FButtonPosition := Value;
-  PositionButton;
+  PositionButtonAndPanel;
 
   Collapsed := wascollpased;
   Animated  := wasanimated;
+
+  Invalidate;
 end;
 
 
@@ -1835,49 +2354,61 @@ end;
 
 
 
-procedure TMyRollOut.PositionButton;
-
-  function ButtonRect: TRect;
-  begin
-    case FButtonPosition of
-      akBottom, akTop: Result := Rect(0, 0, RelevantOrthogonalSize(self, FButtonPosition), FButtonSize);
-      akLeft, akRight: Result := Rect(0, 0, FButtonSize, RelevantOrthogonalSize(self, FButtonPosition));
-      end;
-
-    //this must come after the thing above!!!
-    // this moves the button to the bottom, or the right
-    case FButtonPosition of
-      akBottom: Result.Top := Result.Top + RelevantSize(self, FButtonPosition) - FButtonSize;
-      akRight: Result.Left := Result.Left + RelevantSize(self, FButtonPosition) - FButtonSize;
-      end;
-  end;
-
+procedure TMyRollOut.PositionButtonAndPanel;
 var
-  new: TRect;
+  ButtonRect, PanelRect: TRect;
+
 begin
-  if StopCircleActions or not Assigned(FButton) then
-    exit;
+  //MaxM: Why is Called 2 Times ??
+
+  if StopCircleActions or (csLoading in ComponentState)
+  then exit;
+
   StopCircleActions := True;
 
+  {$ifdef DEBUGINFO}
+    ButtonRect :=FButton.BoundsRect;
+    PanelRect :=rPanel.BoundsRect;
+  {$EndIf}
 
-  new := ButtonRect;
-  FButton.SetBounds(new.Left, new.Top, new.Right, new.Bottom);
+  case FButtonPosition of
+  akTop :begin
+           ButtonRect :=Rect(0, 0, Self.Width, FButtonSize);
+           PanelRect :=Rect(0, FButtonSize, Self.Width, Self.Height);
+         end;
+  akLeft :begin
+            ButtonRect :=Rect(0, 0, FButtonSize, Self.Height);
+            PanelRect :=Rect(FButtonSize, 0, Self.Width, Self.Height);
+          end;
+  akBottom :begin
+              ButtonRect :=Rect(0, Self.Height-FButtonSize, Self.Width, Self.Height);
+              PanelRect :=Rect(0, 0, Self.Width, Self.Height-FButtonSize);
+            end;
+  akRight :begin
+             ButtonRect :=Rect(Self.Width-FButtonSize, 0, Self.Width, Self.Height);
+             PanelRect :=Rect(0, 0, Self.Width-FButtonSize, Self.Height);
+           end;
+  end;
 
+  FButton.BoundsRect :=ButtonRect;
+  rPanel.BoundsRect :=PanelRect;
 
   //set anchors
   case FButtonPosition of
-    akBottom: FButton.Anchors := [akTop, akLeft, akBottom, akRight] - [akTop];
-    akLeft: FButton.Anchors   := [akTop, akLeft, akBottom, akRight] - [akRight];
-    akTop: FButton.Anchors    := [akTop, akLeft, akBottom, akRight] - [akBottom];
-    akRight: FButton.Anchors  := [akTop, akLeft, akBottom, akRight] - [akLeft];
-    end;
-
+  akBottom: FButton.Anchors := [akTop, akLeft, akBottom, akRight] - [akTop];
+  akLeft: FButton.Anchors   := [akTop, akLeft, akBottom, akRight] - [akRight];
+  akTop: FButton.Anchors    := [akTop, akLeft, akBottom, akRight] - [akBottom];
+  akRight: FButton.Anchors  := [akTop, akLeft, akBottom, akRight] - [akLeft];
+  (* MaxM: Now we can use Align intestead????
+  akTop: FButton.Align:=alTop;
+  akLeft: FButton.Align:=alLeft;
+  akBottom: FButton.Align:=alBottom;
+  akRight: FButton.Align:=alRight;
+  *)
+  end;
 
   StopCircleActions := False;
 end;
-
-
-
 
 procedure TMyRollOut.ButtonClick(Sender: TObject);
 begin
@@ -1890,81 +2421,122 @@ begin
     OnButtonClick(self);
 end;
 
-
-
-
-procedure TMyRollOut.Animate(aTargetSize: integer);
+procedure TMyRollOut.DoCollapse(isPartial: Boolean);
 var
-  storAnimated: boolean;
-begin
-  //  FinishLastAnimationFast
-  storAnimated := Animated;
-  Animated     := False;
-  TimerAnimateSize(self);
-  Animated := storAnimated;
+   b_rect: TRect;
 
-
-  // Now do animation
-  TargetAnimationSize := aTargetSize;
-
-
-
-  if (ComponentState * [csLoading, csDesigning] = []) and Animated then
-    begin
-    Timer.Enabled := True;
-    Timer.OnTimer := @TimerAnimateSize;
-    //EndProcedureOfAnimation := nil; On Collapse then EndTimerCollapse never Executed
-    end
-  else
-    begin
-    TimerAnimateSize(self);
-    TimerAnimateSize(self);
-    end;
-end;
-
-
-
-
-procedure TMyRollOut.DoCollapse;
 begin
   if assigned(OnPreCollapse) then
     OnPreCollapse(self);
 
-  //FButton.Color := FCollapsedButtonColor;
-
-  EndProcedureOfAnimation := @EndTimerCollapse;
-
-
-  Animate(FButtonSize);
-
 {$IFDEF DebugInfo}
-  writeln('TMyRollOut.DoCollapse');
-  writeln('FButtonSize ' + IntToStr(FButtonSize));
+  debugln('TMyRollOut.DoCollapse FButtonSize=' + IntToStr(FButtonSize));
 {$ENDIF}
 
+  Timer.Enabled:=False;
+
+  if FAnimated and not(csDesigning in ComponentState) then
+  begin
+    //If is a Partial Collapse (Setting the ExpandedSize) use the maximum speed and Stop on FExpandedSize
+    if isPartial
+    then begin
+           Timer.Interval:=AnimationMinInterval;
+           anim_delta:=AnimationMinDelta;
+           Timer.OnStopTimer:=nil;
+           anim_CollapsedSize :=FExpandedSize;
+         end
+    else begin
+           CalculateAnimValues;
+           Timer.OnStopTimer:=@EndTimerCollapse;
+           anim_CollapsedSize :=FButtonSize;
+         end;
+    Timer.OnTimer:=@AnimateCollapse;
+    anim_step :=0;
+    FAnimating:=True;
+    FAnimating_Collapsing :=True;
+    FAnimating_Partial :=isPartial;
+
+    //Prepare The Sub-Panel size so we have space to do animation (no space needed if AnimationEffectKind = ekNone)
+    //the animation will start too
+    if (rAnimationEffectKind = ekNone)
+    then AnimateCollapse(Self)
+    else AnimateCollapse(nil);
+   end
+  else begin
+         FAnimating:=False;
+         b_rect :=BoundsRect;
+
+{ TODO 5 : MaxM: akRight, akBottom May result in a negative Value so we must correct it, in wich way? }
+         Case FCollapseKind of
+         akTop: b_rect.Bottom :=b_rect.Top+FButtonSize;
+         akLeft: b_rect.Right :=b_rect.Left+FButtonSize;
+         akRight: b_rect.Left :=b_rect.Right-FButtonSize;
+         akBottom: b_rect.Top :=b_rect.Bottom-FButtonSize;
+         end;
+
+         BoundsRect :=b_rect;
+
+         if not(isPartial)
+         then EndTimerCollapse(nil);
+       end;
 end;
 
+procedure TMyRollOut.DoExpand(isPartial: Boolean);
+var
+   b_rect: TRect;
 
-
-procedure TMyRollOut.DoExpand;
 begin
   if assigned(OnPreExpand) then
     OnPreExpand(self);
 
-  //  FButton.ControlStyle := FButton.ControlStyle + [csNoFocus, csNoDesignSelectable];
-  //  FButton.Parent:=self;
-
-  //FButton.Color := FExpandedButtonColor;
-
-  EndProcedureOfAnimation := @EndTimerExpand;
-
-  Animate(FExpandedSize);
-
 {$IFDEF DebugInfo}
-  writeln('TMyRollOut.DoExpand');
-  writeln('FExpandedSize ' + IntToStr(FExpandedSize));
+  debugln('TMyRollOut.DoExpand FExpandedSize=' + IntToStr(FExpandedSize));
 {$ENDIF}
 
+  Timer.Enabled:=False;
+
+  if FAnimated and not(csDesigning in ComponentState) then
+  begin
+    //If is a Partial Expand (Setting the ExpandedSize) use the maximum speed
+    if isPartial
+    then begin
+           Timer.Interval:=AnimationMinInterval;
+           anim_delta:=AnimationMinDelta;
+           Timer.OnStopTimer:=nil;
+          end
+    else begin
+           CalculateAnimValues;
+           Timer.OnStopTimer:=@EndTimerExpand;
+         end;
+    Timer.OnTimer:=@AnimateExpand;
+    anim_step :=0;
+    FAnimating:=True;
+    FAnimating_Collapsing :=False;
+    FAnimating_Partial :=isPartial;
+
+    //Prepare The Sub-Panel size so we have space to do animation (no space needed if AnimationEffectKind = ekNone)
+    //the animation will start too
+    if (rAnimationEffectKind = ekNone)
+    then AnimateExpand(Self)
+    else AnimateExpand(nil);
+  end
+  else begin
+         FAnimating:=False;
+         b_rect :=BoundsRect;
+
+{ TODO 5 : MaxM: akRight, akBottom May result in a negative Value so we must correct it, in wich way? }
+         Case FCollapseKind of
+         akTop: b_rect.Bottom :=b_rect.Top+FExpandedSize;
+         akLeft: b_rect.Right :=b_rect.Left+FExpandedSize;
+         akRight: b_rect.Left :=b_rect.Right-FExpandedSize;
+         akBottom: b_rect.Top :=b_rect.Bottom-FExpandedSize;
+         end;
+
+         BoundsRect :=b_rect;
+
+         if not(isPartial)
+         then EndTimerExpand(nil);
+       end;
 end;
 
 
@@ -1972,7 +2544,8 @@ procedure TMyRollOut.AdjustClientRect(var ARect: TRect);
 begin
   inherited AdjustClientRect(ARect);
 
-  if Assigned(FButton) then
+  (*  MaxM: May be useful in DesignTime?
+  if Assigned(FButton) then  
     case ButtonPosition of
       akTop:
         ARect.Top    := ARect.Top + fButton.Height;
@@ -1983,27 +2556,479 @@ begin
       akRight:
         ARect.Right  := ARect.Right - fButton.Width;
       end;
+      *)
 end;
+
+procedure TMyRollOut.MoveControlsToSubPanel;
+var
+   i: Integer;
+   curControl: TControl;
+
+begin
+  {$IFDEF DebugInfo}DebugLn('TMyRollOut.MoveControlsToSubPanel');{$endif}
+
+  i :=0;
+  while (i < ControlCount) do
+  begin
+    curControl :=Controls[i];
+
+    if ((curControl is TBoundButton) or (curControl is TMyRollOutSubPanel))
+    then inc(i)
+    else
+    begin
+      {$ifdef DebugInfo}DebugLn('  moving '+curControl.Name+':'+curControl.ClassName);{$endif}
+
+      curControl.Parent :=rPanel;
+      Case FButtonPosition of
+      akTop: curControl.Top :=max(curControl.Top-FButtonSize, 0);
+      akLeft: curControl.Left :=max(curControl.Left-FButtonSize, 0);
+      //Bottom and Right maybe in correct position
+      end;
+    end;
+  end;
+end;
+
+(*
+MaxM: Tested for move Components during design Time directly to SubPanel but don't work in any way
+
+function TMyRollOut.DSGN_AddClicked(ADesigner: TIDesigner;
+  MouseDownComponent: TComponent; Button: TMouseButton; Shift: TShiftState; X,
+  Y: Integer; var AComponentClass: TComponentClass; var NewParent: TComponent
+  ): boolean;
+begin
+  if (MouseDownComponent = Self) then
+  begin
+     DebugLn('TMyRollOut.DSGN_AddClicked MouseDownComponent=', MouseDownComponent.Name+':'+MouseDownComponent.ClassName,
+             ' X,Y=', IntToStr(X)+','+IntToStr(Y),
+             ' AComponentClass=', AComponentClass.ClassName);
+     if (NewParent=nil)
+     then DebugLn('TMyRollOut.DSGN_AddClicked NewParent=NIL')
+     else DebugLn('TMyRollOut.DSGN_AddClicked NewParent='+NewParent.Name+':'+NewParent.ClassName);
+
+     new_comp :=True;
+     NewParent :=rPanel;
+   end;
+
+   Result :=True;
+end;
+*)
 
 procedure TMyRollOut.Loaded;
 begin
-     inherited Loaded;
-     StoredBevelOuter := inherited BevelOuter;
-     StoredBevelInner := inherited BevelInner;
+  {$ifdef DebugInfo}DebugLn('TMyRollOut.Loaded');{$endif}
 
-     //Started as Collapsed
-     if (FCollapsed) and not(csDesigning in ComponentState)
-     then begin
-               inherited BevelOuter :=bvNone;
-               inherited BevelInner :=bvNone;
-           end;
-
-     //if not(csDesigning in ComponentState)
-     //then
-     FButton.BuildGlyphs; //Button Loaded is called Before Self.Loaded and cannot Build Glyphs
+  inherited Loaded;
 end;
 
+procedure TMyRollOut.CreateWnd;
+begin
+  {$ifdef DebugInfo}DebugLn('TMyRollOut.CreateWnd');{$endif}
 
+  inherited CreateWnd;
+
+  FButton.BuildGlyphs; //Button Loaded is called Before Self.Loaded and cannot Build Glyphs
+
+  inherited BevelWidth:=0;
+  PositionButtonAndPanel;
+
+  if not(csDesigning in ComponentState) then
+  begin
+       MoveControlsToSubPanel;
+       rPanel.Visible :=not(FCollapsed);
+  end;
+
+  CalculateAnimValues;
+  anim_CollapsedSize :=FButtonSize;
+end;
+
+procedure TMyRollOut.Paint;
+var
+  ARect, PRect: TRect;
+  TS: TTextStyle;
+  gfDirection: TGradientDirection;
+
+begin
+  if (csDesigning in ComponentState) then
+  with rPanel do
+  begin
+    //Do Here the SubPanel Paint because in DesignTime is Invisible (see Create Note)
+    ARect := rPanel.BoundsRect;
+
+    // if BevelOuter is set then draw a frame with BevelWidth
+    if (BevelOuter <> bvNone)
+    then if rBevelRounded
+         then Frame3d_Rounded(Self.Canvas, ARect, BevelWidth, 5, 5, BevelOuter, rColorShadow, rColorHighlight, Color)
+         else Self.Canvas.Frame3d(ARect, BevelWidth, BevelOuter);
+
+    InflateRect(ARect, -BorderWidth, -BorderWidth);
+
+    // if BevelInner is set then skip the BorderWidth and draw a frame with BevelWidth
+    if (BevelInner <> bvNone)
+    then if rBevelRounded
+         then Frame3d_Rounded(Self.Canvas, ARect, BevelWidth, 5, 5, BevelInner, rColorShadow, rColorHighlight, Color)
+         else Self.Canvas.Frame3d(ARect, BevelWidth, BevelInner);
+
+    if (Self.Caption <> '') then
+    begin
+      TS := Canvas.TextStyle;
+      TS.Alignment := BidiFlipAlignment(Self.Alignment, UseRightToLeftAlignment);
+      if (BiDiMode <> bdLeftToRight)
+      then TS.RightToLeft:= True;
+      TS.Layout:= Graphics.tlCenter;
+      TS.Opaque:= false;
+      TS.Clipping:= false;
+      TS.SystemFont:=Canvas.Font.IsDefault;
+      if not(Enabled) then
+      begin
+        Canvas.Font.Color := clBtnHighlight;
+        OffsetRect(ARect, 1, 1);
+        Self.Canvas.TextRect(ARect, ARect.Left, ARect.Top, Self.Caption, TS);
+        Self.Canvas.Font.Color := clBtnShadow;
+        OffsetRect(ARect, -1, -1);
+       end
+      else Self.Canvas.Font.Color := Font.Color;
+
+      Self.Canvas.TextRect(ARect,ARect.Left,ARect.Top, Self.Caption, TS);
+    end;
+   end
+  else
+  if FAnimating and not(rAnimationEffectKind = ekNone) then
+  begin
+    //Calculate the Remaing Rect (between The Sub-Panel and Self)
+    PRect := rPanel.BoundsRect;
+    ARect := Self.ClientRect;
+
+    {$ifdef DEBUG_PAINT}
+     Canvas.Brush.Color:=clMaroon;
+     Canvas.Brush.Style:=bsSolid;
+     Canvas.FillRect(ARect);
+    {$endif}
+
+    Case FCollapseKind of
+    akTop: begin
+             ARect.Left :=PRect.Left;
+             ARect.Right :=PRect.Right;
+
+             if rPanel.Visible
+             then ARect.Top :=PRect.Bottom
+             else ARect.Top :=PRect.Top; //When the Panel is Invisible use All height
+
+             gfDirection :=gdVertical;
+           end;
+    akBottom: begin
+                ARect.Left :=PRect.Left;
+                ARect.Right :=PRect.Right;
+
+                if rPanel.Visible
+                then ARect.Bottom :=PRect.Top
+                else ARect.Bottom :=PRect.Bottom;
+                gfDirection :=gdVertical;
+              end;
+    akLeft: begin
+              ARect.Top :=PRect.Top;
+              ARect.Bottom :=PRect.Bottom;
+
+              if rPanel.Visible
+              then ARect.Left :=PRect.Right
+              else ARect.Left :=PRect.Left; //When the Panel is Invisible use All width
+
+              gfDirection :=gdHorizontal;
+            end;
+    akRight: begin
+               ARect.Top :=PRect.Top;
+               ARect.Bottom :=PRect.Bottom;
+
+               if rPanel.Visible
+               then ARect.Right :=PRect.Left
+               else ARect.Right :=PRect.Right;
+
+               gfDirection :=gdHorizontal;
+             end;
+    end;
+
+    {$ifdef DEBUG_PAINT}
+      Canvas.GradientFill(ARect, clGreen, clLime, gfDirection) ;
+    {$else}
+      Paint_Effect(Canvas, ARect, gfDirection);
+    {$endif}
+  end;
+end;
+
+procedure TMyRollOut.Paint_Effect(ACanvas: TCanvas; ARect: TRect; gfDirection: TGradientDirection);
+var
+   totalHeight, slice : Cardinal;
+   WRect: TRect;
+   cH, cS: TColor;
+
+   //MaxM: GradientFill never Draw the Stop Color so we do a Gradient
+   //  in a smallest Rectangle (-1pixel) and Draw the last pixel with Stop Color
+   procedure GradientV(AStart, AStop: TColor);
+   begin
+     dec(WRect.Bottom);
+     ACanvas.GradientFill(WRect, AStart, AStop, gdVertical);
+     ACanvas.Pen.Color :=AStop;
+     ACanvas.MoveTo(WRect.Left, WRect.Bottom);
+     ACanvas.LineTo(WRect.Right, WRect.Bottom);
+     inc(WRect.Bottom);
+   end;
+
+   procedure GradientH(AStart, AStop: TColor);
+   begin
+     dec(WRect.Right);
+     ACanvas.GradientFill(WRect, AStart, AStop, gdHorizontal);
+     ACanvas.Pen.Color :=AStop;
+     ACanvas.MoveTo(WRect.Right, WRect.Top);
+     ACanvas.LineTo(WRect.Right, WRect.Bottom);
+     inc(WRect.Right);
+   end;
+
+begin
+  WRect :=ARect;
+
+  ACanvas.Pen.Style:=psSolid;
+  cH :=rPanel.ColorHighlight;
+  cS :=rPanel.ColorShadow;
+
+  //MaxM: Code is Duplicated so we can Optimize the Painting speed
+  if (gfDirection = gdVertical)  then
+  begin
+    totalHeight :=ARect.Bottom-ARect.Top;
+
+    Case rAnimationEffectKind of
+    ekFoldingDouble: begin           //            HS-HS-SH
+                       slice :=totalHeight div 3; WRect.Bottom :=WRect.Top+slice;
+                       GradientV(cH, cS);
+                       WRect.Top :=WRect.Bottom; WRect.Bottom :=WRect.Top+slice;
+                       GradientV(cH, cS);
+                       WRect.Top :=WRect.Bottom; WRect.Bottom :=ARect.Bottom;
+                       GradientV(cS, cH);
+                     end;
+    ekFoldingDown: begin             //            HS-SH-HS
+                     slice :=totalHeight div 3; WRect.Bottom :=WRect.Top+slice;
+                     GradientV(cH, cS);
+                     WRect.Top :=WRect.Bottom; WRect.Bottom :=WRect.Top+slice;
+                     GradientV(cS, cH);
+                     WRect.Top :=WRect.Bottom; WRect.Bottom :=ARect.Bottom;
+                     GradientV(cH, cS);
+                   end;
+    ekCurtain: begin                 //            HS-HS-HS
+                 slice :=totalHeight div 3; WRect.Bottom :=WRect.Top+slice;
+                 GradientV(cH, cS);
+                 WRect.Top :=WRect.Bottom; WRect.Bottom :=WRect.Top+slice;
+                 GradientV(cH, cS);
+                 WRect.Top :=WRect.Bottom; WRect.Bottom :=ARect.Bottom;
+                 GradientV(cH, cS);
+               end;
+    ekCurtainPersian: begin          //            SH-SH-SH
+                        slice :=totalHeight div 3; WRect.Bottom :=WRect.Top+slice;
+                        GradientV(cS, cH);
+                        WRect.Top :=WRect.Bottom; WRect.Bottom :=WRect.Top+slice;
+                        GradientV(cS, cH);
+                        WRect.Top :=WRect.Bottom; WRect.Bottom :=ARect.Bottom;
+                        GradientV(cS, cH);
+                      end;
+    ekWaveDoubleExternal: begin      //  |-> SH-SH-HS         SH-HS-HS <-|
+                            slice :=totalHeight div 3; WRect.Bottom :=WRect.Top+slice;
+                            if (FCollapseKind = akTop)
+                            then begin
+                                   GradientV(cS, cH);
+                                   WRect.Top :=WRect.Bottom; WRect.Bottom :=WRect.Top+slice;
+                                   GradientV(cS, cH);
+                                   WRect.Top :=WRect.Bottom; WRect.Bottom :=ARect.Bottom;
+                                   GradientV(cH, cS);
+                                 end
+                            else begin
+                                   GradientV(cS, cH);
+                                   WRect.Top :=WRect.Bottom; WRect.Bottom :=WRect.Top+slice;
+                                   GradientV(cH, cS);
+                                   WRect.Top :=WRect.Bottom; WRect.Bottom :=ARect.Bottom;
+                                   GradientV(cH, cS);
+                                 end;
+                          end;
+    ekWaveDoubleInternal: begin      //  |-> SH-HS-HS         SH-SH-HS <-|
+                            slice :=totalHeight div 3; WRect.Bottom :=WRect.Top+slice;
+                            if (FCollapseKind = akTop)
+                            then begin
+                                   GradientV(cS, cH);
+                                   WRect.Top :=WRect.Bottom; WRect.Bottom :=WRect.Top+slice;
+                                   GradientV(cH, cS);
+                                   WRect.Top :=WRect.Bottom; WRect.Bottom :=ARect.Bottom;
+                                   GradientV(cH, cS);
+                                  end
+                            else begin
+                                   GradientV(cS, cH);
+                                   WRect.Top :=WRect.Bottom; WRect.Bottom :=WRect.Top+slice;
+                                   GradientV(cS, cH);
+                                   WRect.Top :=WRect.Bottom; WRect.Bottom :=ARect.Bottom;
+                                   GradientV(cH, cS);
+                                  end;
+                          end;
+    //ekWaveInternal,          //  |-> SH-HS-SH     Don't work here|
+    ekWave: begin                    //             SH-HS
+              slice :=totalHeight div 2; WRect.Bottom :=WRect.Top+slice;
+              GradientV(cS, cH);
+              WRect.Top :=WRect.Bottom; WRect.Bottom :=ARect.Bottom;
+              GradientV(cH, cS);
+            end;
+    ekWave2: begin                    //             HS-SH
+               slice :=totalHeight div 2; WRect.Bottom :=WRect.Top+slice;
+               GradientV(cH, cS);
+               WRect.Top :=WRect.Bottom; WRect.Bottom :=ARect.Bottom;
+               GradientV(cS, cH);
+             end;
+    end;
+
+    //Draw External Borders
+    ACanvas.Pen.Color :=cH;
+    ACanvas.MoveTo(ARect.Left, ARect.Top);
+    ACanvas.LineTo(ARect.Left, ARect.Bottom);
+    ACanvas.Pen.Color :=cS;
+    ACanvas.MoveTo(ARect.Right-1, ARect.Top);
+    ACanvas.LineTo(ARect.Right-1, ARect.Bottom);
+
+  end
+  else
+  begin
+    totalHeight :=ARect.Right-ARect.Left;
+
+    Case rAnimationEffectKind of
+    ekFoldingDouble: begin           //            HS-HS-SH
+                       slice :=totalHeight div 3; WRect.Right :=WRect.Left+slice;
+                       GradientH(cH, cS);
+                       WRect.Left :=WRect.Right; WRect.Right :=WRect.Left+slice;
+                       GradientH(cH, cS);
+                       WRect.Left :=WRect.Right; WRect.Right :=ARect.Right;
+                       GradientH(cS, cH);
+                     end;
+    ekFoldingDown: begin             //            HS-SH-HS
+                     slice :=totalHeight div 3; WRect.Right :=WRect.Left+slice;
+                     GradientH(cH, cS);
+                     WRect.Left :=WRect.Right; WRect.Right :=WRect.Left+slice;
+                     GradientH(cS, cH);
+                     WRect.Left :=WRect.Right; WRect.Right :=ARect.Right;
+                     GradientH(cH, cS);
+                   end;
+    ekCurtain: begin                 //            HS-HS-HS
+                 slice :=totalHeight div 3; WRect.Right :=WRect.Left+slice;
+                 GradientH(cH, cS);
+                 WRect.Left :=WRect.Right; WRect.Right :=WRect.Left+slice;
+                 GradientH(cH, cS);
+                 WRect.Left :=WRect.Right; WRect.Right :=ARect.Right;
+                 GradientH(cH, cS);
+               end;
+    ekCurtainPersian: begin          //            SH-SH-SH
+                        slice :=totalHeight div 3; WRect.Right :=WRect.Left+slice;
+                        GradientH(cS, cH);
+                        WRect.Left :=WRect.Right; WRect.Right :=WRect.Left+slice;
+                        GradientH(cS, cH);
+                        WRect.Left :=WRect.Right; WRect.Right :=ARect.Right;
+                        GradientH(cS, cH);
+                      end;
+    ekWaveDoubleExternal: begin      //  |-> SH-SH-HS         SH-HS-HS <-|
+                            slice :=totalHeight div 3; WRect.Right :=WRect.Left+slice;
+                            if (FCollapseKind = akLeft)
+                            then begin
+                                   GradientH(cS, cH);
+                                   WRect.Left :=WRect.Right; WRect.Right :=WRect.Left+slice;
+                                   GradientH(cS, cH);
+                                   WRect.Left :=WRect.Right; WRect.Right :=ARect.Right;
+                                   GradientH(cH, cS);
+                                 end
+                            else begin
+                                   GradientH(cS, cH);
+                                   WRect.Left :=WRect.Right; WRect.Right :=WRect.Left+slice;
+                                   GradientH(cH, cS);
+                                   WRect.Left :=WRect.Right; WRect.Right :=ARect.Right;
+                                   GradientH(cH, cS);
+                                 end;
+                          end;
+    ekWaveDoubleInternal: begin      //  |-> SH-HS-HS         SH-SH-HS <-|
+                            slice :=totalHeight div 3; WRect.Right :=WRect.Left+slice;
+                            if (FCollapseKind = akLeft)
+                            then begin
+                                   GradientH(cS, cH);
+                                   WRect.Left :=WRect.Right; WRect.Right :=WRect.Left+slice;
+                                   GradientH(cH, cS);
+                                   WRect.Left :=WRect.Right; WRect.Right :=ARect.Right;
+                                   GradientH(cH, cS);
+                                  end
+                            else begin
+                                   GradientH(cS, cH);
+                                   WRect.Left :=WRect.Right; WRect.Right :=WRect.Left+slice;
+                                   GradientH(cS, cH);
+                                   WRect.Left :=WRect.Right; WRect.Right :=ARect.Right;
+                                   GradientH(cH, cS);
+                                  end;
+                          end;
+    //ekWaveInternal,          //  |-> SH-HS-SH     Don't work here|
+    ekWave: begin                    //             SH-HS
+              slice :=totalHeight div 2; WRect.Right :=WRect.Left+slice;
+              GradientH(cS, cH);
+              WRect.Left :=WRect.Right; WRect.Right :=ARect.Right;
+              GradientH(cH, cS);
+            end;
+    ekWave2: begin                    //             HS-SH
+               slice :=totalHeight div 2; WRect.Right :=WRect.Left+slice;
+               GradientH(cH, cS);
+               WRect.Left :=WRect.Right; WRect.Right :=ARect.Right;
+               GradientH(cS, cH);
+             end;
+    end;
+
+    //Draw External Borders
+    ACanvas.Pen.Color :=cH;
+    ACanvas.MoveTo(ARect.Left, ARect.Top);
+    ACanvas.LineTo(ARect.Right, ARect.Top);
+    ACanvas.Pen.Color :=cS;
+    ACanvas.MoveTo(ARect.Left, ARect.Bottom-1);
+    ACanvas.LineTo(ARect.Right, ARect.Bottom-1);
+
+  end;
+
+end;
+
+procedure TMyRollOut.Resize;
+begin
+  inherited Resize;
+
+  if (csDesigning in ComponentState) then
+  begin
+    {$IFDEF DebugInfo}DebugLn('TMyRollOut.Resize');{$endif}
+  end;
+end;
+
+procedure TMyRollOut.AlignControls(AControl: TControl; var RemainingClientRect: TRect);
+begin
+  inherited AlignControls(AControl, RemainingClientRect);
+
+  if (csDesigning in ComponentState) then
+  begin
+    {$IFDEF DebugInfo}DebugLn('TMyRollOut.AlignControls ',
+                              IntToStr(RemainingClientRect.Top)+', '+IntToStr(RemainingClientRect.Left)+', '+
+                              IntToStr(RemainingClientRect.Bottom)+', '+IntToStr(RemainingClientRect.Right));{$endif}
+  end;
+end;
+
+procedure TMyRollOut.InsertControl(AControl: TControl; Index: integer);
+begin
+  {$IFDEF DebugInfo}
+  DebugLn('TMyRollOut.InsertControl '+IntToStr(Index), AControl.Name+':'+AControl.ClassName);
+  {$endif}
+
+  if (csDesigning in ComponentState) or (csLoading in ComponentState)
+      or (AControl is TBoundButton) or (AControl is TMyRollOutSubPanel)
+  then inherited InsertControl(AControl, Index)
+  else begin
+         {$ifdef DebugInfo}DebugLn('  moving '+AControl.Name);{$endif}
+
+         AControl.Parent :=rPanel;
+         Case FButtonPosition of
+         akTop: AControl.Top :=max(AControl.Top-FButtonSize, 0);
+         akLeft: AControl.Left :=max(AControl.Left-FButtonSize, 0);
+         //Bottom and Right maybe in correct position
+         end;
+       end;
+end;
 
 constructor TMyRollOut.Create(TheOwner: TComponent);
 begin
@@ -2013,19 +3038,20 @@ begin
 
   FButtonSize := 27;
   FAnimated := True;
+  FAnimating :=False;
   FCollapseKind := akTop;
   FVisibleTotal := True;
   FCollapsed := False;
   FButtonPosition := akTop;
   FCollapsedButtonColor := clSkyBlue;
   FExpandedButtonColor := RGBToColor(23, 136, 248);
-  FExpandedSize := 200;
+  FExpandedSize :=200;
   Height  := FExpandedSize;
   Width   := 200;
+  FAnimationTotalTime:=300;
   FAnimationSpeed := 20;
+  rAnimationEffectKind :=ekFoldingDouble;
   Caption := '';
-  StoredBevelOuter :=bvRaised;
-  StoredBevelInner :=bvNone;
 
   Timer      := TTimer.Create(self);
   Timer.Enabled := False;
@@ -2042,27 +3068,52 @@ begin
     FButton.OnClick := @self.ButtonClick;
     end;
 
+  rPanel := TMyRollOutSubPanel.Create(Self);
+  with rPanel do
+    begin
+    Parent  := Self;
+    Name    := 'subPanel';
+    Caption := 'Caption';
+    ControlStyle := ControlStyle + [csAcceptsControls, csNoDesignVisible];
+
+    //MaxM:
+    //The SubPanel is Invisible during Designing because some User Controls, like TLabel,
+    // is Hided because the user controls have Self as Parent (i did not find a way to change this)
+    //and are under the SubPanel.
+    // Changing the ZOrder take no effect because the SubPanel cover all the free space.
+    // In this situation we need to Paint the Border too :-O to simulate the final aspect.
+    Visible :=not(csDesigning in ComponentState);
+    end;
+
+
+  (*if Assigned(GlobalDesignHook) then
+  begin
+       GlobalDesignHook.AddHandlerAddClicked(@DSGN_AddClicked);
+  end;*)
+
   StopCircleActions := False;
-  PositionButton;
 end;
 
 
 
 destructor TMyRollOut.Destroy;
 begin
-  timer.Enabled := False;
-
+  Timer.Enabled := False;
   Timer.Free;
 
   if (ComponentState * [csLoading, csDesigning] = []) then
+  begin
     FButton.Free;  // bringt einen Fehler in der Designtime wenn ich das hier mache
+    rPanel.Free;
+  end;
 
-  //  FButton.Free;  // bringt einen Fehler in der Designtime wenn ich das hier mache
+  (*if Assigned(GlobalDesignHook) then
+  begin
+       GlobalDesignHook.RemoveAllHandlersForObject(Self);
+  end;*)
 
   inherited Destroy;
 end;
-
-
 
 procedure Register;
 begin
@@ -2073,4 +3124,5 @@ end;
 initialization
               {$I pexpandpanels.lrs}
               {$I expandpanels_glyphs.lrs}
+
 end.
