@@ -18,7 +18,6 @@ type
     Edit1: TEdit;
     GroupBox1: TGroupBox;
     ListBox1:   TListBox;
-    RAnimationKind: TRadioGroup;
     RBehaviour: TRadioGroup;
     RButt1: TRadioGroup;
     RButt2: TRadioGroup;
@@ -29,7 +28,6 @@ type
     procedure Edit1Change(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
-    procedure RAnimationKindClick(Sender: TObject);
     procedure RBehaviourClick(Sender: TObject);
     procedure RButt1Click(Sender: TObject);
     procedure RButt2Click(Sender: TObject);
@@ -97,13 +95,6 @@ begin
   p1.Free;
   p2.Free;
   p3.Free;
-end;
-
-procedure TForm1.RAnimationKindClick(Sender: TObject);
-begin
-  p1.AnimationEffectKind:=TmrEffectKind(RAnimationKind.ItemIndex);
-  p2.AnimationEffectKind:=TmrEffectKind(RAnimationKind.ItemIndex);
-  p3.AnimationEffectKind:=TmrEffectKind(RAnimationKind.ItemIndex);
 end;
 
 procedure TForm1.RBehaviourClick(Sender: TObject);
