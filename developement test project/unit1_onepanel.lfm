@@ -1,17 +1,17 @@
 object Form1: TForm1
-  Left = 218
-  Height = 605
-  Top = 93
-  Width = 822
+  Left = 368
+  Height = 489
+  Top = 168
+  Width = 432
   ActiveControl = RColl.RadioButton0
   Caption = 'Form1'
-  ClientHeight = 605
-  ClientWidth = 822
+  ClientHeight = 489
+  ClientWidth = 432
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   LCLVersion = '1.7'
   object RColl: TRadioGroup
-    Left = 280
+    Left = 17
     Height = 107
     Top = 216
     Width = 169
@@ -39,9 +39,9 @@ object Form1: TForm1
     TabOrder = 0
   end
   object RButt: TRadioGroup
-    Left = 280
+    Left = 17
     Height = 86
-    Top = 328
+    Top = 320
     Width = 169
     AutoFill = True
     Caption = 'Button Position'
@@ -66,95 +66,10 @@ object Form1: TForm1
     OnClick = RButtClick
     TabOrder = 1
   end
-  object RBehaviour: TRadioGroup
-    Left = 472
-    Height = 107
-    Top = 216
-    Width = 168
-    AutoFill = True
-    Caption = 'Behaviour'
-    ChildSizing.LeftRightSpacing = 6
-    ChildSizing.TopBottomSpacing = 6
-    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-    ChildSizing.EnlargeVertical = crsHomogenousChildResize
-    ChildSizing.ShrinkHorizontal = crsScaleChilds
-    ChildSizing.ShrinkVertical = crsScaleChilds
-    ChildSizing.Layout = cclLeftToRightThenTopToBottom
-    ChildSizing.ControlsPerLine = 1
-    ClientHeight = 88
-    ClientWidth = 166
-    ItemIndex = 1
-    Items.Strings = (
-      'HotMouse'
-      'Multipanel'
-      'SinglePanel'
-    )
-    OnClick = RBehaviourClick
-    TabOrder = 2
-  end
-  object RDirection: TRadioGroup
-    Left = 472
-    Height = 86
-    Top = 328
-    Width = 169
-    AutoFill = True
-    Caption = 'Direction'
-    ChildSizing.LeftRightSpacing = 6
-    ChildSizing.TopBottomSpacing = 6
-    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-    ChildSizing.EnlargeVertical = crsHomogenousChildResize
-    ChildSizing.ShrinkHorizontal = crsScaleChilds
-    ChildSizing.ShrinkVertical = crsScaleChilds
-    ChildSizing.Layout = cclLeftToRightThenTopToBottom
-    ChildSizing.ControlsPerLine = 1
-    ClientHeight = 67
-    ClientWidth = 167
-    ItemIndex = 0
-    Items.Strings = (
-      'Vertical'
-      'Horizontal'
-    )
-    OnClick = RDirectionClick
-    TabOrder = 3
-  end
-  object ListBox1: TListBox
-    Left = 256
-    Height = 139
-    Top = 56
-    Width = 164
-    Items.Strings = (
-      'u8q6zh403nhaol '
-      'c3q34uzhno'
-      'ilqwu4zh8wzhil'
-      'cuize'
-      'wil 3z84o'
-      'bo 8qg7z'
-      ' bcnoq'
-    )
-    ItemHeight = 22
-    ScrollWidth = 142
-    TabOrder = 4
-  end
-  object Calendar1: TCalendar
-    Left = 480
-    Height = 121
-    Top = 64
-    Width = 145
-    DateTime = 40552
-    TabOrder = 5
-  end
-  object Button1: TButton
-    Left = 144
-    Height = 25
-    Top = 120
-    Width = 75
-    Caption = 'Button1'
-    TabOrder = 6
-  end
   object RGlyph: TRadioGroup
-    Left = 280
+    Left = 17
     Height = 80
-    Top = 424
+    Top = 402
     Width = 169
     AutoFill = True
     Caption = 'Glyph Position'
@@ -176,17 +91,17 @@ object Form1: TForm1
       'None'
     )
     OnClick = RGlyphClick
-    TabOrder = 7
+    TabOrder = 2
   end
   object GroupBox1: TGroupBox
-    Left = 648
-    Height = 176
+    Left = 193
+    Height = 152
     Top = 216
     Width = 169
     Caption = 'Caption'
-    ClientHeight = 157
+    ClientHeight = 133
     ClientWidth = 167
-    TabOrder = 8
+    TabOrder = 3
     object Edit1: TEdit
       Left = 0
       Height = 24
@@ -207,7 +122,7 @@ object Form1: TForm1
     object RCapt: TRadioGroup
       Left = 0
       Height = 80
-      Top = 66
+      Top = 50
       Width = 161
       AutoFill = True
       Caption = 'Caption Position'
@@ -234,9 +149,9 @@ object Form1: TForm1
     end
   end
   object RStyle: TRadioGroup
-    Left = 472
-    Height = 80
-    Top = 424
+    Left = 193
+    Height = 78
+    Top = 360
     Width = 169
     AutoFill = True
     Caption = 'Style'
@@ -248,7 +163,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 61
+    ClientHeight = 59
     ClientWidth = 167
     ItemIndex = 0
     Items.Strings = (
@@ -256,23 +171,64 @@ object Form1: TForm1
       'Tab'
     )
     OnClick = RStyleClick
-    TabOrder = 9
+    TabOrder = 4
+  end
+  object p1: TMyRollOut
+    Left = 8
+    Height = 27
+    Top = 8
+    Width = 400
+    Caption = 'p1'
+    ClientHeight = 27
+    ClientWidth = 400
+    Enabled = True
+    TabOrder = 5
+    CollapseKind = akTop
+    ExpandedSize = 200
+    ButtonPosition = akTop
+    ButtonSize = 27
+    Button.Left = 0
+    Button.Height = 27
+    Button.Top = 0
+    Button.Width = 400
+    Button.Caption = 'Caption'
+    Button.Color = clSkyBlue
+    Button.ColorExpanded = 16287767
+    Button.GlyphLayout = glRight
+    AnimationSpeed = 20
+    Collapsed = True
+    object Edit2: TEdit
+      Left = 47
+      Height = 24
+      Top = 41
+      Width = 80
+      TabOrder = 0
+      Text = 'Edit2'
+    end
+    object Label2: TLabel
+      Left = 136
+      Height = 18
+      Top = 47
+      Width = 40
+      Caption = 'Label2'
+      ParentColor = False
+    end
   end
   object edTabWidth: TSpinEdit
-    Left = 504
+    Left = 225
     Height = 24
-    Top = 527
+    Top = 458
     Width = 103
     MaxValue = 380
     MinValue = -90
     OnChange = edTabWidthChange
-    TabOrder = 10
+    TabOrder = 6
     Value = -50
   end
   object Label1: TLabel
-    Left = 504
+    Left = 225
     Height = 18
-    Top = 504
+    Top = 435
     Width = 153
     Caption = 'Tab Width (Negative is %)'
     ParentColor = False

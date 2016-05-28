@@ -1,47 +1,34 @@
 {
-    Copyright Alexander Roth
+********************************************************************************
+*                         ExpandPanels   Version 2.2                           *
+*                                                                              *
+*                                                                              *
+*   (c)  Alexander Roth, Massimo Magnano                                       *
+*                                                                              *
+*   (o)                                                                        *
+*    This component is free software: you can redistribute it and/or modify    *
+*    it under the terms of the GNU General Public License as published by      *
+*    the Free Software Foundation, version 2 of the License.                   *
+*    It is distributed in the hope that it will be useful,                     *
+*    but WITHOUT ANY WARRANTY;                                                 *
+*    The GNU General Public License is available at                            *
+*    <http://www.gnu.org/licenses/>.                                           *
+*                                                                              *
+********************************************************************************
 
-    This component is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 2 of the License.
-    It is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY;
-    The GNU General Public License is available at <http://www.gnu.org/licenses/>.
-}
-
-
-{
 Instructions and Infos: Readme.txt
+Change Log: Changelog.txt
+To-do and bugs List: to-do.txt
 }
-
-
- //////////////////////////////
- //  ExpandPanels   Version 2.1
- //////////////////////////////
-
-//23-07-2015 MaxM :
-//             Added Owner Draw of Button so we can Draw Vertically when ButtonPosition is akLeft or akRight
-//             Added Glyphs Support (Automatically Loaded from Resources or User Passed)
-//             Solved Bugs About BevelOuter and Starting in Collapsed State
-//             Moved Colors inside Button
-
-
-{
-Todo  List
-
-- simplyfy everything with verctor addition and scalar multiplication (orthogonal basis vectors... and so on)
-      if horizonatal and vertical would be described by a unity vector, I could calculate if a certain operation should be performed
-      and I could just multiply the basis vector  with an operation to get a delta movement (or none)
-- the TExpandPanels lacks a arrange on bottom and right
-     }
 
 unit ExpandPanels;
 
 
 {$mode objfpc}{$H+}
 
-//{$DEFINE DebugInfo}// for debugging purposes
-
+// for debugging purposes
+//{$DEFINE DebugInfo}
+//{$DEFINE DEBUG_PAINT}
 
 interface
 
@@ -73,20 +60,24 @@ type
     tlNone
   );
 
+  TBoundButtonStyle = (bbsButton, bbsTab);
+
   TBoundButton = class(TCustomSpeedButton)
   private
     rColorExpanded: TColor;
     rColorHighlight: TColor;
     rColorShadow: TColor;
     rGlyphLayout: TGlyphLayout;
-    rLineShow: Boolean;
+    rStyle: TBoundButtonStyle;
+    rTabWidth: Integer;
     rTextLayout: TTextLayout;
 
     procedure setColorExpanded(AValue: TColor);
     procedure SetColorHighlight(AValue: TColor);
     procedure SetColorShadow(AValue: TColor);
     procedure SetGlyphLayout(AValue: TGlyphLayout);
-    procedure SetLineShow(AValue: Boolean);
+    procedure SetStyle(AValue: TBoundButtonStyle);
+    procedure SetTabWidth(AValue: Integer);
     procedure SetTextLayout(AValue: TTextLayout);
 
   protected
@@ -130,7 +121,7 @@ type
 
   published
     property Caption;
-    property Color;
+    property Color nodefault;
     property ColorExpanded: TColor read rColorExpanded write setColorExpanded;
     property ColorHighlight: TColor read rColorHighlight write SetColorHighlight default clDefault;
     property ColorShadow: TColor read rColorShadow write SetColorShadow default clDefault;
@@ -141,9 +132,12 @@ type
     //Creating at RUNTIME Set in the Last Line of your Code else Glyphs is not Loaded correctly
     property GlyphLayout: TGlyphLayout read rGlyphLayout write SetGlyphLayout default glNone;
 
-    //property LineShow: Boolean read rLineShow write SetLineShow default False; In The Next Future
     property ShowAccelChar;
     property TextLayout: TTextLayout read rTextLayout write SetTextLayout default tlLeft;
+    property Style: TBoundButtonStyle read rStyle write SetStyle default bbsButton;
+
+    //Negative Values is the % of Total Width, Positive is a Fixed Width
+    property TabWidth: Integer read rTabWidth write SetTabWidth default -50;
   end;
 
   { TMyRollOut }
@@ -168,9 +162,10 @@ type
     FCollapsedButtonColor: TColor;
     FExpandedSize: integer;
     FAnimationSpeed: real;
+    rBevelColorHighlight: TColor;
+    rBevelColorShadow: TColor;
+    rBevelRounded: Boolean;
     StopCircleActions: boolean;
-    StoredBevelOuter,
-    StoredBevelInner: TPanelBevel;
     FAnimating:   boolean;
     FVisibleTotal: boolean;
 
@@ -179,17 +174,13 @@ type
 
     Timer: TTimer;
 
-
-    function GetBevelInner: TPanelBevel;
-    function GetBevelOuter: TPanelBevel;
     function GetEnabled: Boolean;
-    procedure SetBevelInner(AValue: TPanelBevel);
-    procedure SetBevelOuter(AValue: TPanelBevel);
+    procedure SetBevelColorHighlight(AValue: TColor);
+    procedure SetBevelColorShadow(AValue: TColor);
+    procedure SetBevelRounded(AValue: Boolean);
     procedure SetEnabled(AValue: Boolean);
     procedure setExpandedSize(Value: integer);
     procedure setButtonSize(Value: integer);
-
-    procedure SetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
 
     procedure setButtonPosition(Value: TAnchorKind);
     procedure setCollapseKind(Value: TAnchorKind);
@@ -198,7 +189,7 @@ type
 
     procedure PositionButton;
 
-
+    procedure SetRelevantSize(comp: TControl; AKind: TAnchorKind; ASize: Integer);
     function RelevantSize(comp: TControl; akind: TAnchorKind): integer;
     function RelevantOrthogonalSize(comp: TControl; akind: TAnchorKind): integer;
     function DeltaCoordinates(deltaMove, deltaSize: integer): TRect;  // the outpot (left,top right, bottom) has all the information: left and top encode the movement. rigth and bottom the size changes
@@ -220,14 +211,16 @@ type
     property EPManagesCollapsing: TNotifyEvent read FEPManagesCollapsing write FEPManagesCollapsing;
   protected
     procedure Loaded; override;
+    procedure CreateWnd; override;
+    procedure Paint; override;
   public
     property Animating: boolean read FAnimating;
 
     constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
+
+    procedure SetBounds(ALeft, ATop, AWidth, AHeight: integer); override;
   published
-    property BevelInner: TPanelBevel read GetBevelInner write SetBevelInner default bvNone;
-    property BevelOuter: TPanelBevel read GetBevelOuter write SetBevelOuter default bvRaised;
     property Enabled: Boolean read GetEnabled write SetEnabled;
     property CollapseKind: TAnchorKind read FCollapseKind write setCollapseKind;   //To where should it collapse?
     property ExpandedSize: integer read FExpandedSize write setExpandedSize;
@@ -239,6 +232,11 @@ type
     property AnimationSpeed: real read FAnimationSpeed write setAnimationSpeed;
     property Animated: boolean read FAnimated write FAnimated default True;
     property Collapsed: boolean read FCollapsed write setCollapsed default False;
+
+    property BevelColorHighlight: TColor read rBevelColorHighlight write SetBevelColorHighlight default clBtnHighlight;
+    property BevelColorShadow: TColor read rBevelColorShadow write SetBevelColorShadow default clBtnShadow;
+    property BevelRounded: Boolean read rBevelRounded write SetBevelRounded default True;
+
     property OnAnimate: TAnimationEvent read FOnAnimate write FOnAnimate;
     property OnButtonClick: TNotifyEvent read FOnButtonClick write FOnButtonClick;
     property OnPreExpand: TNotifyEvent read FOnPreExpand write FOnPreExpand;
@@ -349,6 +347,8 @@ procedure Register;
 
 implementation
 
+uses GraphType, LCLProc;
+
 const
   //GrayScale a Color : Taken from BGRABitmap package
   redWeightShl10   = 306; // = 0.299
@@ -373,8 +373,6 @@ begin
     w := max;
 end;
 
-
-{ TBoundButton }
 
 //Function copied from BGRABitmap package may work ;-)
 function Grayscale(AColor :TColor):TColor;
@@ -411,12 +409,105 @@ begin
        Max(Blue(rColor) - Value, $22));
 end;
 
+//Canvas Draw Functions
+procedure Frame3d_Rounded(Canvas: TCanvas;
+                          var ARect: TRect; const FrameWidth : integer; RX, RY:Integer;
+                          const Style : TGraphicsBevelCut;
+                          ShadowColor, HighlightColor, InternalColor: TColor);
+var
+   DRect: TRect;
+
+   procedure drawUP;
+   begin
+     inc(DRect.Left,1); inc(DRect.Top,1);
+
+     //is outside the Rect but in this way we don't have a hole of 1 px
+     inc(DRect.Right,1); inc(DRect.Bottom,1);
+
+     Canvas.Brush.Color :=ShadowColor;
+     Canvas.Brush.Style :=bsSolid;
+     Canvas.Pen.Color := clNone;
+     Canvas.Pen.Width := 1;         //The Shadow is always 1 Pixel
+     Canvas.Pen.Style := psClear;
+     Canvas.RoundRect(DRect, RX,RY);
+
+     dec(DRect.Left,1); dec(DRect.Top,1);
+     dec(DRect.Right,2); dec(DRect.Bottom,2);
+     Canvas.Brush.Color :=InternalColor;
+
+     if (InternalColor = clNone)
+     then Canvas.Brush.Style :=bsClear
+     else Canvas.Brush.Style :=bsSolid;
+
+     Canvas.Pen.Color :=HighlightColor;
+     Canvas.Pen.Width := FrameWidth;
+     Canvas.Pen.Style := psSolid;
+     Canvas.RoundRect(DRect, RX,RY);
+
+     Inc(ARect.Top, FrameWidth);
+     Inc(ARect.Left, FrameWidth);
+     Dec(ARect.Right, FrameWidth+1); //+The Shadow (1 Pixel) +1?
+     Dec(ARect.Bottom, FrameWidth+1);
+   end;
+
+   procedure drawFLAT;
+   begin
+     Canvas.Brush.Color := InternalColor;
+
+     if (InternalColor = clNone)
+     then Canvas.Brush.Style :=bsClear
+     else Canvas.Brush.Style :=bsSolid;
+
+     Canvas.Pen.Color := clNone;
+     Canvas.Pen.Width := FrameWidth;
+     Canvas.Pen.Style := psClear;
+     Canvas.RoundRect(DRect, RX,RY);
+
+     InflateRect(ARect, -FrameWidth, -FrameWidth); //No Shadow
+   end;
+
+   procedure drawDOWN;
+   begin
+     Canvas.Brush.Color :=ShadowColor;
+     Canvas.Brush.Style :=bsSolid;
+     Canvas.Pen.Color := clNone;
+     Canvas.Pen.Width := 1;
+     Canvas.Pen.Style := psClear;
+     Canvas.RoundRect(DRect, RX,RY);
+
+     inc(DRect.Left,1); inc(DRect.Top,1);
+     Canvas.Brush.Color :=InternalColor;
+
+     if (InternalColor = clNone)
+     then Canvas.Brush.Style :=bsClear
+     else Canvas.Brush.Style :=bsSolid;
+
+     Canvas.Pen.Color :=HighlightColor;
+     Canvas.Pen.Width := FrameWidth;
+     Canvas.Pen.Style := psSolid;
+     Canvas.RoundRect(DRect, RX,RY);
+
+     Inc(ARect.Top, FrameWidth+1); //+The Shadow (1 Pixel)
+     Inc(ARect.Left, FrameWidth+1);
+     Dec(ARect.Right, FrameWidth);
+     Dec(ARect.Bottom, FrameWidth);
+   end;
+
+begin
+     DRect :=ARect;
+     Case Style of
+     bvNone, bvSpace: drawFLAT;
+     bvRaised: drawUP;
+     bvLowered: drawDOWN;
+     end;
+end;
 
 procedure TBoundButton.SetColorHighlight(AValue: TColor);
 begin
   if (rColorHighlight <> AValue) then
   begin
        rColorHighlight := AValue;
+
        if not(csLoading in ComponentState)
        then Invalidate;
   end;
@@ -427,6 +518,7 @@ begin
   if (rColorExpanded <> AValue) then
   begin
        rColorExpanded := AValue;
+
        if not(csLoading in ComponentState)
        then Invalidate;
   end;
@@ -437,6 +529,7 @@ begin
   if (rColorShadow <> AValue) then
   begin
        rColorShadow := AValue;
+
        if not(csLoading in ComponentState)
        then Invalidate;
   end;
@@ -456,12 +549,22 @@ begin
   end;
 end;
 
-procedure TBoundButton.SetLineShow(AValue: Boolean);
+procedure TBoundButton.SetStyle(AValue: TBoundButtonStyle);
 begin
-  if (rLineShow <> AValue) then
+  if (rStyle <> AValue) then
   begin
-       rLineShow := AValue;
+       rStyle:=AValue;
        if not(csLoading in ComponentState)
+       then Invalidate;
+  end;
+end;
+
+procedure TBoundButton.SetTabWidth(AValue: Integer);
+begin
+  if (rTabWidth <> AValue) then
+  begin
+       rTabWidth:=AValue;
+       if not(csLoading in ComponentState) and (rStyle = bbsTab)
        then Invalidate;
   end;
 end;
@@ -541,6 +644,7 @@ var
   xColor,
   xHColor,
   xSColor  :TColor;
+  xTabWidth,
   middleX,
   middleY,
   glyphLeft,
@@ -549,7 +653,13 @@ var
 
 
   procedure drawButton(Collapsed :Boolean; var ATop, ALeft :Integer);
+  var
+    AWidth, AHeight :Integer;
+
   begin
+    AWidth :=paintRect.Right-paintRect.Left-2;
+    AHeight :=paintRect.Bottom-paintRect.Top-2;
+
     if Collapsed
     then rGlyph.Glyph.Assign(rGlyphCollapsed)
     else rGlyph.Glyph.Assign(rGlyphExpanded);
@@ -564,7 +674,7 @@ var
                               ATop :=middleY-(rGlyph.Glyph.Height div 2);
                           end
                     else begin
-                              ALeft :=paintRect.Right-2-rGlyph.Glyph.Width;
+                              ALeft :=AWidth-rGlyph.Glyph.Width;
                               ATop :=middleY-(rGlyph.Glyph.Height div 2);
                           end;
                 end;
@@ -572,7 +682,7 @@ var
                  if (rGlyphLayout = glLeft)
                  then begin  //Really on Bottom of paintRect
                            ALeft :=middleX-(rGlyph.Glyph.Width div 2);
-                           ATop :=paintRect.Bottom-2-rGlyph.Glyph.Height;
+                           ATop :=AHeight-rGlyph.Glyph.Height;
                        end
                  else begin  //Really on Top of paintRect
                            ALeft :=middleX-(rGlyph.Glyph.Width div 2);
@@ -587,7 +697,7 @@ var
                        end
                  else begin  //Really on Bottom of paintRect
                            ALeft :=middleX-(rGlyph.Glyph.Width div 2);
-                           ATop :=paintRect.Bottom-2-rGlyph.Glyph.Height;
+                           ATop :=AHeight-rGlyph.Glyph.Height;
                        end;
              end;
     end;
@@ -596,51 +706,118 @@ var
   end;
 
   procedure drawUP;
-  begin
-       inc(paintRect.Left,1); inc(paintRect.Top,1);
-       Canvas.Brush.Color :=xSColor; //clbtnShadow;
-       Canvas.Brush.Style :=bsSolid;
-       Canvas.Pen.Color := clNone;
-       Canvas.Pen.Width := 1;
-       Canvas.Pen.Style := psClear;
-       Canvas.RoundRect(paintRect, 5,5);
+  var
+     tX, tX2, tY:Integer;
 
-       dec(paintRect.Left,1); dec(paintRect.Top,1);
-       dec(paintRect.Right,2); dec(paintRect.Bottom,2);
-       Canvas.Brush.Color :=xColor;
-       Canvas.Brush.Style :=bsSolid;
-       Canvas.Pen.Color :=xHColor; //clbtnHighlight;
-       Canvas.Pen.Width := 1;
-       Canvas.Pen.Style := psSolid;
-       Canvas.RoundRect(paintRect, 5,5);
+  begin
+    Case rStyle of
+    bbsButton: begin
+                 inc(paintRect.Left,1); inc(paintRect.Top,1);
+
+                 //is outside the Rect but in this way we don't have a hole of 1 px
+                 inc(paintRect.Right,1); inc(paintRect.Bottom,1);
+
+                 Canvas.Brush.Color :=xSColor;
+                 Canvas.Brush.Style :=bsSolid;
+                 Canvas.Pen.Color := clNone;
+                 Canvas.Pen.Width := 1;
+                 Canvas.Pen.Style := psClear;
+                 Canvas.RoundRect(paintRect, 5,5);
+
+                 dec(paintRect.Left,1); dec(paintRect.Top,1);
+                 dec(paintRect.Right,2); dec(paintRect.Bottom,2);
+                 Canvas.Brush.Color :=xColor;
+                 Canvas.Brush.Style :=bsSolid;
+                 Canvas.Pen.Color :=xHColor;
+                 Canvas.Pen.Width := 1;
+                 Canvas.Pen.Style := psSolid;
+                 Canvas.RoundRect(paintRect, 5,5);
+               end;
+    bbsTab: begin
+
+              Case TMyRollOut(Owner).FButtonPosition of
+              akTop : begin
+                        //If rTabWidth is Negative Calculate the Tab Width
+                        if (rTabWidth < 0)
+                        then xTabWidth :=(paintRect.Right-paintRect.Left)*-rTabWidth div 100
+                        else xTabWidth :=rTabWidth;
+
+                        Canvas.Pen.Width := 1;
+                        Canvas.Pen.Style := psSolid;
+                        tX :=paintRect.Left+middleX-(xTabWidth div 2);
+                        tX2 :=tX+xTabWidth;
+                        tY :=paintRect.Bottom-1;
+
+                        Canvas.Pen.Color :=xSColor;
+
+                        Canvas.MoveTo(paintRect.Left, tY);
+                        Canvas.LineTo(tX-1, tY);
+                        Canvas.MoveTo(tX2, paintRect.Top+3);
+                        Canvas.LineTo(tX2, tY-1);
+                        Canvas.LineTo(paintRect.Right, tY-1);
+
+                        Canvas.Brush.Color :=xColor;
+                        Canvas.Brush.Style :=bsSolid;
+                        Canvas.Pen.Color :=xHColor;
+                        Canvas.RoundRect(tX, paintRect.Top, tX2, paintRect.Bottom, 5,5);
+                        dec(tY);
+                        Canvas.MoveTo(paintRect.Left, tY);
+                        Canvas.LineTo(tX, tY);
+                        Canvas.MoveTo(tX2, tY);
+                        Canvas.LineTo(tX2+1, tY+1);
+                        Canvas.LineTo(paintRect.Right, tY+1);
+
+                        Canvas.Pen.Color :=xColor;
+                        Canvas.MoveTo(tX, tY);
+                        Canvas.LineTo(tX2, tY);
+                        Canvas.MoveTo(tX-1, tY+1);
+                        Canvas.LineTo(tX2+1, tY+1);
+
+                        paintRect.Left :=tX;
+                        paintRect.Right:=tX2;
+                      end;
+              end;
+
+              //else xTabWidth :=(paintRect.Bottom-paintRect.Top)*rTabWidth div 100;
+
+            end;
+    end;
   end;
 
   procedure drawFLAT;
   begin
-       Canvas.Brush.Color := xColor;
-       Canvas.Brush.Style :=bsSolid;
-       Canvas.Pen.Color := clNone;
-       Canvas.Pen.Width := 1;
-       Canvas.Pen.Style := psClear;
-       Canvas.RoundRect(paintRect, 5,5);
+    Case rStyle of
+    bbsButton: begin
+                 Canvas.Brush.Color := xColor;
+                 Canvas.Brush.Style :=bsSolid;
+                 Canvas.Pen.Color := clNone;
+                 Canvas.Pen.Width := 1;
+                 Canvas.Pen.Style := psClear;
+                 Canvas.RoundRect(paintRect, 5,5);
+               end;
+    end;
   end;
 
   procedure drawDOWN;
   begin
-       Canvas.Brush.Color :=xSColor; //clbtnShadow;
-       Canvas.Brush.Style :=bsSolid;
-       Canvas.Pen.Color := clNone;
-       Canvas.Pen.Width := 1;
-       Canvas.Pen.Style := psClear;
-       Canvas.RoundRect(paintRect, 5,5);
+    Case rStyle of
+    bbsButton: begin
+                 Canvas.Brush.Color :=xSColor; //clbtnShadow;
+                 Canvas.Brush.Style :=bsSolid;
+                 Canvas.Pen.Color := clNone;
+                 Canvas.Pen.Width := 1;
+                 Canvas.Pen.Style := psClear;
+                 Canvas.RoundRect(paintRect, 5,5);
 
-       inc(paintRect.Left,1); inc(paintRect.Top,1);
-       Canvas.Brush.Color :=xColor;
-       Canvas.Brush.Style :=bsSolid;
-       Canvas.Pen.Color :=xHColor; //clbtnHighlight;
-       Canvas.Pen.Width := 1;
-       Canvas.Pen.Style := psSolid;
-       Canvas.RoundRect(paintRect, 5,5);
+                 inc(paintRect.Left,1); inc(paintRect.Top,1);
+                 Canvas.Brush.Color :=xColor;
+                 Canvas.Brush.Style :=bsSolid;
+                 Canvas.Pen.Color :=xHColor; //clbtnHighlight;
+                 Canvas.Pen.Width := 1;
+                 Canvas.Pen.Style := psSolid;
+                 Canvas.RoundRect(paintRect, 5,5);
+               end;
+    end;
   end;
 
   procedure CalcCuttedCaption(var ACaption :String; var txtW :Integer; MaxWidth :Integer);
@@ -672,8 +849,8 @@ var
 
   begin
     txtH :=Canvas.TextHeight(xCaption);
-    AWidth :=paintRect.Right-2;
-    AHeight :=paintRect.Bottom-2;
+    AWidth :=paintRect.Right-paintRect.Left-2;
+    AHeight :=paintRect.Bottom-paintRect.Top-2;
 
     Case TMyRollOut(Owner).FButtonPosition of
     akTop,
@@ -702,12 +879,12 @@ var
                     *)
                     Case rTextLayout of
                     tlLeft :begin
-                                  ALeft :=4;
+                                  ALeft :=paintRect.Left+4;
                                   if (rGlyphLayout = glLeft)
                                   then inc(ALeft, rGlyph.Glyph.Width+2);
                              end;
                     tlRight:begin
-                                 ALeft :=AWidth-txtW;
+                                 ALeft :=paintRect.Left+AWidth-txtW;
                                  if (rGlyphLayout = glLeft)
                                  then inc(ALeft, rGlyph.Glyph.Width+2);
                              end;
@@ -810,7 +987,14 @@ var
   end;
 
 begin
-  paintRect :=ClientRect;
+  paintRect :=GetClientRect;
+
+  {$ifdef DEBUG_PAINT}
+    Canvas.Brush.Color:=clYellow;
+    Canvas.Brush.Style:=bsSolid;
+    Canvas.FillRect(paintRect);
+  {$endif}
+
   middleY :=paintRect.Top+((paintRect.Bottom-paintRect.Top) div 2);
   middleX :=paintRect.Left+((paintRect.Right-paintRect.Left) div 2);
 
@@ -897,8 +1081,9 @@ begin
   rColorShadow :=clDefault;
   rGlyphLayout :=glNone;
   rTextLayout :=tlLeft;
-  rLineShow :=False;
   Flat :=False;
+  rStyle :=bbsButton;
+  rTabWidth :=-50;
 
   //Why FGlyph is Private in ancestor?????
   rGlyph := TButtonGlyph.Create;
@@ -1509,18 +1694,26 @@ end;
 procedure TMyRollOut.setCollapsed(Value: boolean);
 begin
 {$IFDEF DebugInfo}
-  writeln('TMyRollOut.setCollapsed');
-  writeln(BoolToStr(Collapsed, True));
+  debugln('TMyRollOut.setCollapsed '+BoolToStr(Collapsed, True));
 {$ENDIF}
 
   if FCollapsed = Value then
     exit;
+
   FCollapsed := Value;
 
-  if FCollapsed then
-    DoCollapse
-  else
-    DoExpand;
+  if not(csLoading in ComponentState)
+  then if Value
+       then DoCollapse
+       else DoExpand;
+end;
+
+procedure TMyRollOut.SetRelevantSize(comp: TControl; AKind: TAnchorKind; ASize: Integer);
+begin
+  case AKind of
+    akTop, akBottom: comp.Height :=ASize;
+    akLeft, akRight: comp.Width :=ASize;
+  end;
 end;
 
 function TMyRollOut.RelevantSize(comp: TControl; akind: TAnchorKind): integer;
@@ -1628,28 +1821,14 @@ end;
 
 procedure TMyRollOut.EndTimerCollapse;
 begin
-  //When Starting as Collapsed don't Set Bevels during Loading (Designing??)
-  if (ComponentState * [csLoading, csDesigning] = []) then
-  begin
-       inherited BevelOuter := bvNone;
-       inherited BevelInner := bvNone;
-  end;
-
   if assigned(OnCollapse) then
     OnCollapse(self);
-
 
   UpdateAll;
 end;
 
 procedure TMyRollOut.EndTimerExpand;
 begin
-  if (ComponentState * [csLoading, csDesigning] = []) then
-  begin
-       inherited BevelOuter := StoredBevelOuter;
-       inherited BevelInner := StoredBevelInner;
-  end;
-
   if assigned(OnExpand) then
     OnExpand(self);
 
@@ -1670,8 +1849,8 @@ end;
 procedure TMyRollOut.setExpandedSize(Value: integer);
 begin
   {$IFDEF DebugInfo}
-  writeln('TMyRollOut.setExpandedSize');
-  writeln(IntToStr(Value));
+  debugln('TMyRollOut.setExpandedSize');
+  debugln(IntToStr(Value));
   {$ENDIF}
 
   if (FExpandedSize = Value) then
@@ -1679,8 +1858,8 @@ begin
 
   FExpandedSize := Value;
 
-  if not Collapsed then
-    Animate(FExpandedSize);
+  if not(csLoading in ComponentState) and not(FCollapsed)
+  then Animate(FExpandedSize);
 end;
 
 function TMyRollOut.GetEnabled: Boolean;
@@ -1690,56 +1869,37 @@ begin
      then FButton.Enabled :=Result;
 end;
 
-procedure TMyRollOut.SetBevelInner(AValue: TPanelBevel);
+procedure TMyRollOut.SetBevelColorHighlight(AValue: TColor);
 begin
-     if (csDesigning in ComponentState) or (csLoading in ComponentState)
-     then inherited BevelInner :=AValue
-     else begin
-               if (AValue <> StoredBevelInner) then
-               begin
-                    StoredBevelInner :=AValue;
-                    if not(FCollapsed)
-                    then inherited BevelInner :=AValue;
-                    Update;
-               end;
-           end;
+  if (rBevelColorHighlight <> AValue) then
+  begin
+    rBevelColorHighlight := AValue;
+
+    if not(csLoading in ComponentState)
+    then Invalidate;
+  end;
 end;
 
-function TMyRollOut.GetBevelOuter: TPanelBevel;
+procedure TMyRollOut.SetBevelColorShadow(AValue: TColor);
 begin
-     if (csDesigning in ComponentState) or (csLoading in ComponentState)
-     then Result :=inherited BevelOuter
-     else begin
-               if FCollapsed
-               then Result :=bvNone
-               else Result :=StoredBevelOuter;
-           end;
+  if (rBevelColorShadow <> AValue) then
+  begin
+    rBevelColorShadow := AValue;
+
+    if not(csLoading in ComponentState)
+    then Invalidate;
+  end;
 end;
 
-function TMyRollOut.GetBevelInner: TPanelBevel;
+procedure TMyRollOut.SetBevelRounded(AValue: Boolean);
 begin
-     if (csDesigning in ComponentState) or (csLoading in ComponentState)
-     then Result :=inherited BevelInner
-     else begin
-               if FCollapsed
-               then Result :=bvNone
-               else Result :=StoredBevelInner;
-           end;
-end;
+  if (rBevelRounded <> AValue) then
+  begin
+    rBevelRounded := AValue;
 
-procedure TMyRollOut.SetBevelOuter(AValue: TPanelBevel);
-begin
-     if (csDesigning in ComponentState) or (csLoading in ComponentState)
-     then inherited BevelOuter :=AValue
-     else begin
-               if (AValue <> StoredBevelOuter) then
-               begin
-                    StoredBevelOuter :=AValue;
-                    if not(FCollapsed)
-                    then inherited BevelOuter :=AValue;
-                    Update;
-               end;
-           end;
+    if not(csLoading in ComponentState)
+    then Invalidate;
+   end;
 end;
 
 procedure TMyRollOut.SetEnabled(AValue: Boolean);
@@ -1757,9 +1917,6 @@ begin
 
   PositionButton;
 end;
-
-
-
 
 procedure TMyRollOut.SetBounds(ALeft, ATop, AWidth, AHeight: integer);
 begin
@@ -1788,6 +1945,8 @@ begin
 
   Collapsed := wascollpased;
   Animated  := wasanimated;
+
+  Invalidate;
 end;
 
 
@@ -1832,9 +1991,6 @@ begin
   FAnimationSpeed := Value;
 end;
 
-
-
-
 procedure TMyRollOut.PositionButton;
 
   function ButtonRect: TRect;
@@ -1855,8 +2011,8 @@ procedure TMyRollOut.PositionButton;
 var
   new: TRect;
 begin
-  if StopCircleActions or not Assigned(FButton) then
-    exit;
+  if StopCircleActions or not(Assigned(FButton)) or (csLoading in ComponentState)
+  then exit;
   StopCircleActions := True;
 
 
@@ -1876,9 +2032,6 @@ begin
   StopCircleActions := False;
 end;
 
-
-
-
 procedure TMyRollOut.ButtonClick(Sender: TObject);
 begin
   if Assigned(FEPManagesCollapsing) then
@@ -1890,24 +2043,21 @@ begin
     OnButtonClick(self);
 end;
 
-
-
-
 procedure TMyRollOut.Animate(aTargetSize: integer);
 var
   storAnimated: boolean;
 begin
+  if (FAnimating) then
+  begin
   //  FinishLastAnimationFast
   storAnimated := Animated;
   Animated     := False;
   TimerAnimateSize(self);
   Animated := storAnimated;
-
+  end;
 
   // Now do animation
   TargetAnimationSize := aTargetSize;
-
-
 
   if (ComponentState * [csLoading, csDesigning] = []) and Animated then
     begin
@@ -1922,11 +2072,26 @@ begin
     end;
 end;
 
-
-
-
 procedure TMyRollOut.DoCollapse;
+var
+   i :Integer;
+   curControl: TControl;
+
 begin
+  (* may work but is irrilevant because TSpeedButton is always on Bottom ????why?
+  i :=0;
+  while (i < ControlCount) do
+  begin
+    curControl :=Controls[i];
+
+    if not(curControl is TBoundButton) then
+    begin
+      Self.SetChildZPosition(curControl, 0);
+     end;
+
+    inc(i)
+  end;*)
+
   if assigned(OnPreCollapse) then
     OnPreCollapse(self);
 
@@ -1938,13 +2103,11 @@ begin
   Animate(FButtonSize);
 
 {$IFDEF DebugInfo}
-  writeln('TMyRollOut.DoCollapse');
-  writeln('FButtonSize ' + IntToStr(FButtonSize));
+  debugln('TMyRollOut.DoCollapse');
+  debugln('FButtonSize ' + IntToStr(FButtonSize));
 {$ENDIF}
 
 end;
-
-
 
 procedure TMyRollOut.DoExpand;
 begin
@@ -1961,12 +2124,11 @@ begin
   Animate(FExpandedSize);
 
 {$IFDEF DebugInfo}
-  writeln('TMyRollOut.DoExpand');
-  writeln('FExpandedSize ' + IntToStr(FExpandedSize));
+  debugln('TMyRollOut.DoExpand');
+  debugln('FExpandedSize ' + IntToStr(FExpandedSize));
 {$ENDIF}
 
 end;
-
 
 procedure TMyRollOut.AdjustClientRect(var ARect: TRect);
 begin
@@ -1988,22 +2150,83 @@ end;
 procedure TMyRollOut.Loaded;
 begin
      inherited Loaded;
-     StoredBevelOuter := inherited BevelOuter;
-     StoredBevelInner := inherited BevelInner;
-
-     //Started as Collapsed
-     if (FCollapsed) and not(csDesigning in ComponentState)
-     then begin
-               inherited BevelOuter :=bvNone;
-               inherited BevelInner :=bvNone;
-           end;
-
-     //if not(csDesigning in ComponentState)
-     //then
-     FButton.BuildGlyphs; //Button Loaded is called Before Self.Loaded and cannot Build Glyphs
 end;
 
+procedure TMyRollOut.CreateWnd;
+begin
+  inherited CreateWnd;
 
+  FButton.BuildGlyphs; //Button Loaded is called Before Self.Loaded and cannot Build Glyphs
+
+(*  if (FCollapsed)
+  then SetRelevantSize(Self, FButtonPosition, FButtonSize)
+  else SetRelevantSize(Self, FButtonPosition, FExpandedSize); *)
+
+  PositionButton;
+end;
+
+procedure TMyRollOut.Paint;
+var
+  ARect: TRect;
+  TS: TTextStyle;
+
+begin
+  if not(FCollapsed) then
+  begin
+    ARect := GetClientRect;
+    Case FButtonPosition of
+    akTop: inc(ARect.Top, FButtonSize);
+    akBottom: dec(ARect.Bottom, FButtonSize);
+    akLeft: inc(ARect.Left, FButtonSize);
+    akRight: dec(ARect.Right, FButtonSize);
+    end;
+
+    {$ifdef DEBUG_PAINT}
+      Canvas.Brush.Color:=clRed;
+      Canvas.Brush.Style:=bsSolid;
+      Canvas.FillRect(ARect);
+    {$endif}
+
+    // if BevelOuter is set then draw a frame with BevelWidth
+    if (BevelOuter <> bvNone)
+    then if rBevelRounded
+         then Frame3d_Rounded(Self.Canvas, ARect, BevelWidth, 5, 5, BevelOuter,
+                              rBevelColorShadow, rBevelColorHighlight, Color)
+         else Self.Canvas.Frame3d(ARect, BevelWidth, BevelOuter);
+
+    InflateRect(ARect, -BorderWidth, -BorderWidth);
+
+    // if BevelInner is set then skip the BorderWidth and draw a frame with BevelWidth
+    if (BevelInner <> bvNone)
+    then if rBevelRounded
+         then Frame3d_Rounded(Self.Canvas, ARect, BevelWidth, 5, 5, BevelInner,
+                              rBevelColorShadow, rBevelColorHighlight, Color)
+         else Self.Canvas.Frame3d(ARect, BevelWidth, BevelInner);
+
+    if (Self.Caption <> '') then
+    begin
+      TS := Canvas.TextStyle;
+      TS.Alignment := BidiFlipAlignment(Self.Alignment, UseRightToLeftAlignment);
+      if (BiDiMode <> bdLeftToRight)
+      then TS.RightToLeft:= True;
+      TS.Layout:= Graphics.tlCenter;
+      TS.Opaque:= false;
+      TS.Clipping:= false;
+      TS.SystemFont:=Canvas.Font.IsDefault;
+      if not(Enabled) then
+      begin
+        Canvas.Font.Color := clBtnHighlight;
+        OffsetRect(ARect, 1, 1);
+        Self.Canvas.TextRect(ARect, ARect.Left, ARect.Top, Self.Caption, TS);
+        Self.Canvas.Font.Color := clBtnShadow;
+        OffsetRect(ARect, -1, -1);
+       end
+      else Self.Canvas.Font.Color := Font.Color;
+
+      Self.Canvas.TextRect(ARect,ARect.Left,ARect.Top, Self.Caption, TS);
+    end;
+  end;
+end;
 
 constructor TMyRollOut.Create(TheOwner: TComponent);
 begin
@@ -2019,13 +2242,14 @@ begin
   FButtonPosition := akTop;
   FCollapsedButtonColor := clSkyBlue;
   FExpandedButtonColor := RGBToColor(23, 136, 248);
+  rBevelColorHighlight:=clBtnHighlight;
+  rBevelColorShadow:=clBtnShadow;
+  rBevelRounded:=True;
   FExpandedSize := 200;
   Height  := FExpandedSize;
   Width   := 200;
   FAnimationSpeed := 20;
   Caption := '';
-  StoredBevelOuter :=bvRaised;
-  StoredBevelInner :=bvNone;
 
   Timer      := TTimer.Create(self);
   Timer.Enabled := False;
@@ -2043,6 +2267,8 @@ begin
     end;
 
   StopCircleActions := False;
+
+  //may be only in CreateWnd but the button is greater by some pixels
   PositionButton;
 end;
 
