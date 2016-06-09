@@ -277,4 +277,33 @@ object Form1: TForm1
     Caption = 'Tab Width (Negative is %)'
     ParentColor = False
   end
+  object cbRounded: TCheckBox
+    Left = 280
+    Height = 21
+    Top = 504
+    Width = 132
+    Caption = 'Rounded Borders'
+    Checked = True
+    OnClick = cbRoundedClick
+    State = cbChecked
+    TabOrder = 11
+  end
+  object cbFlat: TCheckBox
+    Left = 424
+    Height = 21
+    Top = 504
+    Width = 44
+    Caption = 'Flat'
+    OnClick = cbFlatClick
+    TabOrder = 12
+  end
+  object cbNoBorders: TCheckBox
+    Left = 280
+    Height = 21
+    Top = 528
+    Width = 93
+    Caption = 'No Borders'
+    OnClick = cbNoBordersClick
+    TabOrder = 13
+  end
 end

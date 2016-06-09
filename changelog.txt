@@ -2,6 +2,9 @@
 //  ExpandPanels   Version 2.2
 //////////////////////////////
 
+09-06-2016 MaxM :
+     Completed Painting of Button.Style as bbsTab
+
 05-2016 MaxM :
      Added Owner Draw of Panel so we can Draw Rounded Borders and don't draw Borders when Collapsed  
      Added Style property on Button (bbsButton, bbsTab) (bbsTab paint is incomplete do not use)

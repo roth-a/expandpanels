@@ -6,13 +6,16 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
-  ExtCtrls, Calendar, StdCtrls, Buttons, Spin, ExpandPanels, StrUtils;
+  ExtCtrls, StdCtrls, Buttons, Spin, ExpandPanels, StrUtils;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
+    cbNoBorders: TCheckBox;
+    cbRounded: TCheckBox;
+    cbFlat: TCheckBox;
     Edit1: TEdit;
     Edit2: TEdit;
     GroupBox1: TGroupBox;
@@ -26,6 +29,9 @@ type
     RStyle: TRadioGroup;
     SpeedButton1: TSpeedButton;
     edTabWidth: TSpinEdit;
+    procedure cbFlatClick(Sender: TObject);
+    procedure cbNoBordersClick(Sender: TObject);
+    procedure cbRoundedClick(Sender: TObject);
     procedure Edit1Change(Sender: TObject);
     procedure edTabWidthChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -59,6 +65,21 @@ end;
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
    p1.Button.Caption := Edit1.Text;
+end;
+
+procedure TForm1.cbRoundedClick(Sender: TObject);
+begin
+  p1.BevelRounded:=cbRounded.Checked;
+end;
+
+procedure TForm1.cbFlatClick(Sender: TObject);
+begin
+  p1.Button.Flat:=cbFlat.Checked;
+end;
+
+procedure TForm1.cbNoBordersClick(Sender: TObject);
+begin
+  p1.BevelOuter:=bvNone;
 end;
 
 procedure TForm1.edTabWidthChange(Sender: TObject);

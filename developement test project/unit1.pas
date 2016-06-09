@@ -15,6 +15,9 @@ type
   TForm1 = class(TForm)
     Button1:    TButton;
     Calendar1:  TCalendar;
+    cbFlat: TCheckBox;
+    cbRounded: TCheckBox;
+    cbNoBorders: TCheckBox;
     Edit1: TEdit;
     edTabWidth: TSpinEdit;
     GroupBox1: TGroupBox;
@@ -28,6 +31,9 @@ type
     RButt:      TRadioGroup;
     RStyle: TRadioGroup;
     SpeedButton1: TSpeedButton;
+    procedure cbFlatClick(Sender: TObject);
+    procedure cbNoBordersClick(Sender: TObject);
+    procedure cbRoundedClick(Sender: TObject);
     procedure Edit1Change(Sender: TObject);
     procedure edTabWidthChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -93,9 +99,32 @@ begin
    p3.Button.Caption := Edit1.Text;
 end;
 
+procedure TForm1.cbRoundedClick(Sender: TObject);
+begin
+  p1.BevelRounded:=cbRounded.Checked;
+  p2.BevelRounded:=cbRounded.Checked;
+  p3.BevelRounded:=cbRounded.Checked;
+end;
+
+procedure TForm1.cbFlatClick(Sender: TObject);
+begin
+  p1.Button.Flat:=cbFlat.Checked;
+  p2.Button.Flat:=cbFlat.Checked;
+  p3.Button.Flat:=cbFlat.Checked;
+end;
+
+procedure TForm1.cbNoBordersClick(Sender: TObject);
+begin
+  p1.BevelOuter:=bvNone;
+  p2.BevelOuter:=bvNone;
+  p3.BevelOuter:=bvNone;
+end;
+
 procedure TForm1.edTabWidthChange(Sender: TObject);
 begin
   p1.Button.TabWidth:=edTabWidth.Value;
+  p2.Button.TabWidth:=edTabWidth.Value;
+  p3.Button.TabWidth:=edTabWidth.Value;
 end;
 
 

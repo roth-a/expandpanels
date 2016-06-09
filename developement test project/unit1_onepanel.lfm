@@ -1,19 +1,19 @@
 object Form1: TForm1
-  Left = 368
-  Height = 489
-  Top = 168
-  Width = 432
+  Left = 362
+  Height = 634
+  Top = 75
+  Width = 415
   ActiveControl = RColl.RadioButton0
   Caption = 'Form1'
-  ClientHeight = 489
-  ClientWidth = 432
+  ClientHeight = 634
+  ClientWidth = 415
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   LCLVersion = '1.7'
   object RColl: TRadioGroup
     Left = 17
     Height = 107
-    Top = 216
+    Top = 323
     Width = 169
     AutoFill = True
     Caption = 'Collapse To'
@@ -41,7 +41,7 @@ object Form1: TForm1
   object RButt: TRadioGroup
     Left = 17
     Height = 86
-    Top = 320
+    Top = 427
     Width = 169
     AutoFill = True
     Caption = 'Button Position'
@@ -69,7 +69,7 @@ object Form1: TForm1
   object RGlyph: TRadioGroup
     Left = 17
     Height = 80
-    Top = 402
+    Top = 509
     Width = 169
     AutoFill = True
     Caption = 'Glyph Position'
@@ -96,7 +96,7 @@ object Form1: TForm1
   object GroupBox1: TGroupBox
     Left = 193
     Height = 152
-    Top = 216
+    Top = 323
     Width = 169
     Caption = 'Caption'
     ClientHeight = 133
@@ -151,7 +151,7 @@ object Form1: TForm1
   object RStyle: TRadioGroup
     Left = 193
     Height = 78
-    Top = 360
+    Top = 467
     Width = 169
     AutoFill = True
     Caption = 'Style'
@@ -175,16 +175,16 @@ object Form1: TForm1
   end
   object p1: TMyRollOut
     Left = 8
-    Height = 27
+    Height = 312
     Top = 8
     Width = 400
     Caption = 'p1'
-    ClientHeight = 27
+    ClientHeight = 312
     ClientWidth = 400
     Enabled = True
     TabOrder = 5
     CollapseKind = akTop
-    ExpandedSize = 200
+    ExpandedSize = 312
     ButtonPosition = akTop
     ButtonSize = 27
     Button.Left = 0
@@ -196,7 +196,6 @@ object Form1: TForm1
     Button.ColorExpanded = 16287767
     Button.GlyphLayout = glRight
     AnimationSpeed = 20
-    Collapsed = True
     object Edit2: TEdit
       Left = 47
       Height = 24
@@ -217,7 +216,7 @@ object Form1: TForm1
   object edTabWidth: TSpinEdit
     Left = 225
     Height = 24
-    Top = 458
+    Top = 565
     Width = 103
     MaxValue = 380
     MinValue = -90
@@ -228,9 +227,38 @@ object Form1: TForm1
   object Label1: TLabel
     Left = 225
     Height = 18
-    Top = 435
+    Top = 542
     Width = 153
     Caption = 'Tab Width (Negative is %)'
     ParentColor = False
+  end
+  object cbRounded: TCheckBox
+    Left = 17
+    Height = 21
+    Top = 589
+    Width = 132
+    Caption = 'Rounded Borders'
+    Checked = True
+    OnClick = cbRoundedClick
+    State = cbChecked
+    TabOrder = 7
+  end
+  object cbFlat: TCheckBox
+    Left = 160
+    Height = 21
+    Top = 589
+    Width = 44
+    Caption = 'Flat'
+    OnClick = cbFlatClick
+    TabOrder = 8
+  end
+  object cbNoBorders: TCheckBox
+    Left = 17
+    Height = 21
+    Top = 613
+    Width = 93
+    Caption = 'No Borders'
+    OnClick = cbNoBordersClick
+    TabOrder = 9
   end
 end

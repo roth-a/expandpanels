@@ -96,7 +96,6 @@ type
 
   (*  property AllowAllUp;
     property Down;
-    property Flat;
     property Glyph;
     property GroupIndex;
     property Height;            //Don't Decrease visibility :-O
@@ -126,10 +125,10 @@ type
     property ColorHighlight: TColor read rColorHighlight write SetColorHighlight default clDefault;
     property ColorShadow: TColor read rColorShadow write SetColorShadow default clDefault;
     property Font;
+    property Flat;
     property GlyphExpanded: TBitmap read rUserGlyphExpanded write SetGlyphExpanded;
     property GlyphCollapsed: TBitmap read rUserGlyphCollapsed write SetGlyphCollapsed;
 
-    //Creating at RUNTIME Set in the Last Line of your Code else Glyphs is not Loaded correctly
     property GlyphLayout: TGlyphLayout read rGlyphLayout write SetGlyphLayout default glNone;
 
     property ShowAccelChar;
@@ -462,8 +461,6 @@ var
      Canvas.Pen.Width := FrameWidth;
      Canvas.Pen.Style := psClear;
      Canvas.RoundRect(DRect, RX,RY);
-
-     InflateRect(ARect, -FrameWidth, -FrameWidth); //No Shadow
    end;
 
    procedure drawDOWN;
@@ -496,7 +493,11 @@ var
 begin
      DRect :=ARect;
      Case Style of
-     bvNone, bvSpace: drawFLAT;
+     bvNone: drawFLAT;
+     bvSpace: begin
+                drawFLAT;
+                InflateRect(ARect, -FrameWidth, -FrameWidth);
+              end;
      bvRaised: drawUP;
      bvLowered: drawDOWN;
      end;
@@ -640,19 +641,22 @@ end;
 
 procedure TBoundButton.Paint;
 var
-  paintRect :TRect;
+  paintRect, fRect :TRect;
   xColor,
   xHColor,
   xSColor  :TColor;
   xTabWidth,
   middleX,
   middleY,
+  tY, tX,
   glyphLeft,
   glyphTop :Integer;
   xCaption :String;
+  FButtonPosition :TAnchorKind;
+  FCollapsed, Rounded :Boolean;
 
 
-  procedure drawButton(Collapsed :Boolean; var ATop, ALeft :Integer);
+  procedure drawGlyph(var ATop, ALeft :Integer);
   var
     AWidth, AHeight :Integer;
 
@@ -660,12 +664,12 @@ var
     AWidth :=paintRect.Right-paintRect.Left-2;
     AHeight :=paintRect.Bottom-paintRect.Top-2;
 
-    if Collapsed
+    if FCollapsed
     then rGlyph.Glyph.Assign(rGlyphCollapsed)
     else rGlyph.Glyph.Assign(rGlyphExpanded);
 
     //We must Calculate the Real Position of the Glyph
-    Case TMyRollOut(Owner).FButtonPosition of
+    Case FButtonPosition of
     akTop,
     akBottom : begin
                     if (rGlyphLayout = glLeft)
@@ -705,118 +709,190 @@ var
     rGlyph.Draw(Canvas, paintRect, point(ALeft, ATop), FState, true, 0);
   end;
 
-  procedure drawUP;
-  var
-     tX, tX2, tY:Integer;
-
+  procedure drawBtn(const ABorderStyle : TGraphicsBevelCut);
   begin
     Case rStyle of
-    bbsButton: begin
-                 inc(paintRect.Left,1); inc(paintRect.Top,1);
-
-                 //is outside the Rect but in this way we don't have a hole of 1 px
-                 inc(paintRect.Right,1); inc(paintRect.Bottom,1);
-
-                 Canvas.Brush.Color :=xSColor;
-                 Canvas.Brush.Style :=bsSolid;
-                 Canvas.Pen.Color := clNone;
-                 Canvas.Pen.Width := 1;
-                 Canvas.Pen.Style := psClear;
-                 Canvas.RoundRect(paintRect, 5,5);
-
-                 dec(paintRect.Left,1); dec(paintRect.Top,1);
-                 dec(paintRect.Right,2); dec(paintRect.Bottom,2);
-                 Canvas.Brush.Color :=xColor;
-                 Canvas.Brush.Style :=bsSolid;
-                 Canvas.Pen.Color :=xHColor;
-                 Canvas.Pen.Width := 1;
-                 Canvas.Pen.Style := psSolid;
-                 Canvas.RoundRect(paintRect, 5,5);
-               end;
+    bbsButton: Frame3d_Rounded(Canvas, paintRect, 1, 5, 5, ABorderStyle, xSColor, xHColor, xColor);
     bbsTab: begin
+              fRect :=paintRect;
 
-              Case TMyRollOut(Owner).FButtonPosition of
+              Case FButtonPosition of
               akTop : begin
                         //If rTabWidth is Negative Calculate the Tab Width
                         if (rTabWidth < 0)
-                        then xTabWidth :=(paintRect.Right-paintRect.Left)*-rTabWidth div 100
+                        then xTabWidth :=(fRect.Right-fRect.Left)*-rTabWidth div 100
                         else xTabWidth :=rTabWidth;
 
-                        Canvas.Pen.Width := 1;
-                        Canvas.Pen.Style := psSolid;
-                        tX :=paintRect.Left+middleX-(xTabWidth div 2);
-                        tX2 :=tX+xTabWidth;
-                        tY :=paintRect.Bottom-1;
+                        inc(paintRect.Left, middleX-(xTabWidth div 2));
+                        paintRect.Right:=paintRect.Left+xTabWidth;
+                        Frame3d_Rounded(Canvas, paintRect, 1, 5, 5, ABorderStyle, xSColor, xHColor, xColor);
 
-                        Canvas.Pen.Color :=xSColor;
-
-                        Canvas.MoveTo(paintRect.Left, tY);
-                        Canvas.LineTo(tX-1, tY);
-                        Canvas.MoveTo(tX2, paintRect.Top+3);
-                        Canvas.LineTo(tX2, tY-1);
-                        Canvas.LineTo(paintRect.Right, tY-1);
-
-                        Canvas.Brush.Color :=xColor;
-                        Canvas.Brush.Style :=bsSolid;
+                        tY :=fRect.Bottom-2;
+                        Canvas.Pen.Style:=psSolid;
+                        Canvas.Pen.Width:=1;
                         Canvas.Pen.Color :=xHColor;
-                        Canvas.RoundRect(tX, paintRect.Top, tX2, paintRect.Bottom, 5,5);
-                        dec(tY);
-                        Canvas.MoveTo(paintRect.Left, tY);
-                        Canvas.LineTo(tX, tY);
-                        Canvas.MoveTo(tX2, tY);
-                        Canvas.LineTo(tX2+1, tY+1);
-                        Canvas.LineTo(paintRect.Right, tY+1);
+                        if Rounded
+                        then Canvas.MoveTo(2, tY)
+                        else Canvas.MoveTo(0, tY);
+                        Canvas.LineTo(paintRect.Left-3, tY);
+                        Canvas.LineTo(paintRect.Left, tY-3);
+
+                        if Rounded
+                        then Canvas.MoveTo(fRect.Right-4, tY)
+                        else Canvas.MoveTo(fRect.Right, tY);
+                        Canvas.LineTo(paintRect.Right+2, tY);
+                        Canvas.LineTo(paintRect.Right-1, tY-3);
 
                         Canvas.Pen.Color :=xColor;
-                        Canvas.MoveTo(tX, tY);
-                        Canvas.LineTo(tX2, tY);
-                        Canvas.MoveTo(tX-1, tY+1);
-                        Canvas.LineTo(tX2+1, tY+1);
+                        Canvas.MoveTo(paintRect.Left-2, tY);
+                        Canvas.LineTo(paintRect.Right+2, tY);
+                        dec(tY);
+                        Canvas.MoveTo(paintRect.Left-1, tY);
+                        Canvas.LineTo(paintRect.Right+1, tY);
 
-                        paintRect.Left :=tX;
-                        paintRect.Right:=tX2;
+                        tY :=fRect.Bottom-1;
+                        if FCollapsed then Canvas.Pen.Color :=xSColor;
+                        if Rounded
+                        then begin
+                               Canvas.MoveTo(fRect.Left+2, tY);
+                               Canvas.LineTo(fRect.Right-3, tY);
+                              end
+                        else begin
+                               Canvas.MoveTo(fRect.Left, tY);
+                               Canvas.LineTo(fRect.Right, tY);
+                             end;
+                      end;
+              akBottom : begin
+                        if (rTabWidth < 0)
+                        then xTabWidth :=(fRect.Right-fRect.Left)*-rTabWidth div 100
+                        else xTabWidth :=rTabWidth;
+
+                        inc(paintRect.Left, middleX-(xTabWidth div 2));
+                        paintRect.Right:=paintRect.Left+xTabWidth;
+                        dec(paintRect.Top);
+                        Frame3d_Rounded(Canvas, paintRect, 1, 5, 5, ABorderStyle, xSColor, xHColor, xColor);
+
+                        Canvas.Pen.Style:=psSolid;
+                        Canvas.Pen.Width:=1;
+                        Canvas.Pen.Color :=xHColor;
+                        if Rounded
+                        then Canvas.MoveTo(2, 1)
+                        else Canvas.MoveTo(0, 1);
+                        Canvas.LineTo(paintRect.Left-3, 1);
+                        Canvas.LineTo(paintRect.Left, 4);
+
+                        if Rounded
+                        then Canvas.MoveTo(fRect.Right-4, 1)
+                        else Canvas.MoveTo(fRect.Right, 1);
+                        Canvas.LineTo(paintRect.Right+2, 1);
+                        Canvas.LineTo(paintRect.Right-1, 4);
+
+                        Canvas.Pen.Color :=xColor;
+                        Canvas.MoveTo(paintRect.Left-2, 1);
+                        Canvas.LineTo(paintRect.Right+2, 1);
+                        Canvas.MoveTo(paintRect.Left-1, 2);
+                        Canvas.LineTo(paintRect.Right+1, 2);
+
+                        if FCollapsed then Canvas.Pen.Color :=xSColor;
+                        if Rounded
+                        then begin
+                               Canvas.MoveTo(fRect.Left+2, 0);
+                               Canvas.LineTo(fRect.Right-3, 0);
+                              end
+                        else begin
+                               Canvas.MoveTo(fRect.Left, 0);
+                               Canvas.LineTo(fRect.Right, 0);
+                             end;
+                      end;
+              akLeft : begin
+                        if (rTabWidth < 0)
+                        then xTabWidth :=(fRect.Bottom-fRect.Top)*-rTabWidth div 100
+                        else xTabWidth :=rTabWidth;
+
+                        inc(paintRect.Top, middleY-(xTabWidth div 2));
+                        paintRect.Bottom:=paintRect.Top+xTabWidth;
+                        Frame3d_Rounded(Canvas, paintRect, 1, 5, 5, ABorderStyle, xSColor, xHColor, xColor);
+
+                        tX :=fRect.Right-2;
+                        Canvas.Pen.Style:=psSolid;
+                        Canvas.Pen.Width:=1;
+                        Canvas.Pen.Color :=xHColor;
+
+                        if Rounded
+                        then Canvas.MoveTo(tX, 2)
+                        else Canvas.MoveTo(tX, 0);
+                        Canvas.LineTo(tX, paintRect.Top-3);
+                        Canvas.LineTo(tX-3, paintRect.Top);
+
+                        if Rounded
+                        then Canvas.MoveTo(tX, fRect.Bottom-4)
+                        else Canvas.MoveTo(tX, fRect.Bottom);
+                        Canvas.LineTo(tX, paintRect.Bottom+2);
+                        Canvas.LineTo(tX-3, paintRect.Bottom-1);
+
+                        Canvas.Pen.Color :=xColor;
+                        Canvas.MoveTo(tX, paintRect.Top-2);
+                        Canvas.LineTo(tX, paintRect.Bottom+2);
+                        dec(tX);
+                        Canvas.MoveTo(tX, paintRect.Top-1);
+                        Canvas.LineTo(tX, paintRect.Bottom+1);
+
+                        tX :=fRect.Right-1;
+                        if FCollapsed then Canvas.Pen.Color :=xSColor;
+                        if Rounded
+                        then begin
+                               Canvas.MoveTo(tX, fRect.Top+2);
+                               Canvas.LineTo(tX, fRect.Bottom-3);
+                              end
+                        else begin
+                               Canvas.MoveTo(tX, fRect.Top);
+                               Canvas.LineTo(tX, fRect.Bottom);
+                             end;
+                      end;
+              akRight : begin
+                        if (rTabWidth < 0)
+                        then xTabWidth :=(fRect.Bottom-fRect.Top)*-rTabWidth div 100
+                        else xTabWidth :=rTabWidth;
+
+                        inc(paintRect.Top, middleY-(xTabWidth div 2));
+                        paintRect.Bottom:=paintRect.Top+xTabWidth;
+                        dec(paintRect.Left);
+                        Frame3d_Rounded(Canvas, paintRect, 1, 5, 5, ABorderStyle, xSColor, xHColor, xColor);
+
+                        Canvas.Pen.Style:=psSolid;
+                        Canvas.Pen.Width:=1;
+                        Canvas.Pen.Color :=xHColor;
+                        if Rounded
+                        then Canvas.MoveTo(1, 2)
+                        else Canvas.MoveTo(1, 0);
+                        Canvas.LineTo(1, paintRect.Top-3);
+                        Canvas.LineTo(4, paintRect.Top);
+
+                        if Rounded
+                        then Canvas.MoveTo(1, fRect.Bottom-4)
+                        else Canvas.MoveTo(1, fRect.Bottom);
+                        Canvas.LineTo(1, paintRect.Bottom+2);
+                        Canvas.LineTo(4, paintRect.Bottom-1);
+
+                        Canvas.Pen.Color :=xColor;
+                        Canvas.MoveTo(1, paintRect.Top-2);
+                        Canvas.LineTo(1, paintRect.Bottom+2);
+                        Canvas.MoveTo(2, paintRect.Top-1);
+                        Canvas.LineTo(2, paintRect.Bottom+1);
+
+                        if FCollapsed then Canvas.Pen.Color :=xSColor;
+                        if Rounded
+                        then begin
+                               Canvas.MoveTo(0, fRect.Top+2);
+                               Canvas.LineTo(0, fRect.Bottom-3);
+                              end
+                        else begin
+                               Canvas.MoveTo(0, fRect.Top);
+                               Canvas.LineTo(0, fRect.Bottom);
+                             end;
                       end;
               end;
-
-              //else xTabWidth :=(paintRect.Bottom-paintRect.Top)*rTabWidth div 100;
-
             end;
-    end;
-  end;
-
-  procedure drawFLAT;
-  begin
-    Case rStyle of
-    bbsButton: begin
-                 Canvas.Brush.Color := xColor;
-                 Canvas.Brush.Style :=bsSolid;
-                 Canvas.Pen.Color := clNone;
-                 Canvas.Pen.Width := 1;
-                 Canvas.Pen.Style := psClear;
-                 Canvas.RoundRect(paintRect, 5,5);
-               end;
-    end;
-  end;
-
-  procedure drawDOWN;
-  begin
-    Case rStyle of
-    bbsButton: begin
-                 Canvas.Brush.Color :=xSColor; //clbtnShadow;
-                 Canvas.Brush.Style :=bsSolid;
-                 Canvas.Pen.Color := clNone;
-                 Canvas.Pen.Width := 1;
-                 Canvas.Pen.Style := psClear;
-                 Canvas.RoundRect(paintRect, 5,5);
-
-                 inc(paintRect.Left,1); inc(paintRect.Top,1);
-                 Canvas.Brush.Color :=xColor;
-                 Canvas.Brush.Style :=bsSolid;
-                 Canvas.Pen.Color :=xHColor; //clbtnHighlight;
-                 Canvas.Pen.Width := 1;
-                 Canvas.Pen.Style := psSolid;
-                 Canvas.RoundRect(paintRect, 5,5);
-               end;
     end;
   end;
 
@@ -852,21 +928,21 @@ var
     AWidth :=paintRect.Right-paintRect.Left-2;
     AHeight :=paintRect.Bottom-paintRect.Top-2;
 
-    Case TMyRollOut(Owner).FButtonPosition of
+    Case FButtonPosition of
     akTop,
     akBottom : begin
-                    Canvas.Font.Orientation := 0;
+                 Canvas.Font.Orientation := 0;
 
-                    ATop :=middleY-(txtH div 2);
+                 ATop :=middleY-(txtH div 2);
 
-                    if (rGlyphLayout <> glNone) then
-                    begin
-                        if (rTextLayout = tlCenter)
-                        then dec(AWidth, rGlyph.Glyph.Width*2+4)
-                        else dec(AWidth, rGlyph.Glyph.Width+2)
-                     end;
+                 if (rGlyphLayout <> glNone) then
+                 begin
+                   if (rTextLayout = tlCenter)
+                   then dec(AWidth, rGlyph.Glyph.Width*2+4)
+                   else dec(AWidth, rGlyph.Glyph.Width+2)
+                 end;
 
-                    CalcCuttedCaption(xCaption, txtW, AWidth);
+                 CalcCuttedCaption(xCaption, txtW, AWidth);
                     (* Original Code, Test Speed
                     if (txtW > AWidth)
                     then begin
@@ -877,112 +953,112 @@ var
                               then xCaption :='';
                           end;
                     *)
-                    Case rTextLayout of
-                    tlLeft :begin
-                                  ALeft :=paintRect.Left+4;
-                                  if (rGlyphLayout = glLeft)
-                                  then inc(ALeft, rGlyph.Glyph.Width+2);
-                             end;
-                    tlRight:begin
-                                 ALeft :=paintRect.Left+AWidth-txtW;
-                                 if (rGlyphLayout = glLeft)
-                                 then inc(ALeft, rGlyph.Glyph.Width+2);
-                             end;
-                    tlCenter:begin
-                                  ALeft :=middleX-(txtW div 2);
-                              end;
-                    end;
+                 Case rTextLayout of
+                 tlLeft :begin
+                           ALeft :=paintRect.Left+4;
+                           if (rGlyphLayout = glLeft)
+                           then inc(ALeft, rGlyph.Glyph.Width+2);
+                         end;
+                 tlRight:begin
+                           ALeft :=paintRect.Left+AWidth-txtW;
+                           if (rGlyphLayout = glLeft)
+                           then inc(ALeft, rGlyph.Glyph.Width+2);
+                         end;
+                 tlCenter:begin
+                            ALeft :=middleX-(txtW div 2);
+                          end;
+                 end;
 
-                    //Disabled Position
-                    DTop :=ATop+1;
-                    DLeft :=ALeft+1;
-                end;
+                 //Disabled Position
+                 DTop :=ATop+1;
+                 DLeft :=ALeft+1;
+               end;
     akLeft : begin
-                  //Vertically from Bottom to Top
-                  Canvas.Font.Orientation := 900;
+               //Vertically from Bottom to Top
+               Canvas.Font.Orientation := 900;
 
-                  ALeft:=middleX-(txtH div 2);
+               ALeft:=middleX-(txtH div 2);
 
-                  if (rGlyphLayout <> glNone) then
-                  begin
-                     if (rTextLayout = tlCenter)
-                     then dec(AHeight, rGlyph.Glyph.Height*2+4)
-                     else dec(AHeight, rGlyph.Glyph.Height+2)
-                  end;
+               if (rGlyphLayout <> glNone) then
+               begin
+                 if (rTextLayout = tlCenter)
+                 then dec(AHeight, rGlyph.Glyph.Height*2+4)
+                 else dec(AHeight, rGlyph.Glyph.Height+2)
+               end;
 
-                  //Vertically the Max Width is Height
-                  CalcCuttedCaption(xCaption, txtW, AHeight);
+               //Vertically the Max Width is Height
+               CalcCuttedCaption(xCaption, txtW, AHeight);
 
-                  Case rTextLayout of
-                  tlLeft :begin   //To Bottom of the ClientRect
-                               ATop :=AHeight;
+               Case rTextLayout of
+               tlLeft :begin   //To Bottom of the ClientRect
+                         ATop :=paintRect.Top+AHeight;
 
-                               if (rGlyphLayout = glRight)
-                               then inc(ATop, rGlyph.Glyph.Height+2);
-                           end;
-                  tlRight:begin  //To Top of the ClientRect
-                               ATop :=txtW+4;
-                               if (rGlyphLayout = glRight)
-                               then inc(ATop, rGlyph.Glyph.Height+2);
-                           end;
-                  tlCenter:begin
-                                ATop :=middleY+(txtW div 2);
-                            end;
-                  end;
+                         if (rGlyphLayout = glRight)
+                         then inc(ATop, rGlyph.Glyph.Height+2);
+                       end;
+               tlRight:begin  //To Top of the ClientRect
+                         ATop :=paintRect.Top+txtW+4;
+                         if (rGlyphLayout = glRight)
+                         then inc(ATop, rGlyph.Glyph.Height+2);
+                       end;
+               tlCenter:begin
+                          ATop :=middleY+(txtW div 2);
+                        end;
+               end;
 
-                  //Disabled Position
-                  DTop :=ATop-1;
-                  DLeft :=ALeft+1;
+               //Disabled Position
+               DTop :=ATop-1;
+               DLeft :=ALeft+1;
               end;
     akRight : begin
-                  //Vertically from Top to Bottom
-                  Canvas.Font.Orientation := -900;
+                //Vertically from Top to Bottom
+                Canvas.Font.Orientation := -900;
 
-                  ALeft:=middleX+(txtH div 2);
+                ALeft:=middleX+(txtH div 2);
 
-                  if (rGlyphLayout <> glNone) then
-                  begin
-                     if (rTextLayout = tlCenter)
-                     then dec(AHeight, rGlyph.Glyph.Height*2+4)
-                     else dec(AHeight, rGlyph.Glyph.Height+2)
-                  end;
+                if (rGlyphLayout <> glNone) then
+                begin
+                  if (rTextLayout = tlCenter)
+                  then dec(AHeight, rGlyph.Glyph.Height*2+4)
+                  else dec(AHeight, rGlyph.Glyph.Height+2)
+                end;
 
-                  CalcCuttedCaption(xCaption, txtW, AHeight);
+                CalcCuttedCaption(xCaption, txtW, AHeight);
 
-                  Case rTextLayout of
-                  tlLeft :begin  //To Top of the ClientRect
-                               ATop :=4;
+                Case rTextLayout of
+                tlLeft :begin  //To Top of the ClientRect
+                          ATop :=paintRect.Top+4;
 
-                               if (rGlyphLayout = glLeft)
-                               then inc(ATop, rGlyph.Glyph.Height+2);
-                           end;
-                  tlRight:begin  //To Bottom of the ClientRect
-                               ATop :=AHeight-txtW;
-                               if (rGlyphLayout = glLeft)
-                               then inc(ATop, rGlyph.Glyph.Height+2);
-                           end;
-                  tlCenter:begin
-                                ATop :=middleY-(txtW div 2);
-                            end;
-                  end;
+                          if (rGlyphLayout = glLeft)
+                          then inc(ATop, rGlyph.Glyph.Height+2);
+                        end;
+                tlRight:begin  //To Bottom of the ClientRect
+                          ATop :=paintRect.Top+AHeight-txtW;
+                          if (rGlyphLayout = glLeft)
+                          then inc(ATop, rGlyph.Glyph.Height+2);
+                        end;
+                tlCenter:begin
+                           ATop :=middleY-(txtW div 2);
+                         end;
+                end;
 
-                  //Disabled Position
-                  DTop :=ATop+1;
-                  DLeft :=ALeft-1;
+                //Disabled Position
+                DTop :=ATop+1;
+                DLeft :=ALeft-1;
               end;
     end;
 
     if (xCaption <> '') then
     begin
-         if (FState = bsDisabled)
-         then begin
-                   Canvas.Font.Color := clBtnHighlight;
-                   Canvas.TextOut(DLeft, DTop, xCaption);
-                   Canvas.Font.Color := clBtnShadow;
-               end
-         else Canvas.Font.Color := Font.Color;
+      if (FState = bsDisabled)
+      then begin
+             Canvas.Font.Color := clBtnHighlight;
+             Canvas.TextOut(DLeft, DTop, xCaption);
+             Canvas.Font.Color := clBtnShadow;
+           end
+      else Canvas.Font.Color := Font.Color;
 
-         Canvas.TextOut(ALeft, ATop, xCaption);
+      Canvas.TextOut(ALeft, ATop, xCaption);
     end;
   end;
 
@@ -998,7 +1074,11 @@ begin
   middleY :=paintRect.Top+((paintRect.Bottom-paintRect.Top) div 2);
   middleX :=paintRect.Left+((paintRect.Right-paintRect.Left) div 2);
 
-  if TMyRollOut(Owner).FCollapsed
+  FButtonPosition :=TMyRollOut(Owner).FButtonPosition;
+  FCollapsed :=TMyRollOut(Owner).FCollapsed;
+  Rounded :=not(FCollapsed) and TMyRollOut(Owner).rBevelRounded;
+
+  if FCollapsed
   then xColor :=Self.Color
   else xColor :=rColorExpanded;
 
@@ -1015,7 +1095,7 @@ begin
                      else xSColor :=rColorShadow;
 
                      xColor :=GetHighlightColor(xColor, 20);
-                     drawUP;
+                     drawBtn(bvRaised);
                 end;
   Buttons.bsDown:begin
                       if (rColorHighlight = clDefault)
@@ -1027,29 +1107,31 @@ begin
                       else xSColor :=rColorShadow;
 
                       xColor :=GetHighlightColor(xColor, 20);
-                      drawDOWN;
+                      drawBtn(bvLowered);
 
                   end;
   else begin
             if (FState = bsDisabled)
             then xColor :=GrayScale(xColor);
 
-            if (rColorHighlight = clDefault)
-            then xHColor :=GetHighlightColor(xColor, 60)
-            else xHColor :=rColorHighlight;
+            if Flat
+            then xHColor :=xColor
+            else if (rColorHighlight = clDefault)
+                 then xHColor :=GetHighlightColor(xColor, 60)
+                 else xHColor :=rColorHighlight;
 
             if (rColorShadow = clDefault)
             then xSColor :=GetShadowColor(xColor, 60)
             else xSColor :=rColorShadow;
 
             if Flat
-            then drawFLAT
-            else drawUP;
+            then drawBtn(bvSpace)
+            else drawBtn(bvRaised);
         end;
   end;
 
   if (rGlyphLayout <> glNone)
-  then drawButton(TMyRollOut(Owner).Collapsed, glyphTop, glyphLeft)
+  then drawGlyph(glyphTop, glyphLeft)
   else begin
             glyphTop :=0;
             glyphLeft:=0;
