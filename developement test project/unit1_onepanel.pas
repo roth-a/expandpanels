@@ -5,7 +5,7 @@ unit unit1_onepanel;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics, Dialogs,
+  Classes, SysUtils, FileUtil, LResources, Forms, Controls, Graphics,
   ExtCtrls, StdCtrls, Buttons, Spin, ExpandPanels, StrUtils;
 
 type
@@ -13,14 +13,15 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    cbNoBorders: TCheckBox;
     cbRounded: TCheckBox;
     cbFlat: TCheckBox;
+    cbBorders: TComboBox;
     Edit1: TEdit;
     Edit2: TEdit;
     GroupBox1: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
+    Label3: TLabel;
     p1: TMyRollOut;
     RGlyph: TRadioGroup;
     RCapt: TRadioGroup;
@@ -29,14 +30,14 @@ type
     RStyle: TRadioGroup;
     SpeedButton1: TSpeedButton;
     edTabWidth: TSpinEdit;
+    edButtonSize: TSpinEdit;
     procedure cbFlatClick(Sender: TObject);
-    procedure cbNoBordersClick(Sender: TObject);
     procedure cbRoundedClick(Sender: TObject);
+    procedure cbBordersChange(Sender: TObject);
+    procedure edButtonSizeChange(Sender: TObject);
     procedure Edit1Change(Sender: TObject);
     procedure edTabWidthChange(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
-    procedure RBehaviourClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure RGlyphClick(Sender: TObject);
     procedure RCaptClick(Sender: TObject);
     procedure RButtClick(Sender: TObject);
@@ -58,10 +59,6 @@ implementation
 { TForm1 }
 
 
-procedure TForm1.FormCreate(Sender: TObject);
-begin
-end;
-
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
    p1.Button.Caption := Edit1.Text;
@@ -72,14 +69,19 @@ begin
   p1.BevelRounded:=cbRounded.Checked;
 end;
 
+procedure TForm1.cbBordersChange(Sender: TObject);
+begin
+  p1.BevelOuter:=TBevelcut(cbBorders.ItemIndex);
+end;
+
+procedure TForm1.edButtonSizeChange(Sender: TObject);
+begin
+  p1.ButtonSize:=edButtonSize.Value;
+end;
+
 procedure TForm1.cbFlatClick(Sender: TObject);
 begin
   p1.Button.Flat:=cbFlat.Checked;
-end;
-
-procedure TForm1.cbNoBordersClick(Sender: TObject);
-begin
-  p1.BevelOuter:=bvNone;
 end;
 
 procedure TForm1.edTabWidthChange(Sender: TObject);
@@ -87,14 +89,10 @@ begin
   p1.Button.TabWidth:=edTabWidth.Value;
 end;
 
-
-procedure TForm1.FormDestroy(Sender: TObject);
+procedure TForm1.FormShow(Sender: TObject);
 begin
-  p1.Free;
-end;
-
-procedure TForm1.RBehaviourClick(Sender: TObject);
-begin
+  edButtonSize.Value:=p1.ButtonSize;
+  edTabWidth.Value:=p1.Button.TabWidth;
 end;
 
 procedure TForm1.RGlyphClick(Sender: TObject);

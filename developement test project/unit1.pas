@@ -15,13 +15,15 @@ type
   TForm1 = class(TForm)
     Button1:    TButton;
     Calendar1:  TCalendar;
+    cbBorders: TComboBox;
     cbFlat: TCheckBox;
     cbRounded: TCheckBox;
-    cbNoBorders: TCheckBox;
+    edButtonSize: TSpinEdit;
     Edit1: TEdit;
     edTabWidth: TSpinEdit;
     GroupBox1: TGroupBox;
     Label1: TLabel;
+    Label3: TLabel;
     ListBox1:   TListBox;
     RBehaviour: TRadioGroup;
     RGlyph: TRadioGroup;
@@ -31,13 +33,16 @@ type
     RButt:      TRadioGroup;
     RStyle: TRadioGroup;
     SpeedButton1: TSpeedButton;
+    procedure cbBordersChange(Sender: TObject);
     procedure cbFlatClick(Sender: TObject);
     procedure cbNoBordersClick(Sender: TObject);
     procedure cbRoundedClick(Sender: TObject);
+    procedure edButtonSizeChange(Sender: TObject);
     procedure Edit1Change(Sender: TObject);
     procedure edTabWidthChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure RBehaviourClick(Sender: TObject);
     procedure RGlyphClick(Sender: TObject);
     procedure RCaptClick(Sender: TObject);
@@ -79,17 +84,17 @@ begin
   p3.Parent      := self;
   Button1.Parent := p3;
 
+  p1.Button.GlyphLayout:=glRight;
+  p2.Button.GlyphLayout:=glRight;
+  p3.Button.GlyphLayout:=glRight;
+
   ex1.AddPanel(p1);
   ex1.AddPanel(p2);
   ex1.AddPanel(p3);
 
-
-
   ex1.ButtonPosition := TAnchorKind(RButt.ItemIndex);
   ex1.CollapseKind   := TAnchorKind(RColl.ItemIndex);
   ex1.Behaviour      := TExpandPanelsBehaviour(RBehaviour.ItemIndex);
-
-  //RGlyphClick(nil);
 end;
 
 procedure TForm1.Edit1Change(Sender: TObject);
@@ -106,11 +111,25 @@ begin
   p3.BevelRounded:=cbRounded.Checked;
 end;
 
+procedure TForm1.edButtonSizeChange(Sender: TObject);
+begin
+  p1.ButtonSize:=edButtonSize.Value;
+  p2.ButtonSize:=edButtonSize.Value;
+  p3.ButtonSize:=edButtonSize.Value;
+end;
+
 procedure TForm1.cbFlatClick(Sender: TObject);
 begin
   p1.Button.Flat:=cbFlat.Checked;
   p2.Button.Flat:=cbFlat.Checked;
   p3.Button.Flat:=cbFlat.Checked;
+end;
+
+procedure TForm1.cbBordersChange(Sender: TObject);
+begin
+    p1.BevelOuter:=TBevelcut(cbBorders.ItemIndex);
+    p2.BevelOuter:=TBevelcut(cbBorders.ItemIndex);
+    p3.BevelOuter:=TBevelcut(cbBorders.ItemIndex);
 end;
 
 procedure TForm1.cbNoBordersClick(Sender: TObject);
@@ -134,6 +153,12 @@ begin
   p1.Free;
   p2.Free;
   p3.Free;
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+begin
+  edButtonSize.Value:=p1.ButtonSize;
+  edTabWidth.Value:=p1.Button.TabWidth;
 end;
 
 procedure TForm1.RBehaviourClick(Sender: TObject);

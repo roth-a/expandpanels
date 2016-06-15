@@ -60,7 +60,7 @@ type
     tlNone
   );
 
-  TBoundButtonStyle = (bbsButton, bbsTab);
+  TBoundButtonStyle = (bbsButton, bbsTab, bbsLine, bbsLineDouble);
 
   TBoundButton = class(TCustomSpeedButton)
   private
@@ -645,10 +645,11 @@ var
   xColor,
   xHColor,
   xSColor  :TColor;
-  xTabWidth,
   middleX,
   middleY,
-  tY, tX,
+  txtWidth,
+  txtLeft,
+  txtTop,
   glyphLeft,
   glyphTop :Integer;
   xCaption :String;
@@ -710,6 +711,10 @@ var
   end;
 
   procedure drawBtn(const ABorderStyle : TGraphicsBevelCut);
+  var
+     xTabWidth,
+     tY, tX: Integer;
+
   begin
     Case rStyle of
     bbsButton: Frame3d_Rounded(Canvas, paintRect, 1, 5, 5, ABorderStyle, xSColor, xHColor, xColor);
@@ -896,32 +901,42 @@ var
     end;
   end;
 
-  procedure CalcCuttedCaption(var ACaption :String; var txtW :Integer; MaxWidth :Integer);
-  Var
-     txtMaxChars  :Integer;
-
-  begin
-       txtW :=0;
-       if (MaxWidth < Canvas.TextWidth('...'))
-       then ACaption :=''
-       else begin
-                 txtMaxChars :=Canvas.TextFitInfo(ACaption, MaxWidth);
-                 txtW :=Canvas.TextWidth(ACaption);
-                 while (txtW > MaxWidth) do
-                 begin
-                      dec(txtMaxChars, 3);    //-1 Chars fit better, -3 Chars for more speed
-                      ACaption :=Copy(ACaption, 0, txtMaxChars)+'...';
-                      txtW :=Canvas.TextWidth(ACaption);
-                 end;
-             end;
-  end;
 
   procedure drawText;
   Var
-     ATop, ALeft,
      DTop, DLeft,
      AWidth, AHeight,
-     txtW, txtH   :Integer;
+     txtH   :Integer;
+
+    procedure CalcCuttedCaption(MaxWidth :Integer);
+    Var
+       txtMaxChars  :Integer;
+
+    begin
+         txtWidth :=0;
+         if (MaxWidth < Canvas.TextWidth('...'))
+         then xCaption :=''
+         else begin
+                   txtMaxChars :=Canvas.TextFitInfo(xCaption, MaxWidth);
+                   txtWidth :=Canvas.TextWidth(xCaption);
+                   while (txtWidth > MaxWidth) do
+                   begin
+                        dec(txtMaxChars, 3);    //-1 Chars fit better, -3 Chars for more speed
+                        xCaption :=Copy(xCaption, 0, txtMaxChars)+'...';
+                        txtWidth :=Canvas.TextWidth(xCaption);
+                   end;
+               end;
+         (* Original Code, Test Speed
+         if (txtW > AWidth)
+         then begin
+                   txtMaxChars :=Canvas.TextFitInfo(xCaption, AWidth);
+                   xCaption :=Copy(xCaption, 0, txtMaxChars-3)+'...';
+                   txtW :=Canvas.TextWidth(xCaption);
+                   if (txtW > AWidth)
+                   then xCaption :='';
+               end;
+         *)
+    end;
 
   begin
     txtH :=Canvas.TextHeight(xCaption);
@@ -933,7 +948,7 @@ var
     akBottom : begin
                  Canvas.Font.Orientation := 0;
 
-                 ATop :=middleY-(txtH div 2);
+                 txtTop :=middleY-(txtH div 2);
 
                  if (rGlyphLayout <> glNone) then
                  begin
@@ -942,42 +957,33 @@ var
                    else dec(AWidth, rGlyph.Glyph.Width+2)
                  end;
 
-                 CalcCuttedCaption(xCaption, txtW, AWidth);
-                    (* Original Code, Test Speed
-                    if (txtW > AWidth)
-                    then begin
-                              txtMaxChars :=Canvas.TextFitInfo(xCaption, AWidth);
-                              xCaption :=Copy(xCaption, 0, txtMaxChars-3)+'...';
-                              txtW :=Canvas.TextWidth(xCaption);
-                              if (txtW > AWidth)
-                              then xCaption :='';
-                          end;
-                    *)
+                 CalcCuttedCaption(AWidth);
+
                  Case rTextLayout of
                  tlLeft :begin
-                           ALeft :=paintRect.Left+4;
+                           txtLeft :=paintRect.Left+4;
                            if (rGlyphLayout = glLeft)
-                           then inc(ALeft, rGlyph.Glyph.Width+2);
+                           then inc(txtLeft, rGlyph.Glyph.Width+2);
                          end;
                  tlRight:begin
-                           ALeft :=paintRect.Left+AWidth-txtW;
+                           txtLeft :=paintRect.Left+AWidth-txtWidth;
                            if (rGlyphLayout = glLeft)
-                           then inc(ALeft, rGlyph.Glyph.Width+2);
+                           then inc(txtLeft, rGlyph.Glyph.Width+2);
                          end;
                  tlCenter:begin
-                            ALeft :=middleX-(txtW div 2);
+                            txtLeft :=middleX-(txtWidth div 2);
                           end;
                  end;
 
                  //Disabled Position
-                 DTop :=ATop+1;
-                 DLeft :=ALeft+1;
+                 DTop :=txtTop+1;
+                 DLeft :=txtLeft+1;
                end;
     akLeft : begin
                //Vertically from Bottom to Top
                Canvas.Font.Orientation := 900;
 
-               ALeft:=middleX-(txtH div 2);
+               txtLeft:=middleX-(txtH div 2);
 
                if (rGlyphLayout <> glNone) then
                begin
@@ -987,34 +993,34 @@ var
                end;
 
                //Vertically the Max Width is Height
-               CalcCuttedCaption(xCaption, txtW, AHeight);
+               CalcCuttedCaption(AHeight);
 
                Case rTextLayout of
                tlLeft :begin   //To Bottom of the ClientRect
-                         ATop :=paintRect.Top+AHeight;
+                         txtTop :=paintRect.Top+AHeight;
 
                          if (rGlyphLayout = glRight)
-                         then inc(ATop, rGlyph.Glyph.Height+2);
+                         then inc(txtTop, rGlyph.Glyph.Height+2);
                        end;
                tlRight:begin  //To Top of the ClientRect
-                         ATop :=paintRect.Top+txtW+4;
+                         txtTop :=paintRect.Top+txtWidth+4;
                          if (rGlyphLayout = glRight)
-                         then inc(ATop, rGlyph.Glyph.Height+2);
+                         then inc(txtTop, rGlyph.Glyph.Height+2);
                        end;
                tlCenter:begin
-                          ATop :=middleY+(txtW div 2);
+                          txtTop :=middleY+(txtWidth div 2);
                         end;
                end;
 
                //Disabled Position
-               DTop :=ATop-1;
-               DLeft :=ALeft+1;
+               DTop :=txtTop-1;
+               DLeft :=txtLeft+1;
               end;
     akRight : begin
                 //Vertically from Top to Bottom
                 Canvas.Font.Orientation := -900;
 
-                ALeft:=middleX+(txtH div 2);
+                txtLeft:=middleX+(txtH div 2)+1; //+1 because is better centered
 
                 if (rGlyphLayout <> glNone) then
                 begin
@@ -1023,31 +1029,32 @@ var
                   else dec(AHeight, rGlyph.Glyph.Height+2)
                 end;
 
-                CalcCuttedCaption(xCaption, txtW, AHeight);
+                CalcCuttedCaption(AHeight);
 
                 Case rTextLayout of
                 tlLeft :begin  //To Top of the ClientRect
-                          ATop :=paintRect.Top+4;
+                          txtTop :=paintRect.Top+4;
 
                           if (rGlyphLayout = glLeft)
-                          then inc(ATop, rGlyph.Glyph.Height+2);
+                          then inc(txtTop, rGlyph.Glyph.Height+2);
                         end;
                 tlRight:begin  //To Bottom of the ClientRect
-                          ATop :=paintRect.Top+AHeight-txtW;
+                          txtTop :=paintRect.Top+AHeight-txtWidth;
                           if (rGlyphLayout = glLeft)
-                          then inc(ATop, rGlyph.Glyph.Height+2);
+                          then inc(txtTop, rGlyph.Glyph.Height+2);
                         end;
                 tlCenter:begin
-                           ATop :=middleY-(txtW div 2);
+                           txtTop :=middleY-(txtWidth div 2);
                          end;
                 end;
 
                 //Disabled Position
-                DTop :=ATop+1;
-                DLeft :=ALeft-1;
+                DTop :=txtTop+1;
+                DLeft :=txtLeft-1;
               end;
     end;
 
+    //Re Test here because we may not have space to draw the text, so now can be empty
     if (xCaption <> '') then
     begin
       if (FState = bsDisabled)
@@ -1058,7 +1065,131 @@ var
            end
       else Canvas.Font.Color := Font.Color;
 
-      Canvas.TextOut(ALeft, ATop, xCaption);
+      Canvas.Brush.Style:=bsClear;
+      Canvas.TextOut(txtLeft, txtTop, xCaption);
+    end
+    else txtWidth:=0;
+  end;
+
+  procedure DrawLines;
+  var
+     d1, d2, d3, d4 :Integer;
+     isVertical :Boolean;
+
+     procedure calc_d(txtL, txtR, glyphL, glyphR :Integer);
+     begin
+       if (txtWidth > 0)
+       then Case rTextLayout of
+            tlLeft: begin
+                      d1 :=txtR;
+                      if (rGlyphLayout = glRight)
+                      then d2 :=glyphL;
+                    end;
+            tlCenter:begin
+                       d2 :=txtL;
+                       d3 :=txtR;
+                       if (rGlyphLayout = glLeft)
+                       then d1 :=glyphR
+                       else if (rGlyphLayout = glRight)
+                            then d4 :=glyphL;
+                     end;
+            tlRight:begin
+                      d2 :=txtL;
+                      if (rGlyphLayout = glLeft)
+                      then d1 :=glyphR;
+                    end;
+            end
+       else if (rGlyphLayout = glLeft)
+            then d1 :=glyphR
+            else if (rGlyphLayout = glRight)
+                 then d2 :=glyphL;
+     end;
+
+     procedure DrawALine(pCenterX, pCenterY :Integer);
+     begin
+       if isVertical
+       then begin
+              //Avoid go outside the Box
+              pCenterX :=EnsureRange(pCenterX, 0, paintRect.Right-2);
+
+              Canvas.Pen.Color :=xHColor;
+              Canvas.MoveTo(pCenterX, d1);
+              Canvas.LineTo(pCenterX, d2);
+              if (d3 > 0) then
+              begin
+                Canvas.MoveTo(pCenterX, d3);
+                Canvas.LineTo(pCenterX, d4);
+              end;
+              Canvas.Pen.Color :=xSColor;
+              Canvas.MoveTo(pCenterX+1, d1+1);
+              Canvas.LineTo(pCenterX+1, d2);
+              if (d3 > 0) then
+              begin
+                Canvas.MoveTo(pCenterX+1, d3+1);
+                Canvas.LineTo(pCenterX+1, d4);
+              end;
+            end
+       else begin
+              pCenterY :=EnsureRange(pCenterY, 0, paintRect.Bottom-2);
+
+              Canvas.Pen.Color :=xHColor;
+              Canvas.MoveTo(d1, pCenterY);
+              Canvas.LineTo(d2, pCenterY);
+              if (d3 > 0) then
+              begin
+                Canvas.MoveTo(d3, pCenterY);
+                Canvas.LineTo(d4, pCenterY);
+              end;
+              Canvas.Pen.Color :=xSColor;
+              Canvas.MoveTo(d1+1, pCenterY+1);
+              Canvas.LineTo(d2, pCenterY+1);
+              if (d3 > 0) then
+              begin
+                Canvas.MoveTo(d3+1, pCenterY+1);
+                Canvas.LineTo(d4, pCenterY+1);
+              end;
+            end;
+     end;
+
+  begin
+    d3 :=0;
+    isVertical :=(FButtonPosition in [akLeft, akRight]);
+
+    if isVertical
+    then begin
+           d1 :=paintRect.Top;
+           d2 :=paintRect.Bottom;
+           d4 :=d2;
+           if (FButtonPosition = akRight)
+           then begin
+                  d1 :=paintRect.Top;
+                  d2 :=paintRect.Bottom;
+                  d4 :=d2;
+                  calc_d(txtTop-2, txtTop+txtWidth+2, glyphTop-2, glyphTop+rGlyph.Glyph.Height+2)
+                end
+           else begin
+                  //Only in this case the point coordinate is from bottom to top
+                  d1 :=paintRect.Bottom;
+                  d2 :=paintRect.Top;
+                  d4 :=d2;
+                  calc_d(txtTop+2, txtTop-txtWidth-4, glyphTop+rGlyph.Glyph.Height+2, glyphTop-2);
+                end;
+         end
+    else begin
+           d1 :=paintRect.Left;
+           d2 :=paintRect.Right;
+           d4 :=d2;
+           calc_d(txtLeft-2, txtLeft+txtWidth+2, glyphLeft-2, glyphLeft+rGlyph.Glyph.Width+2);
+          end;
+
+    Canvas.Pen.Style:=psSolid;
+    Canvas.Pen.Width:=1;
+    Case rStyle of
+    bbsLine: DrawALine(middleX, middleY);
+    bbsLineDouble: begin
+                     DrawALine(middleX-2, middleY-2);
+                     DrawALine(middleX+2, middleY+2);
+                   end;
     end;
   end;
 
@@ -1108,7 +1239,6 @@ begin
 
                       xColor :=GetHighlightColor(xColor, 20);
                       drawBtn(bvLowered);
-
                   end;
   else begin
             if (FState = bsDisabled)
@@ -1138,7 +1268,11 @@ begin
         end;
 
   if (rTextLayout <> tlNone) and (xCaption <> '')
-  then drawText;
+  then drawText
+  else txtWidth:=0;
+
+  if (rStyle in [bbsLine, bbsLineDouble])
+  then DrawLines;
 end;
 
 procedure TBoundButton.Loaded;
@@ -2110,6 +2244,7 @@ begin
     akRight: FButton.Anchors  := [akTop, akLeft, akBottom, akRight] - [akLeft];
     end;
 
+  Invalidate;
 
   StopCircleActions := False;
 end;
@@ -2131,21 +2266,21 @@ var
 begin
   if (FAnimating) then
   begin
-  //  FinishLastAnimationFast
-  storAnimated := Animated;
-  Animated     := False;
-  TimerAnimateSize(self);
-  Animated := storAnimated;
+    //  FinishLastAnimationFast
+    storAnimated := FAnimated;
+    FAnimated     := False;
+    TimerAnimateSize(self);
+    FAnimated := storAnimated;
   end;
 
   // Now do animation
   TargetAnimationSize := aTargetSize;
 
-  if (ComponentState * [csLoading, csDesigning] = []) and Animated then
+  if (ComponentState * [csLoading, csDesigning] = []) and FAnimated then
     begin
     Timer.Enabled := True;
     Timer.OnTimer := @TimerAnimateSize;
-    //EndProcedureOfAnimation := nil; On Collapse then EndTimerCollapse never Executed
+    //EndProcedureOfAnimation := nil; //On Collapse then EndTimerCollapse never Executed
     end
   else
     begin

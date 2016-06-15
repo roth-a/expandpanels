@@ -2,6 +2,9 @@
 //  ExpandPanels   Version 2.2
 //////////////////////////////
 
+15-06-2016 MaxM :
+     Added Button.Style as bbsLine and bbsLineDouble
+
 09-06-2016 MaxM :
      Completed Painting of Button.Style as bbsTab
 
