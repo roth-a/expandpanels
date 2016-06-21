@@ -27,6 +27,7 @@ type
     RCapt: TRadioGroup;
     RColl:      TRadioGroup;
     RButt:      TRadioGroup;
+    RGlyphKind: TRadioGroup;
     RStyle: TRadioGroup;
     SpeedButton1: TSpeedButton;
     edTabWidth: TSpinEdit;
@@ -42,6 +43,7 @@ type
     procedure RCaptClick(Sender: TObject);
     procedure RButtClick(Sender: TObject);
     procedure RCollClick(Sender: TObject);
+    procedure RGlyphKindClick(Sender: TObject);
     procedure RStyleClick(Sender: TObject);
     procedure RDirectionClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
@@ -114,6 +116,11 @@ end;
 procedure TForm1.RCollClick(Sender: TObject);
 begin
   p1.CollapseKind := TAnchorKind(RColl.ItemIndex);
+end;
+
+procedure TForm1.RGlyphKindClick(Sender: TObject);
+begin
+  p1.Button.GlyphKind:=TGlyphKind(RGlyphKind.ItemIndex);
 end;
 
 procedure TForm1.RStyleClick(Sender: TObject);

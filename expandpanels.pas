@@ -52,6 +52,13 @@ type
     glNone
   );
 
+  TGlyphKind =
+  (
+    gkArrows,
+    gkClose,
+    gkMinMax
+  );
+
   TTextLayout =
   (
     tlLeft,
@@ -67,6 +74,7 @@ type
     rColorExpanded: TColor;
     rColorHighlight: TColor;
     rColorShadow: TColor;
+    rGlyphKind: TGlyphKind;
     rGlyphLayout: TGlyphLayout;
     rStyle: TBoundButtonStyle;
     rTabWidth: Integer;
@@ -75,6 +83,7 @@ type
     procedure setColorExpanded(AValue: TColor);
     procedure SetColorHighlight(AValue: TColor);
     procedure SetColorShadow(AValue: TColor);
+    procedure SetGlyphKind(AValue: TGlyphKind);
     procedure SetGlyphLayout(AValue: TGlyphLayout);
     procedure SetStyle(AValue: TBoundButtonStyle);
     procedure SetTabWidth(AValue: Integer);
@@ -130,6 +139,7 @@ type
     property GlyphCollapsed: TBitmap read rUserGlyphCollapsed write SetGlyphCollapsed;
 
     property GlyphLayout: TGlyphLayout read rGlyphLayout write SetGlyphLayout default glNone;
+    property GlyphKind: TGlyphKind read rGlyphKind write SetGlyphKind default gkArrows;
 
     property ShowAccelChar;
     property TextLayout: TTextLayout read rTextLayout write SetTextLayout default tlLeft;
@@ -262,6 +272,11 @@ type
     // Properties
     FArrangeKind: TAnchorKind;
     FButtonPosition, FCollapseKind: TAnchorKind;
+    FButtonGlyphKind: TGlyphKind;
+    FButtonGlyphLayout: TGlyphLayout;
+    FButtonStyle: TBoundButtonStyle;
+    FButtonTabWidth: Integer;
+    FButtonTextLayout: TTextLayout;
     FOrthogonalAbove: integer;
     FAbove:     integer;
     FOrthogonalSize: integer;
@@ -277,6 +292,11 @@ type
     function RelevantOrthogonalAbove(comp: TControl): integer;
     function RelevantSize(comp: TControl): integer;
     function RelevantOrthogonalSize(comp: TControl): integer;
+    procedure setButtonGlyphKind(AValue: TGlyphKind);
+    procedure setButtonGlyphLayout(AValue: TGlyphLayout);
+    procedure setButtonStyle(AValue: TBoundButtonStyle);
+    procedure SetButtonTabWidth(AValue: Integer);
+    procedure setButtonTextLayout(AValue: TTextLayout);
     procedure WriteRelevantAbove(comp: TMyRollOut; above: integer);
     procedure WriteRelevantSize(comp: TMyRollOut; size: integer);
     procedure WriteRelevantOrthogonalSize(comp: TMyRollOut; size: integer);
@@ -327,6 +347,11 @@ type
 
     property CollapseKind: TAnchorKind read FCollapseKind write setCollapseKind;
     property ButtonPosition: TAnchorKind read FButtonPosition write setButtonPosition;
+    property ButtonGlyphLayout: TGlyphLayout read FButtonGlyphLayout write setButtonGlyphLayout;
+    property ButtonGlyphKind: TGlyphKind read FButtonGlyphKind write setButtonGlyphKind;
+    property ButtonStyle: TBoundButtonStyle read FButtonStyle write setButtonStyle;
+    property ButtonTabWidth: Integer read FButtonTabWidth write SetButtonTabWidth;
+    property ButtonTextLayout: TTextLayout read FButtonTextLayout write setButtonTextLayout;
 
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -536,6 +561,20 @@ begin
   end;
 end;
 
+procedure TBoundButton.SetGlyphKind(AValue: TGlyphKind);
+begin
+  if (rGlyphKind <> AValue) then
+  begin
+       rGlyphKind:=AValue;
+
+       if not(csLoading in ComponentState) then
+       begin
+            BuildGlyphs;
+            Invalidate;
+        end;
+  end;
+end;
+
 procedure TBoundButton.SetGlyphLayout(AValue: TGlyphLayout);
 begin
   if (rGlyphLayout <> AValue) then
@@ -616,25 +655,33 @@ begin
   if (rGlyphLayout <> glNone) then
   begin
        if (rUserGlyphCollapsed.Empty)
-       then begin
-                 case TMyRollOut(Owner).CollapseKind of
-                 akTop: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_BOTTOM');
-                 akLeft: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_RIGHT');
-                 akRight: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_LEFT');
-                 akBottom: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_TOP');
-                 end;
+       then Case rGlyphKind of
+            gkArrows: case TMyRollOut(Owner).CollapseKind of
+                      akTop: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_BOTTOM');
+                      akLeft: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_RIGHT');
+                      akRight: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_LEFT');
+                      akBottom: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_TOP');
+                      end;
+            gkClose: LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_CLOSE');
+            gkMinMax: if (TMyRollOut(Owner).CollapseKind in [akTop, akBottom])
+                      then LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_MAX_H')
+                      else LoadGlyph(rGlyphCollapsed, 'EXP_PANEL_MAX_V');
             end
        else rGlyphCollapsed.Assign(rUserGlyphCollapsed);
 
        if (rUserGlyphExpanded.Empty)
-       then begin
-                 case TMyRollOut(Owner).CollapseKind of
-                 akTop: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_TOP');
-                 akLeft: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_LEFT');
-                 akRight: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_RIGHT');
-                 akBottom: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_BOTTOM');
-                 end;
-             end
+       then Case rGlyphKind of
+            gkArrows: case TMyRollOut(Owner).CollapseKind of
+                      akTop: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_TOP');
+                      akLeft: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_LEFT');
+                      akRight: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_RIGHT');
+                      akBottom: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_BOTTOM');
+                      end;
+            gkClose: LoadGlyph(rGlyphExpanded, 'EXP_PANEL_CLOSE');
+            gkMinMax: if (TMyRollOut(Owner).CollapseKind in [akTop, akBottom])
+                      then LoadGlyph(rGlyphExpanded, 'EXP_PANEL_MIN_H')
+                      else LoadGlyph(rGlyphExpanded, 'EXP_PANEL_MIN_V');
+            end
        else rGlyphExpanded.Assign(rUserGlyphExpanded);
   end;
 end;
@@ -1296,6 +1343,7 @@ begin
   rColorHighlight :=clDefault;
   rColorShadow :=clDefault;
   rGlyphLayout :=glNone;
+  rGlyphKind :=gkArrows;
   rTextLayout :=tlLeft;
   Flat :=False;
   rStyle :=bbsButton;
@@ -1358,6 +1406,11 @@ begin
 
   FCollapseKind := akTop;
   FButtonPosition := akTop;
+  FButtonGlyphKind :=gkArrows;
+  FButtonGlyphLayout :=glNone;
+  FButtonStyle :=bbsButton;
+  FButtonTabWidth :=-50;
+  FButtonTextLayout :=tlLeft;
   FArrangeKind := akTop;
   FUseFixedSize := False;
   FUseClientSize := False;
@@ -1510,6 +1563,76 @@ begin
     akLeft: Result := comp.Height;
     akTop: Result  := comp.Width;
     end;
+end;
+
+procedure TExpandPanels.setButtonGlyphKind(AValue: TGlyphKind);
+var
+   i: Integer;
+
+begin
+  if (FButtonGlyphKind <> AValue) then
+  begin
+    FButtonGlyphKind:=AValue;
+
+    for i := 0 to PanelArray.Count - 1 do
+      Panel(i).Button.GlyphKind := AValue;
+  end;
+end;
+
+procedure TExpandPanels.setButtonGlyphLayout(AValue: TGlyphLayout);
+var
+   i: Integer;
+
+begin
+  if (FButtonGlyphLayout <> AValue) then
+  begin
+    FButtonGlyphLayout:=AValue;
+
+    for i := 0 to PanelArray.Count - 1 do
+      Panel(i).Button.GlyphLayout := AValue;
+  end;
+end;
+
+procedure TExpandPanels.setButtonStyle(AValue: TBoundButtonStyle);
+var
+   i: Integer;
+
+begin
+  if (FButtonStyle <> AValue) then
+  begin
+    FButtonStyle:=AValue;
+
+    for i := 0 to PanelArray.Count - 1 do
+      Panel(i).Button.Style := AValue;
+  end;
+end;
+
+procedure TExpandPanels.SetButtonTabWidth(AValue: Integer);
+var
+   i: Integer;
+
+begin
+  if (FButtonTabWidth <> AValue) then
+  begin
+    FButtonTabWidth:=AValue;
+
+    for i := 0 to PanelArray.Count - 1 do
+      Panel(i).Button.TabWidth := AValue;
+  end;
+end;
+
+procedure TExpandPanels.setButtonTextLayout(AValue: TTextLayout);
+var
+   i: Integer;
+
+begin
+  if (FButtonTextLayout <> AValue) then
+  begin
+    FButtonTextLayout:=AValue;
+
+    for i := 0 to PanelArray.Count - 1 do
+      Panel(i).Button.TextLayout := AValue;
+  end;
 end;
 
 procedure TExpandPanels.WriteRelevantAbove(comp: TMyRollOut; above: integer);

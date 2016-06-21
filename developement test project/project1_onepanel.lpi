@@ -36,13 +36,13 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="41">
+    <Units Count="42">
       <Unit0>
         <Filename Value="project1_onepanel.lpr"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="24" Y="6"/>
-        <UsageCount Value="81"/>
+        <UsageCount Value="84"/>
       </Unit0>
       <Unit1>
         <Filename Value="unit1_onepanel.pas"/>
@@ -51,8 +51,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <CursorPos X="24" Y="15"/>
-        <UsageCount Value="81"/>
+        <TopLine Value="115"/>
+        <CursorPos X="41" Y="123"/>
+        <UsageCount Value="84"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -61,9 +62,9 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="ExpandPanels"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="2372"/>
-        <CursorPos Y="2376"/>
-        <UsageCount Value="81"/>
+        <TopLine Value="7"/>
+        <CursorPos X="37" Y="657"/>
+        <UsageCount Value="84"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
@@ -180,7 +181,7 @@
         <Filename Value="../to-do.txt"/>
         <EditorIndex Value="3"/>
         <CursorPos X="9" Y="5"/>
-        <UsageCount Value="33"/>
+        <UsageCount Value="34"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit18>
@@ -188,8 +189,8 @@
         <Filename Value="../changelog.txt"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="2"/>
-        <CursorPos X="6" Y="7"/>
-        <UsageCount Value="71"/>
+        <CursorPos Y="9"/>
+        <UsageCount Value="74"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit19>
@@ -352,8 +353,13 @@
         <CursorPos X="35" Y="127"/>
         <UsageCount Value="10"/>
       </Unit40>
+      <Unit41>
+        <Filename Value="../expandpanels_glyphs.lrs"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit41>
     </Units>
-    <JumpHistory Count="19" HistoryIndex="18">
+    <JumpHistory Count="21" HistoryIndex="20">
       <Position1>
         <Filename Value="unit1_onepanel.pas"/>
         <Caret Line="64" TopLine="52"/>
@@ -430,6 +436,14 @@
         <Filename Value="unit1_onepanel.pas"/>
         <Caret Line="18" Column="26" TopLine="13"/>
       </Position19>
+      <Position20>
+        <Filename Value="unit1_onepanel.pas"/>
+        <Caret Line="15" Column="24"/>
+      </Position20>
+      <Position21>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="651" TopLine="642"/>
+      </Position21>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
@@ -458,35 +472,35 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="../expandpanels.pas"/>
-        <Line Value="3344"/>
+        <Line Value="3351"/>
       </Item1>
       <Item2>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="../expandpanels.pas"/>
-        <Line Value="3361"/>
+        <Line Value="3368"/>
       </Item2>
       <Item3>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="../expandpanels.pas"/>
-        <Line Value="2946"/>
+        <Line Value="2953"/>
       </Item3>
       <Item4>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="../expandpanels.pas"/>
-        <Line Value="3365"/>
+        <Line Value="3372"/>
       </Item4>
       <Item5>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="../expandpanels.pas"/>
-        <Line Value="2955"/>
+        <Line Value="2962"/>
       </Item5>
     </BreakPoints>
     <Exceptions Count="3">

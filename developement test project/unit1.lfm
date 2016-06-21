@@ -180,7 +180,7 @@ object Form1: TForm1
     TabOrder = 7
   end
   object GroupBox1: TGroupBox
-    Left = 648
+    Left = 637
     Height = 176
     Top = 216
     Width = 169
@@ -235,9 +235,9 @@ object Form1: TForm1
     end
   end
   object RStyle: TRadioGroup
-    Left = 480
+    Left = 637
     Height = 80
-    Top = 411
+    Top = 384
     Width = 185
     AutoFill = True
     Caption = 'Style'
@@ -263,9 +263,9 @@ object Form1: TForm1
     TabOrder = 9
   end
   object edTabWidth: TSpinEdit
-    Left = 512
+    Left = 669
     Height = 24
-    Top = 514
+    Top = 487
     Width = 103
     MaxValue = 380
     MinValue = -90
@@ -274,15 +274,15 @@ object Form1: TForm1
     Value = -50
   end
   object Label1: TLabel
-    Left = 512
+    Left = 669
     Height = 18
-    Top = 491
+    Top = 464
     Width = 153
     Caption = 'Tab Width (Negative is %)'
     ParentColor = False
   end
   object cbRounded: TCheckBox
-    Left = 280
+    Left = 637
     Height = 21
     Top = 520
     Width = 132
@@ -302,7 +302,7 @@ object Form1: TForm1
     TabOrder = 12
   end
   object cbBorders: TComboBox
-    Left = 304
+    Left = 656
     Height = 22
     Top = 544
     Width = 121
@@ -334,5 +334,32 @@ object Form1: TForm1
     Width = 70
     OnChange = edButtonSizeChange
     TabOrder = 14
+  end
+  object RGlyphKind: TRadioGroup
+    Left = 456
+    Height = 80
+    Top = 440
+    Width = 169
+    AutoFill = True
+    Caption = 'Glyph Kind'
+    ChildSizing.LeftRightSpacing = 6
+    ChildSizing.TopBottomSpacing = 6
+    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+    ChildSizing.EnlargeVertical = crsHomogenousChildResize
+    ChildSizing.ShrinkHorizontal = crsScaleChilds
+    ChildSizing.ShrinkVertical = crsScaleChilds
+    ChildSizing.Layout = cclLeftToRightThenTopToBottom
+    ChildSizing.ControlsPerLine = 2
+    ClientHeight = 61
+    ClientWidth = 167
+    Columns = 2
+    ItemIndex = 0
+    Items.Strings = (
+      'Arrows'
+      'Close'
+      'Min/Max'
+    )
+    OnClick = RGlyphKindClick
+    TabOrder = 15
   end
 end

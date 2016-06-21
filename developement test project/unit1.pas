@@ -31,6 +31,7 @@ type
     RDirection: TRadioGroup;
     RColl:      TRadioGroup;
     RButt:      TRadioGroup;
+    RGlyphKind: TRadioGroup;
     RStyle: TRadioGroup;
     SpeedButton1: TSpeedButton;
     procedure cbBordersChange(Sender: TObject);
@@ -48,6 +49,7 @@ type
     procedure RCaptClick(Sender: TObject);
     procedure RButtClick(Sender: TObject);
     procedure RCollClick(Sender: TObject);
+    procedure RGlyphKindClick(Sender: TObject);
     procedure RStyleClick(Sender: TObject);
     procedure RDirectionClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
@@ -84,15 +86,13 @@ begin
   p3.Parent      := self;
   Button1.Parent := p3;
 
-  p1.Button.GlyphLayout:=glRight;
-  p2.Button.GlyphLayout:=glRight;
-  p3.Button.GlyphLayout:=glRight;
 
   ex1.AddPanel(p1);
   ex1.AddPanel(p2);
   ex1.AddPanel(p3);
 
   ex1.ButtonPosition := TAnchorKind(RButt.ItemIndex);
+  ex1.ButtonGlyphLayout :=glRight;
   ex1.CollapseKind   := TAnchorKind(RColl.ItemIndex);
   ex1.Behaviour      := TExpandPanelsBehaviour(RBehaviour.ItemIndex);
 end;
@@ -141,9 +141,7 @@ end;
 
 procedure TForm1.edTabWidthChange(Sender: TObject);
 begin
-  p1.Button.TabWidth:=edTabWidth.Value;
-  p2.Button.TabWidth:=edTabWidth.Value;
-  p3.Button.TabWidth:=edTabWidth.Value;
+  ex1.ButtonTabWidth:=edTabWidth.Value;
 end;
 
 
@@ -168,18 +166,13 @@ end;
 
 procedure TForm1.RGlyphClick(Sender: TObject);
 begin
-  p1.Button.GlyphLayout:=TGlyphLayout(RGlyph.ItemIndex);
-  p2.Button.GlyphLayout:=TGlyphLayout(RGlyph.ItemIndex);
-  p3.Button.GlyphLayout:=TGlyphLayout(RGlyph.ItemIndex);
+  ex1.ButtonGlyphLayout:=TGlyphLayout(RGlyph.ItemIndex);
 end;
 
 procedure TForm1.RCaptClick(Sender: TObject);
 begin
-     p1.Button.TextLayout:=TTextLayout(RCapt.ItemIndex);
-     p2.Button.TextLayout:=TTextLayout(RCapt.ItemIndex);
-     p3.Button.TextLayout:=TTextLayout(RCapt.ItemIndex);
+  ex1.ButtonTextLayout:=TTextLayout(RCapt.ItemIndex);
 end;
-
 
 procedure TForm1.RButtClick(Sender: TObject);
 begin
@@ -191,11 +184,14 @@ begin
   ex1.CollapseKind := TAnchorKind(RColl.ItemIndex);
 end;
 
+procedure TForm1.RGlyphKindClick(Sender: TObject);
+begin
+  ex1.ButtonGlyphKind:=TGlyphKind(RGlyphKind.ItemIndex);
+end;
+
 procedure TForm1.RStyleClick(Sender: TObject);
 begin
-     p1.Button.Style:=TBoundButtonStyle(RStyle.ItemIndex);
-     p2.Button.Style:=TBoundButtonStyle(RStyle.ItemIndex);
-     p3.Button.Style:=TBoundButtonStyle(RStyle.ItemIndex);
+  ex1.ButtonStyle:=TBoundButtonStyle(RStyle.ItemIndex);
 end;
 
 procedure TForm1.RDirectionClick(Sender: TObject);

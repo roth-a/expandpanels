@@ -2,6 +2,12 @@
 //  ExpandPanels   Version 2.2
 //////////////////////////////
 
+21-06-2016 MaxM :
+     Added Button.GlyphKind (default to gkArrows)
+     Added gkClose (EXP_PANEL_CLOSE.png),
+           gkMinMax (EXP_PANEL_MIN_*.png, EXP_PANEL_MAX_*.png) Glyphs
+     Added TExpandPanels properties ButtonGlyphLayout,ButtonGlyphKind,ButtonStyle,ButtonTextLayout,ButtonTabWidth
+
 15-06-2016 MaxM :
      Added Button.Style as bbsLine and bbsLineDouble
 
