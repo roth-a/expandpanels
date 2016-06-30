@@ -67,7 +67,8 @@ type
     tlNone
   );
 
-  TBoundButtonStyle = (bbsButton, bbsTab, bbsLine, bbsLineDouble);
+  TBoundButtonStyle = (bbsButton, bbsTab, bbsLine, bbsLineDouble,
+                       bbsLineTop, bbsLineBottom, bbsLineDoubleTop, bbsLineDoubleBottom);
 
   TBoundButton = class(TCustomSpeedButton)
   private
@@ -1044,13 +1045,13 @@ var
 
                Case rTextLayout of
                tlLeft :begin   //To Bottom of the ClientRect
-                         txtTop :=paintRect.Top+AHeight;
+                         txtTop :=paintRect.Top+AHeight-2;
 
                          if (rGlyphLayout = glRight)
                          then inc(txtTop, rGlyph.Glyph.Height+2);
                        end;
                tlRight:begin  //To Top of the ClientRect
-                         txtTop :=paintRect.Top+txtWidth+4;
+                         txtTop :=paintRect.Top+txtWidth+2;
                          if (rGlyphLayout = glRight)
                          then inc(txtTop, rGlyph.Glyph.Height+2);
                        end;
@@ -1120,7 +1121,7 @@ var
 
   procedure DrawLines;
   var
-     d1, d2, d3, d4 :Integer;
+     d1, d2, d3, d4, dx :Integer;
      isVertical :Boolean;
 
      procedure calc_d(txtL, txtR, glyphL, glyphR :Integer);
@@ -1154,23 +1155,25 @@ var
 
      procedure DrawALine(pCenterX, pCenterY :Integer);
      begin
+       inc(d2); inc(d4); //LineTo don't paint the last Pixel
+
        if isVertical
        then begin
               //Avoid go outside the Box
               pCenterX :=EnsureRange(pCenterX, 0, paintRect.Right-2);
 
-              Canvas.Pen.Color :=xHColor;
+              Canvas.Pen.Color := {$ifdef DEBUG_PAINT} clLime {$else} xHColor {$endif};
               Canvas.MoveTo(pCenterX, d1);
               Canvas.LineTo(pCenterX, d2);
-              if (d3 > 0) then
+              if (d3 > -1) then
               begin
                 Canvas.MoveTo(pCenterX, d3);
                 Canvas.LineTo(pCenterX, d4);
               end;
-              Canvas.Pen.Color :=xSColor;
+              Canvas.Pen.Color := {$ifdef DEBUG_PAINT} clGreen {$else} xSColor {$endif};
               Canvas.MoveTo(pCenterX+1, d1+1);
               Canvas.LineTo(pCenterX+1, d2);
-              if (d3 > 0) then
+              if (d3 > -1) then
               begin
                 Canvas.MoveTo(pCenterX+1, d3+1);
                 Canvas.LineTo(pCenterX+1, d4);
@@ -1179,56 +1182,67 @@ var
        else begin
               pCenterY :=EnsureRange(pCenterY, 0, paintRect.Bottom-2);
 
-              Canvas.Pen.Color :=xHColor;
+              Canvas.Pen.Color :={$ifdef DEBUG_PAINT} clLime {$else} xHColor {$endif};
               Canvas.MoveTo(d1, pCenterY);
               Canvas.LineTo(d2, pCenterY);
-              if (d3 > 0) then
+              if (d3 > -1) then
               begin
                 Canvas.MoveTo(d3, pCenterY);
                 Canvas.LineTo(d4, pCenterY);
               end;
-              Canvas.Pen.Color :=xSColor;
+              Canvas.Pen.Color :={$ifdef DEBUG_PAINT} clGreen {$else} xSColor {$endif};
               Canvas.MoveTo(d1+1, pCenterY+1);
               Canvas.LineTo(d2, pCenterY+1);
-              if (d3 > 0) then
+              if (d3 > -1) then
               begin
                 Canvas.MoveTo(d3+1, pCenterY+1);
                 Canvas.LineTo(d4, pCenterY+1);
               end;
             end;
+
+       dec(d2); dec(d4); //return to the real Pixels
      end;
 
   begin
-    d3 :=0;
+    d3 :=-1;
     isVertical :=(FButtonPosition in [akLeft, akRight]);
 
+    //Assign to (d1-d2) Line All the space
     if isVertical
     then begin
            d1 :=paintRect.Top;
-           d2 :=paintRect.Bottom;
-           d4 :=d2;
-           if (FButtonPosition = akRight)
-           then begin
-                  d1 :=paintRect.Top;
-                  d2 :=paintRect.Bottom;
-                  d4 :=d2;
-                  calc_d(txtTop-2, txtTop+txtWidth+2, glyphTop-2, glyphTop+rGlyph.Glyph.Height+2)
-                end
-           else begin
-                  //Only in this case the point coordinate is from bottom to top
-                  d1 :=paintRect.Bottom;
-                  d2 :=paintRect.Top;
-                  d4 :=d2;
-                  calc_d(txtTop+2, txtTop-txtWidth-4, glyphTop+rGlyph.Glyph.Height+2, glyphTop-2);
-                end;
+           d2 :=paintRect.Bottom-1;
          end
     else begin
            d1 :=paintRect.Left;
-           d2 :=paintRect.Right;
-           d4 :=d2;
-           calc_d(txtLeft-2, txtLeft+txtWidth+2, glyphLeft-2, glyphLeft+rGlyph.Glyph.Width+2);
+           d2 :=paintRect.Right-1;
           end;
 
+    //Calculate the (d1-d2) (d3-d4) Lines between the Glyph and the Text elements
+    if (rStyle in [bbsLine, bbsLineDouble]) then
+    begin
+      d4 :=d2;
+      if isVertical
+      then begin
+             if (FButtonPosition = akRight)
+             then calc_d(txtTop-3, txtTop+txtWidth+2, glyphTop-3, glyphTop+rGlyph.Glyph.Height+2)
+             else begin
+                    //Only in this case (akLeft) the point coordinate is from bottom to top
+                    d1 :=paintRect.Bottom-1;
+                    d2 :=paintRect.Top;
+                    d4 :=d2;
+
+                    calc_d(txtTop+2, txtTop-txtWidth-3, glyphTop+rGlyph.Glyph.Height+2, glyphTop-3);
+
+                    //Exchange the values for Shadow coerence
+                    dx :=d1; d1 :=d2; d2 :=dx;
+                    if (d3 > -1) then begin dx :=d3; d3 :=d4; d4 :=dx; end;
+                  end;
+           end
+      else calc_d(txtLeft-3, txtLeft+txtWidth+2, glyphLeft-3, glyphLeft+rGlyph.Glyph.Width+2);
+    end;
+
+    //Draw the Lines
     Canvas.Pen.Style:=psSolid;
     Canvas.Pen.Width:=1;
     Case rStyle of
@@ -1237,6 +1251,16 @@ var
                      DrawALine(middleX-2, middleY-2);
                      DrawALine(middleX+2, middleY+2);
                    end;
+    bbsLineTop: DrawALine(paintRect.Left, paintRect.Top);
+    bbsLineBottom: DrawALine(paintRect.Right-2, paintRect.Bottom-2);
+    bbsLineDoubleTop: begin
+                        DrawALine(paintRect.Left, paintRect.Top);
+                        DrawALine(paintRect.Left+3, paintRect.Top+3);
+                      end;
+    bbsLineDoubleBottom: begin
+                           DrawALine(paintRect.Right-5, paintRect.Bottom-5);
+                           DrawALine(paintRect.Right-2, paintRect.Bottom-2);
+                         end;
     end;
   end;
 
@@ -1318,7 +1342,7 @@ begin
   then drawText
   else txtWidth:=0;
 
-  if (rStyle in [bbsLine, bbsLineDouble])
+  if (rStyle in [bbsLine..bbsLineDoubleBottom])
   then DrawLines;
 end;
 

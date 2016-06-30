@@ -22,13 +22,14 @@ type
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
+    Label4: TLabel;
     p1: TMyRollOut;
     RGlyph: TRadioGroup;
     RCapt: TRadioGroup;
     RColl:      TRadioGroup;
     RButt:      TRadioGroup;
     RGlyphKind: TRadioGroup;
-    RStyle: TRadioGroup;
+    RStyle: TComboBox;
     SpeedButton1: TSpeedButton;
     edTabWidth: TSpinEdit;
     edButtonSize: TSpinEdit;
@@ -44,7 +45,7 @@ type
     procedure RButtClick(Sender: TObject);
     procedure RCollClick(Sender: TObject);
     procedure RGlyphKindClick(Sender: TObject);
-    procedure RStyleClick(Sender: TObject);
+    procedure RStyleChange(Sender: TObject);
     procedure RDirectionClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
   private
@@ -123,9 +124,9 @@ begin
   p1.Button.GlyphKind:=TGlyphKind(RGlyphKind.ItemIndex);
 end;
 
-procedure TForm1.RStyleClick(Sender: TObject);
+procedure TForm1.RStyleChange(Sender: TObject);
 begin
-     p1.Button.Style:=TBoundButtonStyle(RStyle.ItemIndex);
+  p1.Button.Style:=TBoundButtonStyle(RStyle.ItemIndex);
 end;
 
 procedure TForm1.RDirectionClick(Sender: TObject);

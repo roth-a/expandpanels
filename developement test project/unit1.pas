@@ -24,6 +24,7 @@ type
     GroupBox1: TGroupBox;
     Label1: TLabel;
     Label3: TLabel;
+    Label4: TLabel;
     ListBox1:   TListBox;
     RBehaviour: TRadioGroup;
     RGlyph: TRadioGroup;
@@ -32,7 +33,7 @@ type
     RColl:      TRadioGroup;
     RButt:      TRadioGroup;
     RGlyphKind: TRadioGroup;
-    RStyle: TRadioGroup;
+    RStyle: TComboBox;
     SpeedButton1: TSpeedButton;
     procedure cbBordersChange(Sender: TObject);
     procedure cbFlatClick(Sender: TObject);
@@ -50,7 +51,7 @@ type
     procedure RButtClick(Sender: TObject);
     procedure RCollClick(Sender: TObject);
     procedure RGlyphKindClick(Sender: TObject);
-    procedure RStyleClick(Sender: TObject);
+    procedure RStyleChange(Sender: TObject);
     procedure RDirectionClick(Sender: TObject);
     procedure SpeedButton1Click(Sender: TObject);
   private
@@ -86,6 +87,9 @@ begin
   p3.Parent      := self;
   Button1.Parent := p3;
 
+  p1.Button.Caption:='Caption 1';
+  p2.Button.Caption:='Caption 2';
+  p3.Button.Caption:='Caption 3';
 
   ex1.AddPanel(p1);
   ex1.AddPanel(p2);
@@ -99,9 +103,9 @@ end;
 
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
-   p1.Button.Caption := Edit1.Text;
-   p2.Button.Caption := Edit1.Text;
-   p3.Button.Caption := Edit1.Text;
+   p1.Button.Caption := Edit1.Text+' 1';
+   p2.Button.Caption := Edit1.Text+' 2';
+   p3.Button.Caption := Edit1.Text+' 3';
 end;
 
 procedure TForm1.cbRoundedClick(Sender: TObject);
@@ -189,7 +193,7 @@ begin
   ex1.ButtonGlyphKind:=TGlyphKind(RGlyphKind.ItemIndex);
 end;
 
-procedure TForm1.RStyleClick(Sender: TObject);
+procedure TForm1.RStyleChange(Sender: TObject);
 begin
   ex1.ButtonStyle:=TBoundButtonStyle(RStyle.ItemIndex);
 end;
@@ -201,9 +205,9 @@ end;
 
 procedure TForm1.SpeedButton1Click(Sender: TObject);
 begin
-     p1.Button.Caption := DupeString(Edit1.Caption, 10);
-     p2.Button.Caption := DupeString(Edit1.Caption, 10);
-     p3.Button.Caption := DupeString(Edit1.Caption, 10);
+     p1.Button.Caption := DupeString(Edit1.Caption, 10)+' 1';
+     p2.Button.Caption := DupeString(Edit1.Caption, 10)+' 2';
+     p3.Button.Caption := DupeString(Edit1.Caption, 10)+' 3';
 end;
 
 initialization

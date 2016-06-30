@@ -42,7 +42,7 @@
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="24" Y="6"/>
-        <UsageCount Value="84"/>
+        <UsageCount Value="86"/>
       </Unit0>
       <Unit1>
         <Filename Value="unit1_onepanel.pas"/>
@@ -51,9 +51,9 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="115"/>
-        <CursorPos X="41" Y="123"/>
-        <UsageCount Value="84"/>
+        <TopLine Value="116"/>
+        <CursorPos Y="130"/>
+        <UsageCount Value="86"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -62,9 +62,9 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="ExpandPanels"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="7"/>
-        <CursorPos X="37" Y="657"/>
-        <UsageCount Value="84"/>
+        <TopLine Value="1158"/>
+        <CursorPos X="45" Y="1171"/>
+        <UsageCount Value="86"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
@@ -180,8 +180,8 @@
       <Unit18>
         <Filename Value="../to-do.txt"/>
         <EditorIndex Value="3"/>
-        <CursorPos X="9" Y="5"/>
-        <UsageCount Value="34"/>
+        <CursorPos X="23" Y="20"/>
+        <UsageCount Value="35"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit18>
@@ -189,8 +189,8 @@
         <Filename Value="../changelog.txt"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="2"/>
-        <CursorPos Y="9"/>
-        <UsageCount Value="74"/>
+        <CursorPos X="18" Y="9"/>
+        <UsageCount Value="76"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="None"/>
       </Unit19>
@@ -253,9 +253,9 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Unit1"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="117"/>
-        <CursorPos X="7" Y="121"/>
-        <UsageCount Value="9"/>
+        <TopLine Value="44"/>
+        <CursorPos Y="55"/>
+        <UsageCount Value="10"/>
       </Unit27>
       <Unit28>
         <Filename Value="../../../../../Development/FreePascal/lazarus/lcl/buttons.pp"/>
@@ -359,91 +359,99 @@
         <UsageCount Value="10"/>
       </Unit41>
     </Units>
-    <JumpHistory Count="21" HistoryIndex="20">
+    <JumpHistory Count="23" HistoryIndex="22">
       <Position1>
         <Filename Value="unit1_onepanel.pas"/>
-        <Caret Line="64" TopLine="52"/>
+        <Caret Line="122" Column="10" TopLine="114"/>
       </Position1>
       <Position2>
         <Filename Value="unit1_onepanel.pas"/>
-        <Caret Line="92" TopLine="84"/>
+        <Caret Line="123" Column="10" TopLine="115"/>
       </Position2>
       <Position3>
-        <Filename Value="unit1_onepanel.pas"/>
-        <Caret Line="41" TopLine="30"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="1332" Column="36" TopLine="1318"/>
       </Position3>
       <Position4>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="227" Column="60" TopLine="217"/>
+        <Caret Line="1248" Column="13" TopLine="1235"/>
       </Position4>
       <Position5>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="2134" Column="10" TopLine="2126"/>
+        <Caret Line="1161" TopLine="1150"/>
       </Position5>
       <Position6>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="65" Column="26" TopLine="54"/>
+        <Caret Line="1246" Column="64" TopLine="1237"/>
       </Position6>
       <Position7>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="37" Column="38" TopLine="30"/>
+        <Caret Line="1248" Column="20" TopLine="1237"/>
       </Position7>
       <Position8>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="65" Column="31" TopLine="54"/>
+        <Caret Line="1161" TopLine="1150"/>
       </Position8>
       <Position9>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="128" Column="7" TopLine="117"/>
+        <Caret Line="1249" Column="75" TopLine="1234"/>
       </Position9>
       <Position10>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="134" Column="7" TopLine="124"/>
+        <Caret Line="1248" Column="7" TopLine="1234"/>
       </Position10>
       <Position11>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="65" Column="47" TopLine="54"/>
+        <Caret Line="1161" TopLine="1150"/>
       </Position11>
       <Position12>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="144" Column="25" TopLine="135"/>
+        <Caret Line="1184" TopLine="1174"/>
       </Position12>
       <Position13>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="65" Column="49" TopLine="60"/>
+        <Caret Line="1161" Column="6" TopLine="1153"/>
       </Position13>
       <Position14>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="65" Column="32" TopLine="62"/>
+        <Caret Line="1164" TopLine="1153"/>
       </Position14>
       <Position15>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="36" Column="47" TopLine="20"/>
+        <Caret Line="1166" TopLine="1153"/>
       </Position15>
       <Position16>
-        <Filename Value="unit1_onepanel.pas"/>
-        <Caret Line="95" Column="40" TopLine="81"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="1167" TopLine="1153"/>
       </Position16>
       <Position17>
-        <Filename Value="unit1_onepanel.pas"/>
-        <Caret Line="19" Column="25" TopLine="13"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="1168" TopLine="1153"/>
       </Position17>
       <Position18>
-        <Filename Value="unit1_onepanel.pas"/>
-        <Caret Line="19" Column="25" TopLine="13"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="1169" TopLine="1153"/>
       </Position18>
       <Position19>
-        <Filename Value="unit1_onepanel.pas"/>
-        <Caret Line="18" Column="26" TopLine="13"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="1174" TopLine="1156"/>
       </Position19>
       <Position20>
-        <Filename Value="unit1_onepanel.pas"/>
-        <Caret Line="15" Column="24"/>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="1175" TopLine="1157"/>
       </Position20>
       <Position21>
         <Filename Value="../expandpanels.pas"/>
-        <Caret Line="651" TopLine="642"/>
+        <Caret Line="1176" TopLine="1158"/>
       </Position21>
+      <Position22>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="1177" TopLine="1159"/>
+      </Position22>
+      <Position23>
+        <Filename Value="../expandpanels.pas"/>
+        <Caret Line="1203" TopLine="1193"/>
+      </Position23>
     </JumpHistory>
   </ProjectOptions>
   <CompilerOptions>
@@ -472,35 +480,35 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="../expandpanels.pas"/>
-        <Line Value="3351"/>
+        <Line Value="3362"/>
       </Item1>
       <Item2>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="../expandpanels.pas"/>
-        <Line Value="3368"/>
+        <Line Value="3379"/>
       </Item2>
       <Item3>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="../expandpanels.pas"/>
-        <Line Value="2953"/>
+        <Line Value="2964"/>
       </Item3>
       <Item4>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="../expandpanels.pas"/>
-        <Line Value="3372"/>
+        <Line Value="3383"/>
       </Item4>
       <Item5>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="../expandpanels.pas"/>
-        <Line Value="2962"/>
+        <Line Value="2973"/>
       </Item5>
     </BreakPoints>
     <Exceptions Count="3">

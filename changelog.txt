@@ -2,6 +2,10 @@
 //  ExpandPanels   Version 2.2
 //////////////////////////////
 
+30-06-2016 MaxM :
+     Added Button.Style as bbsLineTop,bbsLineBottom,bbsLineDoubleTop,bbsLineDoubleBottom
+     Fixed Some Paint Coordinate position of Button elements and Lines
+
 21-06-2016 MaxM :
      Added Button.GlyphKind (default to gkArrows)
      Added gkClose (EXP_PANEL_CLOSE.png),

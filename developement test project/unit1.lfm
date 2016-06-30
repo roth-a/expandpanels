@@ -1,11 +1,11 @@
 object Form1: TForm1
   Left = 218
-  Height = 605
+  Height = 607
   Top = 93
   Width = 822
   ActiveControl = RColl.RadioButton0
   Caption = 'Form1'
-  ClientHeight = 605
+  ClientHeight = 607
   ClientWidth = 822
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -97,7 +97,7 @@ object Form1: TForm1
     Left = 472
     Height = 86
     Top = 328
-    Width = 169
+    Width = 153
     AutoFill = True
     Caption = 'Direction'
     ChildSizing.LeftRightSpacing = 6
@@ -109,7 +109,7 @@ object Form1: TForm1
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
     ClientHeight = 67
-    ClientWidth = 167
+    ClientWidth = 151
     ItemIndex = 0
     Items.Strings = (
       'Vertical'
@@ -234,63 +234,35 @@ object Form1: TForm1
       TabOrder = 1
     end
   end
-  object RStyle: TRadioGroup
-    Left = 637
-    Height = 80
-    Top = 384
-    Width = 185
-    AutoFill = True
-    Caption = 'Style'
-    ChildSizing.LeftRightSpacing = 6
-    ChildSizing.TopBottomSpacing = 6
-    ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
-    ChildSizing.EnlargeVertical = crsHomogenousChildResize
-    ChildSizing.ShrinkHorizontal = crsScaleChilds
-    ChildSizing.ShrinkVertical = crsScaleChilds
-    ChildSizing.Layout = cclLeftToRightThenTopToBottom
-    ChildSizing.ControlsPerLine = 2
-    ClientHeight = 61
-    ClientWidth = 183
-    Columns = 2
-    ItemIndex = 0
-    Items.Strings = (
-      'Button'
-      'Tab'
-      'Line'
-      'Line Double'
-    )
-    OnClick = RStyleClick
-    TabOrder = 9
-  end
   object edTabWidth: TSpinEdit
-    Left = 669
+    Left = 660
     Height = 24
-    Top = 487
+    Top = 463
     Width = 103
     MaxValue = 380
     MinValue = -90
     OnChange = edTabWidthChange
-    TabOrder = 10
+    TabOrder = 9
     Value = -50
   end
   object Label1: TLabel
-    Left = 669
+    Left = 660
     Height = 18
-    Top = 464
+    Top = 440
     Width = 153
     Caption = 'Tab Width (Negative is %)'
     ParentColor = False
   end
   object cbRounded: TCheckBox
-    Left = 637
+    Left = 628
     Height = 21
-    Top = 520
+    Top = 496
     Width = 132
     Caption = 'Rounded Borders'
     Checked = True
     OnClick = cbRoundedClick
     State = cbChecked
-    TabOrder = 11
+    TabOrder = 10
   end
   object cbFlat: TCheckBox
     Left = 405
@@ -299,12 +271,12 @@ object Form1: TForm1
     Width = 44
     Caption = 'Flat'
     OnClick = cbFlatClick
-    TabOrder = 12
+    TabOrder = 11
   end
   object cbBorders: TComboBox
-    Left = 656
+    Left = 647
     Height = 22
-    Top = 544
+    Top = 520
     Width = 121
     ItemHeight = 0
     ItemIndex = 2
@@ -316,7 +288,7 @@ object Form1: TForm1
     )
     OnChange = cbBordersChange
     Style = csDropDownList
-    TabOrder = 13
+    TabOrder = 12
     Text = 'Raised'
   end
   object Label3: TLabel
@@ -333,7 +305,7 @@ object Form1: TForm1
     Top = 411
     Width = 70
     OnChange = edButtonSizeChange
-    TabOrder = 14
+    TabOrder = 13
   end
   object RGlyphKind: TRadioGroup
     Left = 456
@@ -360,6 +332,36 @@ object Form1: TForm1
       'Min/Max'
     )
     OnClick = RGlyphKindClick
+    TabOrder = 14
+  end
+  object Label4: TLabel
+    Left = 638
+    Height = 18
+    Top = 391
+    Width = 36
+    Caption = 'Style :'
+    ParentColor = False
+  end
+  object RStyle: TComboBox
+    Left = 637
+    Height = 22
+    Top = 410
+    Width = 176
+    ItemHeight = 0
+    ItemIndex = 0
+    Items.Strings = (
+      'Button'
+      'Tab'
+      'Line'
+      'Line Double'
+      'Line Top'
+      'Line Bottom'
+      'Line Double Top'
+      'Line Double Bottom'
+    )
+    OnChange = RStyleChange
+    Style = csDropDownList
     TabOrder = 15
+    Text = 'Button'
   end
 end
