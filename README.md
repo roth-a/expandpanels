@@ -7,6 +7,16 @@ These are [Lazarus](http://www.lazarus-ide.org/) components. More infos please c
 * ![](TExpandPanels.png) TExpandPanels a non visual component. It arranges multiple TMyRollOut instances beneath/side-by-side to each other to save space.
 
 
+## Features
+ * saves space
+ * everything is animated (you can turn it off if you want)
+ * you can place the button of the panel on the top, bottom, left or right (in this cases the caption is printed vertically)
+ * you can collapse the panel to any direction you want
+ * you can align the caption to the left, right, center and the glyph to left, right or hide both
+ * ExpandPanels arranges all the panel nicely under (or besides) each other, so it takes as little space as possible
+ * ExpandPanels has different "behaviors": It can open as many panels as you click, or just the one you last clicked
+
+
 ## Usage
 
 ### Components installed in Lazarus
